@@ -433,4 +433,41 @@ describe("S3 Routes", () => {
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
   });
+
+  // ─── Bug 2 regression: error handling on object detail route ──────────────
+  // GET /buckets/:name/objects/* must return 404 (not 500) when NoSuchKey.
+  // Without the fix the unhandled SDK error propagates to app.onError → 500.
+
+  describe("Object detail — error handling (Bug 2 regression)", () => {
+    beforeEach(() => { mockSend.mockReset(); });
+
+    it("GET /buckets/:name/objects/* — returns 404 when object does not exist", async () => {
+      const notFound = Object.assign(new Error("NoSuchKey"), {
+        name: "NoSuchKey",
+        $metadata: { httpStatusCode: 404 },
+      });
+      mockSend.mockRejectedValueOnce(notFound);
+      const res = await get("/buckets/my-bucket/objects/missing-file.txt");
+      expect(res.status).toBe(404);
+      const body = await res.json();
+      expect(body.error).toBeDefined();
+    });
+
+    it("GET /buckets/:name/objects/*/raw — returns 404 when object does not exist", async () => {
+      const notFound = Object.assign(new Error("NoSuchKey"), {
+        name: "NoSuchKey",
+        $metadata: { httpStatusCode: 404 },
+      });
+      mockSend.mockRejectedValueOnce(notFound);
+      const res = await get("/buckets/my-bucket/objects/missing-file.txt/raw");
+      expect(res.status).toBe(404);
+    });
+
+    it("GET /buckets/:name/objects/* — re-throws unexpected errors (non-404)", async () => {
+      mockSend.mockRejectedValueOnce(new Error("InternalError"));
+      const res = await get("/buckets/my-bucket/objects/some-file.txt");
+      // Hono's onError returns 500 for re-thrown errors — the route itself should NOT swallow them
+      expect(res.status).toBe(500);
+    });
+  });
 });

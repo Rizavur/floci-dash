@@ -47,7 +47,7 @@ describe("useLambdaFunctions", () => {
     mockApi.mockResolvedValueOnce({ functions: [], total: 0 });
     const { result } = renderHook(() => useLambdaFunctions(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockApi).toHaveBeenCalledWith("/lambda/functions");
+    expect(mockApi).toHaveBeenCalledWith("/aws/lambda/functions");
   });
 });
 
@@ -63,7 +63,7 @@ describe("useLambdaFunction", () => {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockApi).toHaveBeenCalledWith("/lambda/functions/fn-1");
+    expect(mockApi).toHaveBeenCalledWith("/aws/lambda/functions/fn-1");
   });
 });
 
@@ -141,7 +141,7 @@ describe("useLambdaVersions", () => {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockApi).toHaveBeenCalledWith("/lambda/functions/fn-1/versions");
+    expect(mockApi).toHaveBeenCalledWith("/aws/lambda/functions/fn-1/versions");
   });
 });
 
@@ -187,7 +187,7 @@ describe("useLambdaAliases", () => {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockApi).toHaveBeenCalledWith("/lambda/functions/fn-1/aliases");
+    expect(mockApi).toHaveBeenCalledWith("/aws/lambda/functions/fn-1/aliases");
   });
 });
 
@@ -198,7 +198,7 @@ describe("useEventSourceMappings", () => {
     mockApi.mockResolvedValueOnce({ eventSourceMappings: [], total: 0 });
     const { result } = renderHook(() => useEventSourceMappings(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockApi).toHaveBeenCalledWith("/lambda/event-source-mappings");
+    expect(mockApi).toHaveBeenCalledWith("/aws/lambda/event-source-mappings");
   });
 
   it("appends functionName when provided", async () => {
@@ -208,7 +208,7 @@ describe("useEventSourceMappings", () => {
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mockApi).toHaveBeenCalledWith(
-      "/lambda/event-source-mappings?functionName=fn-1"
+      "/aws/lambda/event-source-mappings?functionName=fn-1"
     );
   });
 });
@@ -234,7 +234,7 @@ describe("useLambdaLayers", () => {
     mockApi.mockResolvedValueOnce({ layers: [], total: 0 });
     const { result } = renderHook(() => useLambdaLayers(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockApi).toHaveBeenCalledWith("/lambda/layers");
+    expect(mockApi).toHaveBeenCalledWith("/aws/lambda/layers");
   });
 });
 
@@ -250,7 +250,7 @@ describe("useLambdaLayerVersions", () => {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockApi).toHaveBeenCalledWith("/lambda/layers/layer-1/versions");
+    expect(mockApi).toHaveBeenCalledWith("/aws/lambda/layers/layer-1/versions");
   });
 });
 
@@ -281,7 +281,7 @@ describe("useLambdaTags", () => {
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mockApi).toHaveBeenCalledWith(
-      "/lambda/tags/arn:aws:lambda:us-east-1:1:function:fn-1"
+      "/aws/lambda/tags/arn:aws:lambda:us-east-1:1:function:fn-1"
     );
   });
 });
@@ -298,7 +298,7 @@ describe("useFunctionUrl", () => {
     mockApi.mockResolvedValueOnce({ url: "https://x", authType: "NONE", cors: {}, invokeMode: "BUFFERED" });
     const { result } = renderHook(() => useFunctionUrl("fn-1"), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockApi).toHaveBeenCalledWith("/lambda/functions/fn-1/url");
+    expect(mockApi).toHaveBeenCalledWith("/aws/lambda/functions/fn-1/url");
   });
 });
 
@@ -316,6 +316,6 @@ describe("useFunctionConcurrency", () => {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockApi).toHaveBeenCalledWith("/lambda/functions/fn-1/concurrency");
+    expect(mockApi).toHaveBeenCalledWith("/aws/lambda/functions/fn-1/concurrency");
   });
 });
