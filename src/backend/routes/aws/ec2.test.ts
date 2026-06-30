@@ -806,20 +806,25 @@ describe("EC2 Routes", () => {
       expect(res.status).toBe(400);
     });
 
-    it("DELETE /tags — deletes tags", async () => {
+    it("DELETE /tags — deletes tags via query params", async () => {
       mockSend.mockResolvedValueOnce({});
-      const res = await del("/tags", {
-        resources: ["i-001"],
-        tags: [{ key: "Name" }],
-      });
+      const res = await router.request(
+        "/tags?resourceIds=i-001,i-002&tagKeys=Name,Env",
+        { method: "DELETE" }
+      );
       const body = await res.json();
       expect(body.untagged).toBe(true);
-      expect(mockSend.mock.calls[0][0].Resources).toEqual(["i-001"]);
-      expect(mockSend.mock.calls[0][0].Tags).toEqual([{ Key: "Name" }]);
+      expect(mockSend.mock.calls[0][0].Resources).toEqual(["i-001", "i-002"]);
+      expect(mockSend.mock.calls[0][0].Tags).toEqual([{ Key: "Name" }, { Key: "Env" }]);
     });
 
-    it("DELETE /tags — 400 when missing fields", async () => {
-      const res = await del("/tags", { resources: ["i-001"] });
+    it("DELETE /tags — 400 when resourceIds missing", async () => {
+      const res = await router.request("/tags?tagKeys=Name", { method: "DELETE" });
+      expect(res.status).toBe(400);
+    });
+
+    it("DELETE /tags — 400 when tagKeys missing", async () => {
+      const res = await router.request("/tags?resourceIds=i-001", { method: "DELETE" });
       expect(res.status).toBe(400);
     });
   });

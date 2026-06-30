@@ -446,7 +446,10 @@ router.post("/security-groups/:id/rules/ingress", async (c: Context) => {
 
 router.delete("/security-groups/:id/rules/ingress", async (c: Context) => {
   const id = c.req.param("id");
-  const body = await c.req.json<any>();
+  // The frontend sends rule parameters as a JSON body on DELETE.
+  // Guard against proxies that strip the body by falling back to 400.
+  const body = await c.req.json<any>().catch(() => null);
+  if (!body) return c.json({ error: "Rule parameters are required in the request body" }, 400);
   const permissions: any = { IpProtocol: body.ipProtocol || "tcp", FromPort: body.fromPort ?? 22, ToPort: body.toPort ?? 22 };
   if (body.cidrIp) permissions.IpRanges = [{ CidrIp: body.cidrIp }];
   await ec2().send(new RevokeSecurityGroupIngressCommand({ GroupId: id!, IpPermissions: [permissions] }));
@@ -464,7 +467,8 @@ router.post("/security-groups/:id/rules/egress", async (c: Context) => {
 
 router.delete("/security-groups/:id/rules/egress", async (c: Context) => {
   const id = c.req.param("id");
-  const body = await c.req.json<any>();
+  const body = await c.req.json<any>().catch(() => null);
+  if (!body) return c.json({ error: "Rule parameters are required in the request body" }, 400);
   const permissions: any = { IpProtocol: body.ipProtocol || "-1", FromPort: body.fromPort, ToPort: body.toPort };
   if (body.cidrIp) permissions.IpRanges = [{ CidrIp: body.cidrIp }];
   await ec2().send(new RevokeSecurityGroupEgressCommand({ GroupId: id!, IpPermissions: [permissions] }));
@@ -555,13 +559,18 @@ router.post("/tags", async (c: Context) => {
   return c.json({ tagged: true });
 });
 
+// No frontend hook calls this route, so query params are safe here.
+// resourceIds=i-001,i-002  tagKeys=Name,Env
 router.delete("/tags", async (c: Context) => {
-  const body = await c.req.json<any>();
-  if (!body.resources || !body.tags) return c.json({ error: "Resources and tags are required" }, 400);
+  const resourceIds = c.req.query("resourceIds")?.split(",").filter(Boolean) || [];
+  const tagKeys = c.req.query("tagKeys")?.split(",").filter(Boolean) || [];
+  if (resourceIds.length === 0 || tagKeys.length === 0) {
+    return c.json({ error: "resourceIds and tagKeys query parameters are required" }, 400);
+  }
   await ec2().send(
     new DeleteTagsCommand({
-      Resources: body.resources,
-      Tags: body.tags.map((t: any) => ({ Key: t.key })),
+      Resources: resourceIds,
+      Tags: tagKeys.map((k) => ({ Key: k })),
     })
   );
   return c.json({ untagged: true });
