@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Box, BreadcrumbGroup, Button, ColumnLayout, Container, Header, SpaceBetween, StatusIndicator } from "@cloudscape-design/components";
+import { Box, BreadcrumbGroup, Button, Container, Header, SpaceBetween, StatusIndicator } from "@cloudscape-design/components";
 import { useHealth, useActiveServices } from "../hooks/useSystem";
 import { useResourceCounts } from "../hooks/useResourceCounts";
 import { useActivityFeed } from "../hooks/useActivityFeed";
@@ -20,10 +20,23 @@ function formatTime(ts: number) {
 
 function serviceIcon(service: string) {
   const icons: Record<string, string> = {
-    s3: "☰", dynamodb: "▤", ec2: "◈", lambda: "λ", rds: "🗄", sqs: "☰", sns: "☰", kms: "🔑", cloudwatch: "📊",
+    s3: "☰", dynamodb: "▤", ec2: "◈", lambda: "λ", rds: "🗄",
+    sqs: "☰", sns: "☰", kms: "🔑", cloudwatch: "📊",
   };
   return icons[service] || "•";
 }
+
+const QUICK_ACTIONS = [
+  { label: "S3",        path: "/services/s3",        primary: true  },
+  { label: "DynamoDB",  path: "/services/dynamodb",  primary: false },
+  { label: "EC2",       path: "/services/ec2",        primary: false },
+  { label: "Lambda",    path: "/services/lambda",     primary: false },
+  { label: "RDS",       path: "/services/rds",        primary: false },
+  { label: "SQS",       path: "/services/sqs",        primary: false },
+  { label: "SNS",       path: "/services/sns",        primary: false },
+  { label: "KMS",       path: "/services/kms",        primary: false },
+  { label: "IAM",       path: "/services/iam",        primary: false },
+] as const;
 
 export default function DashboardHome() {
   const navigate = useNavigate();
@@ -52,11 +65,10 @@ export default function DashboardHome() {
       ) : health ? (
         <SpaceBetween size="xl">
           <BreadcrumbGroup
-            items={[
-              { text: "Dashboard", href: "/#/" },
-            ]}
+            items={[{ text: "Dashboard", href: "/#/" }]}
             onFollow={(e) => { e.preventDefault(); navigate(e.detail.href.replace("/#", "") || "/"); }}
           />
+
           <Header
             variant="h1"
             description="Local AWS emulator — manage services, buckets, tables, and more"
@@ -69,7 +81,8 @@ export default function DashboardHome() {
             Floci Dash
           </Header>
 
-          <ColumnLayout columns={4} variant="text-grid">
+          {/* ── Stat cards — responsive 1→2→4 column grid ─────────────── */}
+          <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-4 tw-gap-4">
             <StatCard
               label="Available Services"
               value={health.stats.total}
@@ -80,25 +93,38 @@ export default function DashboardHome() {
               label="Active"
               value={active?.activeCount ?? "—"}
               variant="success"
-              subtext={active?.activeServices?.length ? active.activeServices.join(", ") : "Services with resources"}
+              subtext={
+                active?.activeServices?.length
+                  ? active.activeServices.join(", ")
+                  : "Services with resources"
+              }
             />
             <StatCard
               label="Running"
               value={health.stats.running}
               variant="warning"
-              subtext={health.stats.available === 0 ? "All running" : `${health.stats.available} inactive`}
+              subtext={
+                health.stats.available === 0
+                  ? "All running"
+                  : `${health.stats.available} inactive`
+              }
             />
             <StatCard
               label="Resources"
-              value={resourceCounts ? Object.values(resourceCounts).reduce((a, b) => a + b, 0) : "—"}
+              value={
+                resourceCounts
+                  ? Object.values(resourceCounts).reduce((a, b) => a + b, 0)
+                  : "—"
+              }
               variant="info"
               subtext="Total resources across all services"
             />
-          </ColumnLayout>
+          </div>
 
+          {/* ── Per-service resource counts ────────────────────────────── */}
           {resourceCounts && Object.keys(resourceCounts).length > 0 && (
             <Container header={<Header variant="h3">Resource Counts</Header>}>
-              <ColumnLayout columns={Math.min(Object.keys(resourceCounts).length, 5)}>
+              <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 md:tw-grid-cols-5 tw-gap-3">
                 {Object.entries(resourceCounts)
                   .filter(([, count]) => count > 0)
                   .sort(([, a], [, b]) => b - a)
@@ -112,64 +138,68 @@ export default function DashboardHome() {
                       size="sm"
                     />
                   ))}
-              </ColumnLayout>
+              </div>
             </Container>
           )}
 
+          {/* ── Quick actions ──────────────────────────────────────────── */}
           <Container header={<Header variant="h3">Quick actions</Header>}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              <Button variant="primary" onClick={() => trackNav("/services/s3", "s3")}>Open S3</Button>
-              <Button variant="normal" onClick={() => trackNav("/services/dynamodb", "dynamodb")}>Open DynamoDB</Button>
-              <Button variant="normal" onClick={() => trackNav("/services/ec2", "ec2")}>Open EC2</Button>
-              <Button variant="normal" onClick={() => trackNav("/services/lambda", "lambda")}>Open Lambda</Button>
-              <Button variant="normal" onClick={() => trackNav("/services/rds", "rds")}>Open RDS</Button>
-              <Button variant="normal" onClick={() => trackNav("/services/sqs", "sqs")}>Open SQS</Button>
-              <Button variant="normal" onClick={() => trackNav("/services/sns", "sns")}>Open SNS</Button>
-              <Button variant="normal" onClick={() => trackNav("/services/kms", "kms")}>Open KMS</Button>
-              <Button variant="normal" onClick={() => trackNav("/services/iam", "iam")}>Open IAM</Button>
+            <div className="tw-flex tw-flex-wrap tw-gap-2">
+              {QUICK_ACTIONS.map(({ label, path, primary }) => (
+                <Button
+                  key={label}
+                  variant={primary ? "primary" : "normal"}
+                  onClick={() => trackNav(path, label.toLowerCase())}
+                >
+                  Open {label}
+                </Button>
+              ))}
             </div>
           </Container>
 
+          {/* ── Recent activity feed ───────────────────────────────────── */}
           {entries.length > 0 && (
             <Container
               header={
                 <Header
                   variant="h3"
                   actions={
-                    <Button variant="inline-link" onClick={() => clearActivity()}>Clear</Button>
+                    <Button variant="inline-link" onClick={() => clearActivity()}>
+                      Clear
+                    </Button>
                   }
                 >
                   Recent Activity
                 </Header>
               }
             >
-              <SpaceBetween size="xs">
+              <div className="tw-flex tw-flex-col tw-gap-1">
                 {entries.slice(0, 10).map((entry) => (
-                  <div key={entry.id} style={{ padding: "4px 0" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <span style={{ color: "var(--color-text-body-secondary, #5f6b7a)", fontSize: 12 }}>
-                          {serviceIcon(entry.service)}
-                        </span>
-                        <span style={{ fontSize: 12 }}>
-                          {entry.description}
-                        </span>
-                        {entry.resource && (
-                          <span style={{ fontSize: 12, color: "var(--color-text-body-secondary, #5f6b7a)" }}>
-                            — {entry.resource}
-                          </span>
-                        )}
-                      </div>
-                      <span style={{ fontSize: 12, color: "var(--color-text-body-secondary, #5f6b7a)" }}>
-                        {formatTime(entry.timestamp)}
+                  <div
+                    key={entry.id}
+                    className="tw-flex tw-justify-between tw-items-center tw-gap-2 tw-py-1"
+                  >
+                    <div className="tw-flex tw-items-center tw-gap-2 tw-min-w-0">
+                      <span className="fd-text-muted-subtle tw-text-xs tw-shrink-0">
+                        {serviceIcon(entry.service)}
                       </span>
+                      <span className="tw-text-xs tw-truncate">{entry.description}</span>
+                      {entry.resource && (
+                        <span className="fd-text-muted tw-text-xs tw-truncate tw-hidden sm:tw-block">
+                          — {entry.resource}
+                        </span>
+                      )}
                     </div>
+                    <span className="fd-text-muted tw-text-xs tw-shrink-0">
+                      {formatTime(entry.timestamp)}
+                    </span>
                   </div>
                 ))}
-              </SpaceBetween>
+              </div>
             </Container>
           )}
 
+          {/* ── Services grid ──────────────────────────────────────────── */}
           <Container
             header={
               <Header
