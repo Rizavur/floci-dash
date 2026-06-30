@@ -1,472 +1,491 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { AppLayout, SideNavigation, TopNavigation, Input, Button, Autosuggest, Modal, Box, SpaceBetween, StatusIndicator } from "@cloudscape-design/components";
-import type { SideNavigationProps, AutosuggestProps } from "@cloudscape-design/components";
 import { useHealth, useActiveServices } from "../hooks/useSystem";
 import { useSettings } from "../stores/settings";
 import { useFavorites } from "../stores/favorites";
 import { useRecentlyVisited } from "../hooks/useRecentlyVisited";
-import { SERVICE_LABELS, CATEGORY_ORDER, SERVICE_CATEGORY_MAP } from "../types/services";
+import {
+  SERVICE_LABELS,
+  CATEGORY_ORDER,
+  SERVICE_CATEGORY_MAP,
+  getServiceLabel,
+} from "../types/services";
 
-interface Props {
-  children: React.ReactNode;
-}
+interface Props { children: React.ReactNode }
 
-const FLOCI_LOGO_SVG = `data:image/svg+xml,${encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00d4ff"/><stop offset="100%" stop-color="#0073e6"/></linearGradient></defs><rect width="32" height="32" rx="7" fill="url(#g)"/><text x="16" y="23" font-size="20" font-weight="bold" fill="#fff" text-anchor="middle" font-family="Arial,sans-serif">F</text></svg>'
-)}`;
+// ── Icons (inline SVG, no dependency) ─────────────────────────────────────
 
-// Services with full management UI (dedicated pages)
-const IMPLEMENTED_SERVICES: Record<string, string> = {
-  ec2: "EC2",
-  lambda: "Lambda",
-  iam: "IAM",
-  s3: "S3",
-  dynamodb: "DynamoDB",
-  rds: "RDS",
-  sqs: "SQS",
-  sns: "SNS",
-  events: "EventBridge",
-  logs: "CloudWatch Logs",
-  cloudwatch: "CloudWatch",
-  secretsmanager: "Secrets Manager",
-  cloudformation: "CloudFormation",
-  kms: "KMS",
-  ecs: "ECS",
-  ssm: "Systems Manager",
-  route53: "Route 53",
-  apigateway: "API Gateway",
-  batch: "AWS Batch",
-  memorydb: "MemoryDB",
-};
-
-const BellIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
-    <path d="M8 1.5c-2.2 0-4 1.8-4 4v2.2L2.7 10.7C2.2 11.5 2.8 12.5 3.7 12.5H12.3c.9 0 1.5-1 .9-1.8L12 7.7V5.5c0-2.2-1.8-4-4-4zM6.5 13.5c0 .8.7 1.5 1.5 1.5s1.5-.7 1.5-1.5" fill="currentColor"/>
+const IconSearch = () => (
+  <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/>
   </svg>
 );
 
-function ActiveDot() {
+const IconChevron = ({ open }: { open: boolean }) => (
+  <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"
+       style={{ transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }}>
+    <path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+  </svg>
+);
+
+const IconStar = ({ filled }: { filled: boolean }) => (
+  <svg width="11" height="11" viewBox="0 0 16 16" fill={filled ? "currentColor" : "none"}
+       stroke="currentColor" strokeWidth={filled ? 0 : 1.5}>
+    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+  </svg>
+);
+
+const IconMoon = () => (
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+  </svg>
+);
+
+const IconSun = () => (
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+  </svg>
+);
+
+const IconMenu = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+    <path fillRule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+  </svg>
+);
+
+const IconSettings = () => (
+  <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+    <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.892 3.434-.901 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.892-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.474l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
+  </svg>
+);
+
+// ── Nav item component ─────────────────────────────────────────────────────
+
+interface NavItemProps {
+  label: string;
+  serviceKey: string;
+  status?: "running" | "available";
+  active: boolean;
+  fav?: boolean;
+  onNavigate: (key: string) => void;
+  onToggleFav?: (e: React.MouseEvent, key: string) => void;
+}
+
+function NavItem({ label, serviceKey, status, active, fav, onNavigate, onToggleFav }: NavItemProps) {
+  const isRunning = status === "running";
   return (
-    <span
-      className="fd-dot-success"
-      style={{ display: "inline-block", width: "6px", height: "6px" }}
-    />
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onNavigate(serviceKey)}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onNavigate(serviceKey); } }}
+      className="tw-group tw-relative tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-cursor-pointer tw-select-none tw-rounded-[4px] tw-transition-colors tw-duration-100"
+      style={{
+        background: active ? "var(--sh-accent-bg)" : "transparent",
+        color: active ? "var(--sh-accent)" : "var(--sh-dim)",
+        outline: "none",
+      }}
+      onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = "var(--sh-hover)"; }}
+      onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = "transparent"; }}
+    >
+      {/* Active indicator */}
+      {active && (
+        <span className="tw-absolute tw-left-0 tw-top-1 tw-bottom-1 tw-w-[2px] tw-rounded-full"
+              style={{ background: "var(--sh-accent)" }} />
+      )}
+
+      {/* Status dot */}
+      <span className="tw-w-1.5 tw-h-1.5 tw-rounded-full tw-flex-shrink-0"
+            style={{ background: isRunning ? "var(--sh-ok)" : "var(--sh-faint)" }} />
+
+      {/* Label */}
+      <span className="tw-flex-1 tw-text-[12px] tw-leading-none tw-truncate tw-font-medium"
+            style={{ color: active ? "var(--sh-accent)" : "var(--sh-dim)", fontFamily: "var(--font-sans)" }}>
+        {label}
+      </span>
+
+      {/* Favourite star — show on hover or when starred */}
+      {onToggleFav && (
+        <button
+          onClick={(e) => onToggleFav(e, serviceKey)}
+          className="tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-100 tw-p-0.5 tw-rounded"
+          style={{
+            opacity: fav ? 1 : undefined,
+            color: fav ? "var(--sh-warn)" : "var(--sh-faint)",
+            background: "transparent", border: "none", cursor: "pointer",
+          }}
+          aria-label={fav ? `Unstar ${label}` : `Star ${label}`}
+        >
+          <IconStar filled={!!fav} />
+        </button>
+      )}
+    </div>
   );
 }
 
+// ── Main shell ─────────────────────────────────────────────────────────────
+
 export default function AppLayoutShell({ children }: Props) {
-  const [navOpen, setNavOpen] = useState(true);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 600);
-  const mainRef = useRef<HTMLDivElement>(null);
-  const [navQuery, setNavQuery] = useState("");
-  const [navAllExpanded, setNavAllExpanded] = useState(false);
-  const [navKey, setNavKey] = useState(0);
-  const [globalSearch, setGlobalSearch] = useState("");
-  const [showNotifications, setShowNotifications] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { darkMode, toggleDarkMode } = useSettings();
   const { data: health } = useHealth();
   const { data: active } = useActiveServices();
-  const { darkMode, toggleDarkMode } = useSettings();
+  const favorites = useFavorites((s) => s.favorites);
+  const { toggleFavorite, isFavorite } = useFavorites();
+  const recentlyVisited = useRecentlyVisited((s) => s.recentlyVisited);
+  const [navQuery, setNavQuery] = useState("");
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
 
+  // ── Apply dark mode ──────────────────────────────────────────────────────
   useEffect(() => {
-    document.body.classList.toggle("awsui-dark-mode", darkMode);
-    document.documentElement.classList.toggle("awsui-dark-mode", darkMode);
+    // Keep Cloudscape dark mode in sync (for tables/forms in service pages)
+    if (darkMode) {
+      document.body.classList.add("awsui-dark-mode");
+    } else {
+      document.body.classList.remove("awsui-dark-mode");
+    }
   }, [darkMode]);
 
-  // Track viewport size for responsive adjustments
+  // ── Track navigation for recently visited ───────────────────────────────
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 600);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const match = location.pathname.match(/^\/services\/([^/]+)/);
+    if (match) useRecentlyVisited.getState().addVisited(match[1]);
+  }, [location.pathname]);
+
+  // ── Build navigation tree ───────────────────────────────────────────────
+  const services = health?.services ?? {};
+  const activeSet = new Set(active?.activeServices ?? []);
+
+  const toggleCollapse = useCallback((cat: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      next.has(cat) ? next.delete(cat) : next.add(cat);
+      return next;
+    });
   }, []);
 
-  const currentHref = location.pathname ? `/#${location.pathname}` : "/#/";
-  const query = navQuery.toLowerCase().trim();
+  const handleToggleFav = useCallback((e: React.MouseEvent, key: string) => {
+    e.stopPropagation();
+    toggleFavorite(key);
+  }, [toggleFavorite]);
 
-  const toggleAll = useCallback(() => {
-    setNavAllExpanded((prev) => !prev);
-    setNavKey((k) => k + 1);
-  }, []);
+  const handleNavigate = useCallback((key: string) => {
+    const path = `/services/${key}`;
+    navigate(path);
+    setSidebarOpen(false);
+  }, [navigate]);
 
-  const searchOptions: AutosuggestProps.Options = useMemo(() => {
-    const flociServices = health?.services ? Object.keys(health.services) : [];
-    const all: AutosuggestProps.Option[] = [];
-    const added = new Set<string>();
+  const query = navQuery.trim().toLowerCase();
 
-    for (const key of flociServices) {
-      const label = IMPLEMENTED_SERVICES[key] || SERVICE_LABELS[key] || key;
-      if (!added.has(label)) {
-        added.add(label);
-        all.push({ value: label, label, description: key });
-      }
+  // Grouped service list
+  const grouped = useMemo(() => {
+    const groups: Record<string, string[]> = {};
+    for (const key of Object.keys(services)) {
+      const cat = SERVICE_CATEGORY_MAP[key] || "Other";
+      (groups[cat] ??= []).push(key);
     }
+    return groups;
+  }, [services]);
 
-    const sorted = all.sort((a, b) => a.label!.localeCompare(b.label!));
-    return [
-      { label: "Services", options: sorted },
-    ];
-  }, [health]);
+  const orderedCategories = useMemo(() => {
+    const cats: string[] = CATEGORY_ORDER.filter((c) => grouped[c]?.length);
+    if (grouped["Other"]?.length) cats.push("Other");
+    return cats;
+  }, [grouped]);
 
-  // Subscribe reactively so nav rebuilds when favorites/recents change
-  const favorites = useFavorites((s) => s.favorites);
-  const recentlyVisited = useRecentlyVisited((s) => s.recentlyVisited);
+  // Filtered view when searching
+  const searchResults = useMemo(() => {
+    if (!query) return null;
+    return Object.keys(services)
+      .filter((k) => (SERVICE_LABELS[k] || k).toLowerCase().includes(query))
+      .sort((a, b) => (SERVICE_LABELS[a] || a).localeCompare(SERVICE_LABELS[b] || b));
+  }, [query, services]);
 
-  const navItems = useMemo(() => {
-    const items: SideNavigationProps.Item[] = [
-      { type: "link" as const, text: "Dashboard", href: "/#/" },
-      { type: "divider" as const },
-    ];
+  // Active service key
+  const activeKey = location.pathname.match(/^\/services\/([^/]+)/)?.[1] ?? "";
 
-    const activeSet = new Set(active?.activeServices || []);
-    const implementedKeys = Object.keys(IMPLEMENTED_SERVICES);
-    const flociServices = health?.services ? Object.keys(health.services) : [];
-
-    // ── Favorites ──
-    const validFavorites = favorites.filter((k) => flociServices.includes(k));
-    if (validFavorites.length > 0) {
-      const textMatchesFav = (text: string) => !query || text.toLowerCase().includes(query);
-      const filteredFavs = validFavorites.filter((k) =>
-        textMatchesFav(SERVICE_LABELS[k] || k),
-      );
-      if (filteredFavs.length > 0) {
-        items.push({
-          type: "section" as const,
-          text: "★ Favorites",
-          items: filteredFavs.map((key) => ({
-            type: "link" as const,
-            text: SERVICE_LABELS[key] || key,
-            href: `/#/services/${key}`,
-            info: activeSet.has(key) ? <ActiveDot /> : undefined,
-          })) as SideNavigationProps.Item[],
-        });
-      }
-    }
-
-    // ── Recently Visited ──
-    const validRecent = recentlyVisited.filter((k) => flociServices.includes(k));
-    if (validRecent.length > 0) {
-      const textMatchesRecent = (text: string) => !query || text.toLowerCase().includes(query);
-      const filteredRecent = validRecent.filter((k) =>
-        textMatchesRecent(SERVICE_LABELS[k] || k),
-      );
-      if (filteredRecent.length > 0) {
-        items.push({
-          type: "section" as const,
-          text: "Recently Visited",
-          items: filteredRecent.map((key) => ({
-            type: "link" as const,
-            text: SERVICE_LABELS[key] || key,
-            href: `/#/services/${key}`,
-            info: activeSet.has(key) ? <ActiveDot /> : undefined,
-          })) as SideNavigationProps.Item[],
-        });
-      }
-    }
-
-    const availableImplemented = implementedKeys.filter((k) => flociServices.includes(k));
-
-    // ── Filter helpers ──
-    const textMatches = (text: string) => !query || text.toLowerCase().includes(query);
-
-    // ── When searching, show all matches in one flat list ──
-    if (query) {
-      const allMatching: Array<{ key: string; label: string }> = [];
-
-      // Add implemented services that match
-      for (const k of availableImplemented) {
-        if (textMatches(IMPLEMENTED_SERVICES[k])) {
-          allMatching.push({ key: k, label: IMPLEMENTED_SERVICES[k] });
-        }
-      }
-
-      // Add non-implemented services that match
-      if (health?.services) {
-        for (const svc of flociServices) {
-          if (IMPLEMENTED_SERVICES[svc]) continue;
-          const label = SERVICE_LABELS[svc] || svc;
-          if (textMatches(label)) {
-            allMatching.push({ key: svc, label });
-          }
-        }
-      }
-
-      if (allMatching.length > 0) {
-        items.push({
-          type: "section" as const,
-          text: "Search Results",
-          items: allMatching
-            .sort((a, b) => a.label.localeCompare(b.label))
-            .map((s) => ({
-              type: "link" as const,
-              text: s.label,
-              href: `/#/services/${s.key}`,
-              info: activeSet.has(s.key) ? <ActiveDot /> : undefined,
-            })) as SideNavigationProps.Item[],
-        });
-      } else {
-        items.push({
-          type: "section" as const,
-          text: "No matches",
-          items: [],  // empty items — section header itself communicates no results
-        });
-      }
-
-      items.push({ type: "divider" as const });
-      items.push({ type: "link" as const, text: "Settings", href: "/#/settings" });
-      return items;
-    }
-
-    // ── Implemented services (no query — show as Resources) ──
-    const filteredImplemented = availableImplemented.filter((k) =>
-      textMatches(IMPLEMENTED_SERVICES[k]),
-    );
-
-    if (filteredImplemented.length > 0) {
-      items.push({
-        type: "section" as const,
-        text: "Resources",
-        items: filteredImplemented.map((key) => ({
-          type: "link" as const,
-          text: IMPLEMENTED_SERVICES[key],
-          href: `/#/services/${key}`,
-          info: activeSet.has(key) ? <ActiveDot /> : undefined,
-        })) as SideNavigationProps.Item[],
-      });
-    }
-
-    // ── All services by category (no query) ──
-    if (!health?.services) {
-      return items;
-    }
-
-    items.push({ type: "divider" as const });
-
-    const grouped: Record<string, Array<{ key: string; label: string; status: string }>> = {};
-    for (const svc of flociServices) {
-      if (IMPLEMENTED_SERVICES[svc]) continue;
-      const category = SERVICE_CATEGORY_MAP[svc] || "Other";
-      if (!grouped[category]) grouped[category] = [];
-      grouped[category].push({
-        key: svc,
-        label: SERVICE_LABELS[svc] || svc,
-        status: health.services[svc],
-      });
-    }
-
-    for (const cat of CATEGORY_ORDER) {
-      const svcs = grouped[cat];
-      if (!svcs || svcs.length === 0) continue;
-
-      const sorted = svcs.sort((a, b) => a.label.localeCompare(b.label));
-      items.push({
-        type: "expandable-link-group" as const,
-        text: cat,
-        href: `/#/category/${cat.toLowerCase()}`,
-        defaultExpanded: navAllExpanded || undefined,
-        items: sorted.map((s) => ({
-          type: "link" as const,
-          text: s.label,
-          href: `/#/services/${s.key}`,
-        })),
-      } as SideNavigationProps.ExpandableLinkGroup);
-    }
-
-    const other = grouped["Other"];
-    if (other && other.length > 0) {
-      items.push({
-        type: "expandable-link-group" as const,
-        text: "Other",
-        href: "/#/category/other",
-        defaultExpanded: navAllExpanded || undefined,
-        items: other.map((s) => ({
-          type: "link" as const,
-          text: s.label,
-          href: `/#/services/${s.key}`,
-        })),
-      } as SideNavigationProps.ExpandableLinkGroup);
-    }
-
-    items.push({ type: "divider" as const });
-    items.push({ type: "link" as const, text: "Settings", href: "/#/settings" });
-
-    return items;
-  }, [health, active, query, navAllExpanded, favorites, recentlyVisited]);
-
-  const handleFollow = (e: CustomEvent<SideNavigationProps.FollowDetail>) => {
-    e.preventDefault();
-    const path = e.detail.href.replace("/#", "");
-    if (path) {
-      // Track recently visited services
-      const serviceMatch = path.match(/^\/services\/([^/]+)/);
-      if (serviceMatch) {
-        useRecentlyVisited.getState().addVisited(serviceMatch[1]);
-      }
-      navigate(path);
-    }
-  };
-
+  // Health summary
   const running = health?.stats.running ?? 0;
   const total = health?.stats.total ?? 0;
-  const allHealthy = running === total;
+  const version = health?.version ?? "—";
 
-  const nonRunningServices = useMemo(() => {
-    if (!health?.services) return [];
-    return Object.entries(health.services)
-      .filter(([, status]) => status !== "running")
-      .map(([key, status]) => ({ key, status }));
-  }, [health]);
+  // ── Sidebar content ──────────────────────────────────────────────────────
+  const SidebarContent = (
+    <div className="tw-flex tw-flex-col tw-h-full" style={{ fontFamily: "var(--font-sans)" }}>
 
-  const handleSkipToContent = () => {
-    // Focus the main content area — prefer semantic selectors first
-    const contentEl = document.querySelector<HTMLElement>("main, [role='main'], #main-content");
-    if (contentEl) {
-      contentEl.setAttribute("tabindex", "-1");
-      contentEl.focus();
-      contentEl.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+      {/* ── Header ──────────────────────────────────────────────── */}
+      <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-3"
+           style={{ borderBottom: "1px solid var(--sh-line)" }}>
+        <button
+          onClick={() => navigate("/")}
+          className="tw-flex tw-items-center tw-gap-2 tw-cursor-pointer tw-bg-transparent tw-border-0 tw-p-0"
+        >
+          <span className="tw-inline-flex tw-items-center tw-justify-center tw-w-[22px] tw-h-[22px] tw-rounded-[5px] tw-text-[11px] tw-font-bold"
+                style={{ background: "var(--sh-accent)", color: "#0d1117" }}>
+            F
+          </span>
+          <span className="tw-text-[13px] tw-font-semibold" style={{ color: "var(--sh-ink)" }}>
+            Floci Dash
+          </span>
+        </button>
 
-  return (
-    <>
-      {/* Skip to main content link — visually hidden until focused via CSS :focus-visible */}
-      <a
-        href="#main-content"
-        className="fd-skip-link"
-        onClick={(e) => {
-          e.preventDefault();
-          handleSkipToContent();
-        }}
-      >
-        Skip to main content
-      </a>
-      <div id="header">
-        <TopNavigation
-          identity={{
-            href: "/#/",
-            title: isMobile ? "Floci" : "Floci Dash",
-            logo: { src: FLOCI_LOGO_SVG, alt: "Floci" },
-          }}
-          search={
-            <div className={isMobile ? "fd-hide-mobile" : ""} style={{ minWidth: isMobile ? 0 : 200, maxWidth: 300 }}>
-              <Autosuggest
-                placeholder="Search services..."
-                ariaLabel="Search services"
-                value={globalSearch}
-                onChange={(e) => setGlobalSearch(e.detail.value)}
-                onSelect={(e) => {
-                  const label = e.detail.value;
-                  const flociServices = health?.services ? Object.keys(health.services) : [];
-                  const found = flociServices.find(
-                    (k) => (IMPLEMENTED_SERVICES[k] || SERVICE_LABELS[k] || k) === label,
-                  );
-                  if (found) {
-                    setGlobalSearch("");
-                    useRecentlyVisited.getState().addVisited(found);
-                    navigate(`/services/${found}`);
-                  }
-                }}
-                options={searchOptions}
-                enteredTextLabel={(v) => `Search for "${v}"`}
-                empty="No matching services"
-              />
-            </div>
-          }
-          utilities={[
-            {
-              type: "button",
-              iconSvg: <BellIcon />,
-              ariaLabel: "Notifications",
-              badge: nonRunningServices.length > 0,
-              onClick: () => setShowNotifications(true),
-            },
-            {
-              type: "button",
-              text: darkMode ? "\u2600" : "\u263D",
-              ariaLabel: darkMode ? "Switch to light mode" : "Switch to dark mode",
-              onClick: toggleDarkMode,
-            },
-          ]}
-          i18nStrings={{ searchIconAriaLabel: "Search", overflowMenuTriggerText: "More" }}
-        />
-      </div>
-      <AppLayout
-        content={
-          <div ref={mainRef} id="main-content" data-testid="app-layout-content">
-            {children}
-          </div>
-        }
-        navigationOpen={navOpen}
-        onNavigationChange={(e) => setNavOpen(e.detail.open)}
-        navigation={
-          <div>
-            <div
+        {/* Health pill */}
+        <span className="tw-flex tw-items-center tw-gap-1 tw-text-[10px] tw-font-mono tw-px-1.5 tw-py-0.5 tw-rounded"
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "10px 20px 6px",
-                fontSize: "12px",
+                color: running === total && total > 0 ? "var(--sh-ok)" : "var(--sh-warn)",
+                background: "var(--sh-elevated)",
+                border: "1px solid var(--sh-line)",
+              }}>
+          <span className="tw-w-1.5 tw-h-1.5 tw-rounded-full tw-flex-shrink-0"
+                style={{ background: running === total && total > 0 ? "var(--sh-ok)" : "var(--sh-warn)" }} />
+          {running}/{total}
+        </span>
+      </div>
+
+      {/* ── Search ──────────────────────────────────────────────── */}
+      <div className="tw-px-3 tw-pt-3 tw-pb-2">
+        <div className="tw-relative">
+          <span className="tw-absolute tw-left-2.5 tw-top-1/2 tw--translate-y-1/2" style={{ color: "var(--sh-faint)" }}>
+            <IconSearch />
+          </span>
+          <input
+            ref={searchRef}
+            type="text"
+            placeholder="Search services…"
+            value={navQuery}
+            onChange={(e) => setNavQuery(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Escape") setNavQuery(""); }}
+            className="tw-w-full tw-pl-7 tw-pr-3 tw-py-1.5 tw-text-[12px] tw-rounded-[5px] tw-outline-none"
+            style={{
+              background: "var(--sh-elevated)",
+              border: "1px solid var(--sh-line)",
+              color: "var(--sh-ink)",
+              fontFamily: "var(--font-sans)",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* ── Nav list (scrollable) ────────────────────────────────── */}
+      <nav className="tw-flex-1 tw-overflow-y-auto tw-px-2 tw-pb-2"
+           style={{ scrollbarWidth: "none" }}>
+
+        {/* Search results */}
+        {searchResults !== null && (
+          <div>
+            <p className="tw-px-2 tw-pt-2 tw-pb-1 tw-text-[10px] tw-uppercase tw-tracking-widest tw-font-semibold"
+               style={{ color: "var(--sh-faint)", fontFamily: "var(--font-mono)" }}>
+              {searchResults.length ? `${searchResults.length} match${searchResults.length !== 1 ? "es" : ""}` : "No matches"}
+            </p>
+            {searchResults.map((key) => (
+              <NavItem key={key} serviceKey={key} label={getServiceLabel(key)}
+                       status={services[key]} active={activeKey === key}
+                       fav={isFavorite(key)} onNavigate={handleNavigate}
+                       onToggleFav={handleToggleFav} />
+            ))}
+          </div>
+        )}
+
+        {/* Normal view */}
+        {searchResults === null && (
+          <>
+            {/* Dashboard link */}
+            <div
+              role="button" tabIndex={0}
+              onClick={() => { navigate("/"); setSidebarOpen(false); }}
+              onKeyDown={(e) => { if (e.key === "Enter") { navigate("/"); setSidebarOpen(false); } }}
+              className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-mb-1 tw-cursor-pointer tw-rounded-[4px] tw-transition-colors tw-duration-100 tw-text-[12px] tw-font-medium"
+              style={{
+                background: location.pathname === "/" ? "var(--sh-accent-bg)" : "transparent",
+                color: location.pathname === "/" ? "var(--sh-accent)" : "var(--sh-dim)",
+                outline: "none",
               }}
+              onMouseEnter={(e) => { if (location.pathname !== "/") e.currentTarget.style.background = "var(--sh-hover)"; }}
+              onMouseLeave={(e) => { if (location.pathname !== "/") e.currentTarget.style.background = "transparent"; }}
             >
-              <span className={allHealthy ? "fd-dot-success" : "fd-dot-warning"} />
-              {running} / {total} services running
+              <span className="tw-w-1.5 tw-h-1.5 tw-rounded-full"
+                    style={{ background: location.pathname === "/" ? "var(--sh-accent)" : "var(--sh-faint)" }} />
+              Dashboard
             </div>
-            <div style={{ padding: "0 12px 8px" }}>
-              <Input
-                placeholder="Find services..."
-                type="search"
-                value={navQuery}
-                onChange={(e) => setNavQuery(e.detail.value)}
-                clearAriaLabel="Clear search"
-                ariaLabel="Filter services by name"
-              />
-            </div>
-            {!navQuery && (
-              <div style={{ padding: "0 12px 8px", textAlign: "right" }}>
-                <Button
-                  variant="inline-link"
-                  onClick={toggleAll}
-                >
-                  {navAllExpanded ? "Collapse all" : "Expand all"}
-                </Button>
+
+            {/* Favorites */}
+            {favorites.length > 0 && (
+              <div className="tw-mb-1">
+                <p className="tw-px-2 tw-pt-2 tw-pb-1 tw-text-[10px] tw-uppercase tw-tracking-widest tw-font-semibold"
+                   style={{ color: "var(--sh-faint)", fontFamily: "var(--font-mono)" }}>
+                  Starred
+                </p>
+                {favorites
+                  .filter((k) => k in services)
+                  .map((key) => (
+                    <NavItem key={key} serviceKey={key} label={getServiceLabel(key)}
+                             status={services[key]} active={activeKey === key}
+                             fav onNavigate={handleNavigate}
+                             onToggleFav={handleToggleFav} />
+                  ))}
               </div>
             )}
-            <SideNavigation
-              key={navKey}
-              header={{ text: "Floci", href: "/#/" }}
-              activeHref={currentHref}
-              onFollow={handleFollow}
-              items={navItems}
-            />
-          </div>
-        }
-        toolsHide
-        navigationWidth={260}
-        headerSelector="#header"
-      />
-      <Modal
-        visible={showNotifications}
-        onDismiss={() => setShowNotifications(false)}
-        header="Notifications"
-      >
-        {nonRunningServices.length === 0 ? (
-          <Box variant="p">All services are running.</Box>
-        ) : (
-          <SpaceBetween size="s">
-            {nonRunningServices.map(({ key, status }) => (
-              <Box key={key} variant="p">
-                <StatusIndicator type={status === "running" ? "success" : "warning"}>
-                  {SERVICE_LABELS[key as keyof typeof SERVICE_LABELS] || key}: {status}
-                </StatusIndicator>
-              </Box>
-            ))}
-          </SpaceBetween>
+
+            {/* Recently visited */}
+            {recentlyVisited.filter((k) => k in services).length > 0 && (
+              <div className="tw-mb-1">
+                <p className="tw-px-2 tw-pt-2 tw-pb-1 tw-text-[10px] tw-uppercase tw-tracking-widest tw-font-semibold"
+                   style={{ color: "var(--sh-faint)", fontFamily: "var(--font-mono)" }}>
+                  Recent
+                </p>
+                {recentlyVisited
+                  .filter((k) => k in services)
+                  .slice(0, 5)
+                  .map((key) => (
+                    <NavItem key={key} serviceKey={key} label={getServiceLabel(key)}
+                             status={services[key]} active={activeKey === key}
+                             fav={isFavorite(key)} onNavigate={handleNavigate}
+                             onToggleFav={handleToggleFav} />
+                  ))}
+              </div>
+            )}
+
+            {/* Divider before categories */}
+            <div className="tw-my-2 tw-mx-2" style={{ height: "1px", background: "var(--sh-line-sub)" }} />
+
+            {/* Categories */}
+            {orderedCategories.map((cat) => {
+              const keys = (grouped[cat] || []).sort((a, b) =>
+                (SERVICE_LABELS[a] || a).localeCompare(SERVICE_LABELS[b] || b)
+              );
+              const isOpen = !collapsed.has(cat);
+              return (
+                <div key={cat} className="tw-mb-0.5">
+                  <button
+                    onClick={() => toggleCollapse(cat)}
+                    className="tw-flex tw-items-center tw-gap-1.5 tw-w-full tw-px-2 tw-py-1.5 tw-cursor-pointer tw-rounded-[3px]"
+                    style={{
+                      background: "transparent", border: "none",
+                      color: "var(--sh-faint)", fontFamily: "var(--font-mono)",
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = "var(--sh-dim)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = "var(--sh-faint)"; }}
+                  >
+                    <span style={{ flexShrink: 0 }}><IconChevron open={isOpen} /></span>
+                    <span className="tw-text-[10px] tw-uppercase tw-tracking-widest tw-font-semibold tw-truncate">
+                      {cat}
+                    </span>
+                    <span className="tw-ml-auto tw-text-[10px] tw-font-mono">{keys.length}</span>
+                  </button>
+
+                  {isOpen && (
+                    <div>
+                      {keys.map((key) => (
+                        <NavItem key={key} serviceKey={key} label={getServiceLabel(key)}
+                                 status={services[key]} active={activeKey === key}
+                                 fav={isFavorite(key)} onNavigate={handleNavigate}
+                                 onToggleFav={handleToggleFav} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </>
         )}
-      </Modal>
-    </>
+      </nav>
+
+      {/* ── Footer ──────────────────────────────────────────────── */}
+      <div className="tw-flex tw-items-center tw-justify-between tw-px-3 tw-py-2"
+           style={{ borderTop: "1px solid var(--sh-line)" }}>
+        <button
+          onClick={() => navigate("/settings")}
+          className="tw-flex tw-items-center tw-gap-1.5 tw-text-[11px] tw-cursor-pointer tw-rounded-[4px] tw-px-2 tw-py-1 tw-bg-transparent tw-border-0 tw-transition-colors"
+          style={{ color: "var(--sh-faint)", fontFamily: "var(--font-sans)" }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = "var(--sh-dim)"; e.currentTarget.style.background = "var(--sh-hover)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = "var(--sh-faint)"; e.currentTarget.style.background = "transparent"; }}
+        >
+          <IconSettings /> Settings
+        </button>
+
+        <button
+          onClick={toggleDarkMode}
+          className="tw-flex tw-items-center tw-justify-center tw-w-7 tw-h-7 tw-rounded-[4px] tw-cursor-pointer tw-bg-transparent tw-border-0 tw-transition-colors"
+          style={{ color: "var(--sh-faint)" }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "var(--sh-hover)"; e.currentTarget.style.color = "var(--sh-dim)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sh-faint)"; }}
+          aria-label="Toggle dark mode"
+        >
+          {darkMode ? <IconSun /> : <IconMoon />}
+        </button>
+      </div>
+    </div>
+  );
+
+  // ── Shell ─────────────────────────────────────────────────────────────────
+  return (
+    <div
+      id="app-shell"
+      className={`tw-flex tw-h-screen tw-overflow-hidden${darkMode ? "" : " light"}`}
+      style={{ background: "var(--sh-bg)", fontFamily: "var(--font-sans)" }}
+    >
+      {/* ── Skip link ─────────────────────────────────────────── */}
+      <a href="#main-content" className="fd-skip-link">Skip to content</a>
+
+      {/* ── Sidebar (desktop) ─────────────────────────────────── */}
+      <aside
+        className="tw-hidden md:tw-flex tw-flex-col tw-w-[220px] tw-flex-shrink-0 tw-h-full"
+        style={{ background: "var(--sh-surface)", borderRight: "1px solid var(--sh-line)" }}
+      >
+        {SidebarContent}
+      </aside>
+
+      {/* ── Mobile sidebar overlay ────────────────────────────── */}
+      {sidebarOpen && (
+        <div className="md:tw-hidden tw-fixed tw-inset-0 tw-z-50 tw-flex">
+          <div
+            className="tw-absolute tw-inset-0"
+            style={{ background: "rgba(0,0,0,0.6)" }}
+            onClick={() => setSidebarOpen(false)}
+          />
+          <aside
+            className="tw-relative tw-w-[220px] tw-h-full tw-flex tw-flex-col"
+            style={{ background: "var(--sh-surface)", borderRight: "1px solid var(--sh-line)" }}
+          >
+            {SidebarContent}
+          </aside>
+        </div>
+      )}
+
+      {/* ── Main area ─────────────────────────────────────────── */}
+      <div className="tw-flex-1 tw-flex tw-flex-col tw-overflow-hidden">
+
+        {/* Mobile topbar */}
+        <div className="md:tw-hidden tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-3 tw-flex-shrink-0"
+             style={{ background: "var(--sh-surface)", borderBottom: "1px solid var(--sh-line)" }}>
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="tw-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded tw-cursor-pointer tw-bg-transparent tw-border-0"
+            style={{ color: "var(--sh-dim)" }}
+          >
+            <IconMenu />
+          </button>
+          <span className="tw-text-[13px] tw-font-semibold" style={{ color: "var(--sh-ink)" }}>
+            Floci Dash
+          </span>
+          <span className="tw-ml-auto tw-font-mono tw-text-[11px]" style={{ color: "var(--sh-ok)" }}>
+            v{version}
+          </span>
+        </div>
+
+        {/* Page content */}
+        <main
+          id="main-content"
+          className="tw-flex-1 tw-overflow-auto"
+          style={{ background: "var(--sh-bg)" }}
+        >
+          {children}
+        </main>
+      </div>
+    </div>
   );
 }
