@@ -152,8 +152,8 @@ router.get("/users/:name", async (c: Context) => {
   const name = c.req.param("name");
   const result = await iam().send(new GetUserCommand({ UserName: name }));
 
-  // Fetch groups and attached policies in parallel
-  const [groupsRes, attachedRes, accessKeysRes, inlineRes] = await Promise.all([
+  // Use allSettled so a failure in any enrichment call doesn't collapse the response.
+  const [groupsRes, attachedRes, accessKeysRes, inlineRes] = await Promise.allSettled([
     iam().send(new ListGroupsForUserCommand({ UserName: name })),
     iam().send(new ListAttachedUserPoliciesCommand({ UserName: name })),
     iam().send(new ListAccessKeysCommand({ UserName: name })),
@@ -163,13 +163,12 @@ router.get("/users/:name", async (c: Context) => {
   const user = mapUser(result.User);
   return c.json({
     user,
-    groups: (groupsRes.Groups || []).map(mapGroup),
-    attachedPolicies: (attachedRes.AttachedPolicies || []).map((p: any) => ({
-      name: p.PolicyName,
-      arn: p.PolicyArn,
-    })),
-    accessKeys: (accessKeysRes.AccessKeyMetadata || []).map(mapAccessKey),
-    inlinePolicies: inlineRes.PolicyNames || [],
+    groups: groupsRes.status === "fulfilled" ? (groupsRes.value.Groups || []).map(mapGroup) : [],
+    attachedPolicies: attachedRes.status === "fulfilled"
+      ? (attachedRes.value.AttachedPolicies || []).map((p: any) => ({ name: p.PolicyName, arn: p.PolicyArn }))
+      : [],
+    accessKeys: accessKeysRes.status === "fulfilled" ? (accessKeysRes.value.AccessKeyMetadata || []).map(mapAccessKey) : [],
+    inlinePolicies: inlineRes.status === "fulfilled" ? (inlineRes.value.PolicyNames || []) : [],
   });
 });
 
@@ -207,21 +206,22 @@ router.get("/roles/:name", async (c: Context) => {
   const name = c.req.param("name");
   const result = await iam().send(new GetRoleCommand({ RoleName: name }));
 
-  const [attachedRes, tagsRes] = await Promise.all([
+  const [attachedRes, tagsRes] = await Promise.allSettled([
     iam().send(new ListAttachedRolePoliciesCommand({ RoleName: name })),
     iam().send(new ListRoleTagsCommand({ RoleName: name })),
   ]);
 
   const role = mapRole(result.Role);
   const tags: Record<string, string> = {};
-  (tagsRes.Tags || []).forEach((t: any) => { tags[t.Key] = t.Value; });
+  if (tagsRes.status === "fulfilled") {
+    (tagsRes.value.Tags || []).forEach((t: any) => { tags[t.Key] = t.Value; });
+  }
 
   return c.json({
     role,
-    attachedPolicies: (attachedRes.AttachedPolicies || []).map((p: any) => ({
-      name: p.PolicyName,
-      arn: p.PolicyArn,
-    })),
+    attachedPolicies: attachedRes.status === "fulfilled"
+      ? (attachedRes.value.AttachedPolicies || []).map((p: any) => ({ name: p.PolicyName, arn: p.PolicyArn }))
+      : [],
     tags,
   });
 });

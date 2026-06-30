@@ -283,13 +283,15 @@ router.get("/aliases", async (c: Context) => {
 
 router.post("/aliases", async (c: Context) => {
   const body = await c.req.json<any>();
+  if (!body.aliasName) return c.json({ error: "aliasName is required" }, 400);
+  const aliasName = body.aliasName.startsWith("alias/") ? body.aliasName : `alias/${body.aliasName}`;
   await kms().send(
     new CreateAliasCommand({
-      AliasName: body.aliasName.startsWith("alias/") ? body.aliasName : `alias/${body.aliasName}`,
+      AliasName: aliasName,
       TargetKeyId: body.targetKeyId,
     })
   );
-  return c.json({ aliasName: body.aliasName, created: true });
+  return c.json({ aliasName, created: true });
 });
 
 router.delete("/aliases/:name", async (c: Context) => {
