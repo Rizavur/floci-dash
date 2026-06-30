@@ -98,7 +98,7 @@ export const SERVICE_DASHBOARDS: Record<string, ComponentType> = {
   "codedeploy": CodeDeployDashboard,
   "transfer": TransferDashboard,
   "cur": CURDashboard,
-  "bcmdataexports": BCMDashboard,
+  "bcm-data-exports": BCMDashboard,
   "wafv2": WafV2Dashboard,
   "elasticache": ElastiCacheDashboard,
   "batch": BatchDashboard,

@@ -50,7 +50,7 @@ export const SERVICE_CATEGORY_MAP: Record<string, string> = {
   ce: "Cost Management", cur: "Cost Management", "bcm-data-exports": "Cost Management", pricing: "Cost Management", tagging: "Cost Management",
   codedeploy: "Developer Tools", codebuild: "Developer Tools",
   backup: "Migration & Transfer", transfer: "Migration & Transfer",
-  batch: "Analytics",
+  batch: "Compute",
 };
 
 export const SERVICE_LABELS: Record<string, string> = {

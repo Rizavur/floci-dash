@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ContentLayout,
   Header,
@@ -47,6 +48,7 @@ const RUNTIMES = [
 ].map((r) => ({ label: r, value: r }));
 
 export default function LambdaPage() {
+  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState("functions");
   const [selectedFunction, setSelectedFunction] = useState<string | null>(null);
 
@@ -85,7 +87,7 @@ export default function LambdaPage() {
       breadcrumbs={
         <BreadcrumbGroup
           items={[{ text: "Dashboard", href: "#/" }, { text: "Lambda", href: "#/services/lambda" }]}
-          onFollow={(e) => { e.preventDefault(); window.location.hash = e.detail.href.replace("#", ""); }}
+          onFollow={(e) => { e.preventDefault(); navigate(e.detail.href.replace("/#", "") || "/"); }}
         />
       }
     >

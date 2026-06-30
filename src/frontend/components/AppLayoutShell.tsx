@@ -210,8 +210,8 @@ export default function AppLayoutShell({ children }: Props) {
       } else {
         items.push({
           type: "section" as const,
-          text: "Search Results",
-          items: [{ type: "link" as const, text: "No matches", href: "" }],
+          text: "No matches",
+          items: [],  // empty items — section header itself communicates no results
         });
       }
 
@@ -296,7 +296,7 @@ export default function AppLayoutShell({ children }: Props) {
     return items;
   }, [health, active, query, navAllExpanded, favorites, recentlyVisited]);
 
-  const handleFollow = (e: CustomEvent<{ href: string }>) => {
+  const handleFollow = (e: CustomEvent<SideNavigationProps.FollowDetail>) => {
     e.preventDefault();
     const path = e.detail.href.replace("/#", "");
     if (path) {
@@ -305,12 +305,12 @@ export default function AppLayoutShell({ children }: Props) {
       if (serviceMatch) {
         useRecentlyVisited.getState().addVisited(serviceMatch[1]);
       }
-      navigate(path || "/");
+      navigate(path);
     }
   };
 
-  const running = health?.stats?.running ?? 0;
-  const total = health?.stats?.total ?? 0;
+  const running = health?.stats.running ?? 0;
+  const total = health?.stats.total ?? 0;
   const allHealthy = running === total;
 
   const nonRunningServices = useMemo(() => {
@@ -439,7 +439,7 @@ export default function AppLayoutShell({ children }: Props) {
               key={navKey}
               header={{ text: "Floci", href: "/#/" }}
               activeHref={currentHref}
-              onFollow={handleFollow as any}
+              onFollow={handleFollow}
               items={navItems}
             />
           </div>

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Box, BreadcrumbGroup, Button, ColumnLayout, Container, Header, SpaceBetween, StatusIndicator, Link } from "@cloudscape-design/components";
+import { Box, BreadcrumbGroup, Button, ColumnLayout, Container, Header, SpaceBetween, StatusIndicator } from "@cloudscape-design/components";
 import { useHealth, useActiveServices } from "../hooks/useSystem";
 import { useResourceCounts } from "../hooks/useResourceCounts";
 import { useActivityFeed } from "../hooks/useActivityFeed";
@@ -55,6 +55,7 @@ export default function DashboardHome() {
             items={[
               { text: "Dashboard", href: "/#/" },
             ]}
+            onFollow={(e) => { e.preventDefault(); navigate(e.detail.href.replace("/#", "") || "/"); }}
           />
           <Header
             variant="h1"
