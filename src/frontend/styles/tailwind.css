@@ -1,0 +1,8 @@
+/*
+ * Tailwind CSS v4 — loaded alongside Cloudscape Design System.
+ *
+ * All Tailwind utilities use the `tw-` prefix (e.g. tw-flex, tw-grid-cols-4)
+ * to prevent any collision with Cloudscape's global class names.
+ * Cloudscape's own styles remain unaffected.
+ */
+@import "tailwindcss" prefix(tw-);
