@@ -148,8 +148,10 @@ export function useLambdaTags(arn: string | null) {
 export function useFunctionUrl(name: string | null) {
   return useQuery({
     queryKey: ["aws", "lambda", "functions", name, "url"],
-    queryFn: () => api<{ url: string; authType: string; cors: any; invokeMode: string }>(`/aws/lambda/functions/${name}/url`),
+    queryFn: () => api<{ url: string | null; authType: string | null; cors: any; invokeMode: string | null }>(`/aws/lambda/functions/${name}/url`),
     enabled: !!name,
+    // Not having a URL is normal — don't retry on 404
+    retry: false,
   });
 }
 
