@@ -1,5 +1,15 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import {
+  MagnifyingGlassIcon,
+  ChevronRightIcon,
+  StarIcon,
+  MoonIcon,
+  SunIcon,
+  Bars3Icon,
+  Cog6ToothIcon,
+} from "@heroicons/react/16/solid";
+import { StarIcon as StarIconOutline } from "@heroicons/react/24/outline";
 import { useHealth, useActiveServices } from "../hooks/useSystem";
 import { useSettings } from "../stores/settings";
 import { useFavorites } from "../stores/favorites";
@@ -11,54 +21,8 @@ import {
   getServiceLabel,
 } from "../types/services";
 
-interface Props { children: React.ReactNode }
-
-// ── Icons (inline SVG, no dependency) ─────────────────────────────────────
-
-const IconSearch = () => (
-  <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
-    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/>
-  </svg>
-);
-
-const IconChevron = ({ open }: { open: boolean }) => (
-  <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"
-       style={{ transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }}>
-    <path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-  </svg>
-);
-
-const IconStar = ({ filled }: { filled: boolean }) => (
-  <svg width="11" height="11" viewBox="0 0 16 16" fill={filled ? "currentColor" : "none"}
-       stroke="currentColor" strokeWidth={filled ? 0 : 1.5}>
-    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-  </svg>
-);
-
-const IconMoon = () => (
-  <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-    <path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
-  </svg>
-);
-
-const IconSun = () => (
-  <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-    <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
-  </svg>
-);
-
-const IconMenu = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-    <path fillRule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
-  </svg>
-);
-
-const IconSettings = () => (
-  <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
-    <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
-    <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.892 3.434-.901 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.892-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.474l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
-  </svg>
-);
+// Shared icon size — all nav/UI icons at 14×14 px
+const IC = "tw-w-3.5 tw-h-3.5 tw-flex-shrink-0";
 
 // ── Nav item component ─────────────────────────────────────────────────────
 
@@ -117,12 +81,17 @@ function NavItem({ label, serviceKey, status, active, fav, onNavigate, onToggleF
           }}
           aria-label={fav ? `Unstar ${label}` : `Star ${label}`}
         >
-          <IconStar filled={!!fav} />
+          {fav
+            ? <StarIcon className={IC} />
+            : <StarIconOutline className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0" />
+          }
         </button>
       )}
     </div>
   );
 }
+
+interface Props { children: React.ReactNode }
 
 // ── Main shell ─────────────────────────────────────────────────────────────
 
@@ -250,7 +219,7 @@ export default function AppLayoutShell({ children }: Props) {
       <div className="tw-px-3 tw-pt-3 tw-pb-2">
         <div className="tw-relative">
           <span className="tw-absolute tw-left-2.5 tw-top-1/2 tw--translate-y-1/2" style={{ color: "var(--sh-faint)" }}>
-            <IconSearch />
+            <MagnifyingGlassIcon className={IC} />
           </span>
           <input
             ref={searchRef}
@@ -370,7 +339,10 @@ export default function AppLayoutShell({ children }: Props) {
                     onMouseEnter={(e) => { e.currentTarget.style.color = "var(--sh-dim)"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = "var(--sh-faint)"; }}
                   >
-                    <span style={{ flexShrink: 0 }}><IconChevron open={isOpen} /></span>
+                    <ChevronRightIcon
+                      className={IC}
+                      style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }}
+                    />
                     <span className="tw-text-[10px] tw-uppercase tw-tracking-widest tw-font-semibold tw-truncate">
                       {cat}
                     </span>
@@ -404,7 +376,7 @@ export default function AppLayoutShell({ children }: Props) {
           onMouseEnter={(e) => { e.currentTarget.style.color = "var(--sh-dim)"; e.currentTarget.style.background = "var(--sh-hover)"; }}
           onMouseLeave={(e) => { e.currentTarget.style.color = "var(--sh-faint)"; e.currentTarget.style.background = "transparent"; }}
         >
-          <IconSettings /> Settings
+          <Cog6ToothIcon className={IC} /> Settings
         </button>
 
         <button
@@ -415,7 +387,7 @@ export default function AppLayoutShell({ children }: Props) {
           onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sh-faint)"; }}
           aria-label="Toggle dark mode"
         >
-          {darkMode ? <IconSun /> : <IconMoon />}
+          {darkMode ? <SunIcon className={IC} /> : <MoonIcon className={IC} />}
         </button>
       </div>
     </div>
@@ -467,7 +439,7 @@ export default function AppLayoutShell({ children }: Props) {
             className="tw-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded tw-cursor-pointer tw-bg-transparent tw-border-0"
             style={{ color: "var(--sh-dim)" }}
           >
-            <IconMenu />
+            <Bars3Icon className="tw-w-4 tw-h-4" />
           </button>
           <span className="tw-text-[13px] tw-font-semibold" style={{ color: "var(--sh-ink)" }}>
             Floci Dash
