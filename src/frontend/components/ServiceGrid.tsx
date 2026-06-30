@@ -1,4 +1,4 @@
-import { Box, SpaceBetween } from "@cloudscape-design/components";
+import { SpaceBetween } from "@cloudscape-design/components";
 import { SERVICE_LABELS, CATEGORY_ORDER, SERVICE_CATEGORY_MAP } from "../types/services";
 import ServiceCard from "./ServiceCard";
 
@@ -25,10 +25,13 @@ export default function ServiceGrid({ services }: Props) {
         );
         return (
           <div key={category}>
-            <Box variant="h3" padding={{ bottom: "m" }} color="text-body-secondary">
+            {/* Category header — Tailwind typography instead of Cloudscape Box */}
+            <p className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-mb-3 fd-text-muted-subtle">
               {category}
-            </Box>
-            <div className="fd-grid-responsive">
+            </p>
+            {/* Responsive auto-fill grid — matches the existing fd-grid-responsive breakpoints */}
+            <div className="tw-grid tw-grid-cols-[repeat(auto-fill,minmax(220px,1fr))] tw-gap-3
+                            max-sm:tw-grid-cols-[repeat(auto-fill,minmax(140px,1fr))] max-sm:tw-gap-2">
               {keys.map((key) => (
                 <ServiceCard key={key} serviceKey={key} status={services[key]} />
               ))}
