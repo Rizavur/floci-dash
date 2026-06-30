@@ -25,10 +25,12 @@ export default function StatCard({
   size = "md",
 }: Props) {
   const v = VARIANTS[variant] ?? VARIANTS.default;
-  const padding = size === "sm" ? "tw-p-4" : "tw-p-5";
+  // Keep padding as inline style — fd-accent-card (non-layered CSS) beats
+  // Tailwind utility classes (@layer utilities), so tw-p-* would be ignored.
+  const padStyle = size === "sm" ? { padding: "16px 20px" } : { padding: "20px 24px" };
 
   return (
-    <div className={`fd-accent-card tw-flex tw-flex-col tw-gap-1.5 ${padding}`}>
+    <div className="fd-accent-card tw-flex tw-flex-col tw-gap-1.5" style={padStyle}>
       {/* Label row */}
       <Box variant="small" color="text-body-secondary">
         <span className={`${v.accent} tw-mr-1.5`}>{v.icon}</span>
