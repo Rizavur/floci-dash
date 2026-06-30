@@ -1,10 +1,10 @@
 import { Box } from "@cloudscape-design/components";
 
-const VARIANTS: Record<string, { className: string; icon: string }> = {
-  info: { className: "fd-accent-info", icon: "●" },
-  success: { className: "fd-accent-success", icon: "●" },
-  warning: { className: "fd-accent-warning", icon: "●" },
-  default: { className: "fd-accent-purple", icon: "◆" },
+const VARIANTS: Record<string, { accent: string; icon: string }> = {
+  info:    { accent: "fd-accent-info",    icon: "●" },
+  success: { accent: "fd-accent-success", icon: "●" },
+  warning: { accent: "fd-accent-warning", icon: "●" },
+  default: { accent: "fd-accent-purple",  icon: "◆" },
 };
 
 interface Props {
@@ -24,20 +24,25 @@ export default function StatCard({
   isText,
   size = "md",
 }: Props) {
-  const v = VARIANTS[variant] || VARIANTS.default;
-  const padding = size === "sm" ? "16px 20px" : "20px 24px";
+  const v = VARIANTS[variant] ?? VARIANTS.default;
+  const padding = size === "sm" ? "tw-p-4" : "tw-p-5";
 
   return (
-    <div className="fd-accent-card" style={{ padding, display: "flex", flexDirection: "column", gap: 6 }}>
+    <div className={`fd-accent-card tw-flex tw-flex-col tw-gap-1.5 ${padding}`}>
+      {/* Label row */}
       <Box variant="small" color="text-body-secondary">
-        <span className={v.className} style={{ marginRight: 6 }}>{v.icon}</span>
+        <span className={`${v.accent} tw-mr-1.5`}>{v.icon}</span>
         {label}
       </Box>
+
+      {/* Value */}
       <Box variant={isText ? "h4" : "h1"} color="inherit" padding={{ top: "xxs" }}>
-        <span className={v.className} style={{ fontWeight: 700, fontSize: isText ? 14 : undefined }}>
+        <span className={v.accent} style={{ fontWeight: 700, fontSize: isText ? 14 : undefined }}>
           {value}
         </span>
       </Box>
+
+      {/* Subtext */}
       {subtext && (
         <Box variant="small" color="text-body-secondary" padding={{ top: "xxs" }}>
           {subtext}
