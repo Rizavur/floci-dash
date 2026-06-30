@@ -5,6 +5,13 @@ import userEvent from "@testing-library/user-event";
 import { clickButton, createWrapper } from "../../test/helpers";
 import React from "react";
 
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", () => ({
+  useNavigate: () => mockNavigate,
+  useParams: () => ({}),
+  useSearchParams: () => [new URLSearchParams(), vi.fn()],
+}));
+
 const mockFunctions = vi.fn();
 const mockFunctionDetail = vi.fn();
 const mockCreateFunctionMutate = vi.fn();
