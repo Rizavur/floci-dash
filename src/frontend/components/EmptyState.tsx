@@ -12,7 +12,7 @@ export default function EmptyState({ title, description, actionText, onAction, i
       display: "flex", flexDirection: "column", alignItems: "center",
       justifyContent: "center", textAlign: "center",
       padding: "64px 24px", gap: "12px",
-      fontFamily: "var(--font-sans)",
+      fontFamily: "var(--font-ui)",
     }}>
       {icon && (
         <span style={{ fontSize: "32px", lineHeight: 1 }}>{icon}</span>
@@ -33,7 +33,7 @@ export default function EmptyState({ title, description, actionText, onAction, i
             fontSize: "12px", fontWeight: 500, cursor: "pointer",
             background: "var(--sh-accent)", color: "#0d1117",
             border: "none", borderRadius: "5px",
-            fontFamily: "var(--font-sans)",
+            fontFamily: "var(--font-ui)",
           }}
         >
           {actionText}

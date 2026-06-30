@@ -35,7 +35,7 @@ export default function StatCard({
         display: "flex",
         flexDirection: "column",
         gap: size === "sm" ? "4px" : "6px",
-        fontFamily: "var(--font-sans)",
+        fontFamily: "var(--font-ui)",
       }}
     >
       {/* Label */}
@@ -55,7 +55,7 @@ export default function StatCard({
         fontWeight: 600,
         lineHeight: 1,
         color: accent,
-        fontFamily: isText ? "var(--font-sans)" : "var(--font-mono)",
+        fontFamily: isText ? "var(--font-ui)" : "var(--font-mono)",
       }}>
         {value}
       </span>

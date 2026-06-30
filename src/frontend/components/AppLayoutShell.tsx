@@ -65,7 +65,7 @@ function NavItem({ label, serviceKey, status, active, fav, onNavigate, onToggleF
 
       {/* Label */}
       <span className="tw-flex-1 tw-text-[12px] tw-leading-none tw-truncate tw-font-medium"
-            style={{ color: active ? "var(--sh-accent)" : "var(--sh-dim)", fontFamily: "var(--font-sans)" }}>
+            style={{ color: active ? "var(--sh-accent)" : "var(--sh-dim)", fontFamily: "var(--font-ui)" }}>
         {label}
       </span>
 
@@ -184,7 +184,7 @@ export default function AppLayoutShell({ children }: Props) {
 
   // ── Sidebar content ──────────────────────────────────────────────────────
   const SidebarContent = (
-    <div className="tw-flex tw-flex-col tw-h-full" style={{ fontFamily: "var(--font-sans)" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", fontFamily: "var(--font-ui)" }}>
 
       {/* ── Header ──────────────────────────────────────────────── */}
       <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-3"
@@ -233,7 +233,7 @@ export default function AppLayoutShell({ children }: Props) {
               background: "var(--sh-elevated)",
               border: "1px solid var(--sh-line)",
               color: "var(--sh-ink)",
-              fontFamily: "var(--font-sans)",
+              fontFamily: "var(--font-ui)",
             }}
           />
         </div>
@@ -372,7 +372,7 @@ export default function AppLayoutShell({ children }: Props) {
         <button
           onClick={() => navigate("/settings")}
           className="tw-flex tw-items-center tw-gap-1.5 tw-text-[11px] tw-cursor-pointer tw-rounded-[4px] tw-px-2 tw-py-1 tw-bg-transparent tw-border-0 tw-transition-colors"
-          style={{ color: "var(--sh-faint)", fontFamily: "var(--font-sans)" }}
+          style={{ color: "var(--sh-faint)", fontFamily: "var(--font-ui)" }}
           onMouseEnter={(e) => { e.currentTarget.style.color = "var(--sh-dim)"; e.currentTarget.style.background = "var(--sh-hover)"; }}
           onMouseLeave={(e) => { e.currentTarget.style.color = "var(--sh-faint)"; e.currentTarget.style.background = "transparent"; }}
         >
@@ -397,31 +397,49 @@ export default function AppLayoutShell({ children }: Props) {
   return (
     <div
       id="app-shell"
-      className={`tw-flex tw-h-screen tw-overflow-hidden${darkMode ? "" : " light"}`}
-      style={{ background: "var(--sh-bg)", fontFamily: "var(--font-sans)" }}
+      className={darkMode ? "" : "light"}
+      // Structural layout uses inline styles so the shell ALWAYS renders
+      // correctly regardless of whether Tailwind CSS is emitted.
+      style={{
+        display: "flex",
+        height: "100vh",
+        overflow: "hidden",
+        background: "var(--sh-bg)",
+        fontFamily: "var(--font-ui)",
+      }}
     >
       {/* ── Skip link ─────────────────────────────────────────── */}
       <a href="#main-content" className="fd-skip-link">Skip to content</a>
 
       {/* ── Sidebar (desktop) ─────────────────────────────────── */}
       <aside
-        className="tw-hidden md:tw-flex tw-flex-col tw-w-[220px] tw-flex-shrink-0 tw-h-full"
-        style={{ background: "var(--sh-surface)", borderRight: "1px solid var(--sh-line)" }}
+        className="tw-hidden md:tw-flex tw-flex-col"
+        style={{
+          width: 220,
+          flexShrink: 0,
+          height: "100%",
+          background: "var(--sh-surface)",
+          borderRight: "1px solid var(--sh-line)",
+          // Fallback: show on wider screens even without Tailwind
+          display: window.innerWidth >= 768 ? undefined : "none",
+        }}
       >
         {SidebarContent}
       </aside>
 
       {/* ── Mobile sidebar overlay ────────────────────────────── */}
       {sidebarOpen && (
-        <div className="md:tw-hidden tw-fixed tw-inset-0 tw-z-50 tw-flex">
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex" }}>
           <div
-            className="tw-absolute tw-inset-0"
-            style={{ background: "rgba(0,0,0,0.6)" }}
+            style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)" }}
             onClick={() => setSidebarOpen(false)}
           />
           <aside
-            className="tw-relative tw-w-[220px] tw-h-full tw-flex tw-flex-col"
-            style={{ background: "var(--sh-surface)", borderRight: "1px solid var(--sh-line)" }}
+            style={{
+              position: "relative", width: 220, height: "100%",
+              display: "flex", flexDirection: "column",
+              background: "var(--sh-surface)", borderRight: "1px solid var(--sh-line)",
+            }}
           >
             {SidebarContent}
           </aside>
@@ -429,11 +447,16 @@ export default function AppLayoutShell({ children }: Props) {
       )}
 
       {/* ── Main area ─────────────────────────────────────────── */}
-      <div className="tw-flex-1 tw-flex tw-flex-col tw-overflow-hidden">
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
-        {/* Mobile topbar */}
-        <div className="md:tw-hidden tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-3 tw-flex-shrink-0"
-             style={{ background: "var(--sh-surface)", borderBottom: "1px solid var(--sh-line)" }}>
+        {/* Mobile topbar — hidden above md via Tailwind; inline flex as fallback
+            (the sidebar's inline display:none fallback mirrors this) */}
+        <div className="md:tw-hidden"
+             style={{
+               display: window.innerWidth >= 768 ? "none" : "flex",
+               alignItems: "center", gap: 12, padding: "12px 16px", flexShrink: 0,
+               background: "var(--sh-surface)", borderBottom: "1px solid var(--sh-line)",
+             }}>
           <button
             onClick={() => setSidebarOpen(true)}
             className="tw-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded tw-cursor-pointer tw-bg-transparent tw-border-0"
@@ -452,8 +475,7 @@ export default function AppLayoutShell({ children }: Props) {
         {/* Page content */}
         <main
           id="main-content"
-          className="tw-flex-1 tw-overflow-auto"
-          style={{ background: "var(--sh-bg)" }}
+          style={{ flex: 1, overflowY: "auto", background: "var(--sh-bg)" }}
         >
           {children}
         </main>

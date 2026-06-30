@@ -45,7 +45,7 @@ export default function ServiceCard({ serviceKey, status }: Props) {
         border: "1px solid var(--sh-line)",
         borderLeft: `2px solid ${isRunning ? "var(--sh-ok)" : "var(--sh-line)"}`,
         borderRadius: "5px",
-        fontFamily: "var(--font-sans)",
+        fontFamily: "var(--font-ui)",
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.background = "var(--sh-elevated)";

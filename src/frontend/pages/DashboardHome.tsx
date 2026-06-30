@@ -66,7 +66,7 @@ export default function DashboardHome() {
 
   if (isLoading) {
     return (
-      <div className="tw-p-8" style={{ fontFamily: "var(--font-sans)" }}>
+      <div className="tw-p-8" style={{ fontFamily: "var(--font-ui)" }}>
         <div className="tw-grid tw-grid-cols-2 lg:tw-grid-cols-4 tw-gap-3 tw-mb-8">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="fd-skeleton tw-h-[80px] tw-rounded-md" />
@@ -103,7 +103,7 @@ export default function DashboardHome() {
     : [];
 
   return (
-    <div className="tw-p-6 tw-max-w-[1280px] tw-mx-auto" style={{ fontFamily: "var(--font-sans)" }}>
+    <div className="tw-p-6 tw-max-w-[1280px] tw-mx-auto" style={{ fontFamily: "var(--font-ui)" }}>
 
       {/* ── Page header ──────────────────────────────────────── */}
       <div className="tw-flex tw-items-baseline tw-justify-between tw-mb-8">
@@ -186,7 +186,7 @@ export default function DashboardHome() {
                 background: primary ? "var(--sh-accent)" : "var(--sh-elevated)",
                 color: primary ? "#0d1117" : "var(--sh-dim)",
                 border: `1px solid ${primary ? "var(--sh-accent)" : "var(--sh-line)"}`,
-                fontFamily: "var(--font-sans)",
+                fontFamily: "var(--font-ui)",
               }}
               onMouseEnter={(e) => {
                 if (!primary) {
@@ -216,7 +216,7 @@ export default function DashboardHome() {
               <button
                 onClick={clearActivity}
                 className="tw-text-[11px] tw-cursor-pointer tw-bg-transparent tw-border-0 tw-transition-colors tw-duration-100"
-                style={{ color: "var(--sh-faint)", fontFamily: "var(--font-sans)" }}
+                style={{ color: "var(--sh-faint)", fontFamily: "var(--font-ui)" }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = "var(--sh-dim)"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = "var(--sh-faint)"; }}
               >
