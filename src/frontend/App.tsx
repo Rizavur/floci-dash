@@ -77,10 +77,11 @@ export default function App() {
       <ToastProvider>
         <ToastProviderWithErrorReporter>
           <HashRouter>
-            <AppLayoutShell>
-              <ErrorBoundary>
-                <Suspense fallback={<DashboardSkeleton />}>
-                  <Routes>
+            <ErrorBoundary>
+              <AppLayoutShell>
+                <ErrorBoundary>
+                  <Suspense fallback={<DashboardSkeleton />}>
+                    <Routes>
                     <Route path="/" element={<DashboardHome />} />
                     <Route path="/services/s3" element={<S3Page />} />
                     <Route path="/services/ec2" element={<EC2Page />} />
@@ -100,6 +101,7 @@ export default function App() {
                 </Suspense>
               </ErrorBoundary>
             </AppLayoutShell>
+          </ErrorBoundary>
           </HashRouter>
         </ToastProviderWithErrorReporter>
       </ToastProvider>
