@@ -148,7 +148,33 @@ All commands use `make`. Run `make help` for the full list.
 9. Update the tracker in PLAN.md
 10. **Update README.md** — add the service to the "Fully implemented" table
 
-## Conventions
+## UI conventions
+
+### Icons — always use Heroicons
+**Never write inline SVG or use `dangerouslySetInnerHTML` for icons.**
+Import from `@heroicons/react` — it is already installed:
+
+```tsx
+import { MagnifyingGlassIcon, StarIcon, ChevronRightIcon } from "@heroicons/react/16/solid";
+import { StarIcon as StarIconOutline } from "@heroicons/react/24/outline";
+```
+
+| Size prefix | When to use |
+|---|---|
+| `16/solid` | Nav items, toolbar buttons, compact UI (14–16 px rendered) |
+| `20/solid` | Medium UI — form labels, table column headers |
+| `24/solid` | Large controls, page-level actions |
+| `24/outline` | Paired with `16/solid` for toggleable states (starred/unstarred) |
+
+Set rendered size with Tailwind: `className="tw-w-4 tw-h-4"`. Do not set `width`/`height` directly on the icon component.
+
+### Design system
+- Custom shell (`AppLayoutShell`) uses Tailwind with `tw-` prefix + CSS variables in `#app-shell`.
+- Cloudscape remains in service pages for tables, forms, and modals — do not remove it from those.
+- Dark mode: toggle `awsui-dark-mode` on `document.body` (Cloudscape) **and** `.light` class on `#app-shell` (custom shell).
+- Design tokens live in `src/frontend/styles/tailwind.css` (`@theme`) and `src/frontend/styles/dashboard.css` (`#app-shell` variables).
+
+## General conventions
 
 - No Floci changes
 - Backend routes first, test with curl, then frontend
