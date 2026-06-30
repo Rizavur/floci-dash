@@ -135,7 +135,7 @@ function LambdaFunctionList({ onSelect }: { onSelect: (name: string) => void }) 
         timeout: Number(form.timeout),
         memorySize: Number(form.memorySize),
         description: form.description,
-        zipFile: Buffer.from("UEsDBBQAAAAAA").toString("base64"),
+        zipFile: "UEsDBBQAAAAAA",
       },
       { onSuccess: () => setShowCreate(false) }
     );
