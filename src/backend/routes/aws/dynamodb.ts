@@ -102,7 +102,7 @@ router.get("/tables/:name", async (c: Context) => {
 // Scan table
 router.get("/tables/:name/items", async (c: Context) => {
   const name = c.req.param("name");
-  const limit = parseInt(c.req.query("limit") || "50");
+  const limit = Math.min(Math.max(parseInt(c.req.query("limit") || "50") || 50, 1), 1000);
 
   const params: any = { TableName: name, Limit: limit };
 

@@ -93,22 +93,38 @@ router.get("/stacks", async (c: Context) => {
 router.get("/stacks/:name", async (c: Context) => {
   const name = c.req.param("name");
 
-  const [stackRes, resourcesRes, eventsRes] = await Promise.all([
-    cfn().send(new DescribeStacksCommand({ StackName: name })),
+  // Fetch primary stack first so we can return a clean 404 when it doesn't exist,
+  // rather than letting Promise.all collapse all three calls into an unhandled 500.
+  let stackRes;
+  try {
+    stackRes = await cfn().send(new DescribeStacksCommand({ StackName: name }));
+  } catch (err: any) {
+    if (err.$metadata?.httpStatusCode === 404 || err.name === "ValidationError" || err.name === "StackNotFoundException") {
+      return c.json({ error: "Stack not found", stackName: name }, 404);
+    }
+    throw err;
+  }
+
+  // Fetch enrichment data in parallel; tolerate partial failures gracefully.
+  const [resourcesRes, eventsRes] = await Promise.allSettled([
     cfn().send(new ListStackResourcesCommand({ StackName: name })),
     cfn().send(new DescribeStackEventsCommand({ StackName: name })),
   ]);
 
   const stack = stackRes.Stacks?.[0] ? mapStack(stackRes.Stacks[0]) : null;
-  const resources = (resourcesRes.StackResourceSummaries || []).map(mapResource);
-  const events = (eventsRes.StackEvents || []).map((e: any) => ({
-    eventId: e.EventId,
-    timestamp: e.Timestamp,
-    logicalId: e.LogicalResourceId,
-    type: e.ResourceType,
-    status: e.ResourceStatus,
-    statusReason: e.ResourceStatusReason,
-  }));
+  const resources = resourcesRes.status === "fulfilled"
+    ? (resourcesRes.value.StackResourceSummaries || []).map(mapResource)
+    : [];
+  const events = eventsRes.status === "fulfilled"
+    ? (eventsRes.value.StackEvents || []).map((e: any) => ({
+        eventId: e.EventId,
+        timestamp: e.Timestamp,
+        logicalId: e.LogicalResourceId,
+        type: e.ResourceType,
+        status: e.ResourceStatus,
+        statusReason: e.ResourceStatusReason,
+      }))
+    : [];
 
   return c.json({ stack, resources, events });
 });

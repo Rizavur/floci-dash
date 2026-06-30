@@ -271,7 +271,10 @@ router.post("/tags/:arn", async (c: Context) => {
 
 router.delete("/tags/:arn", async (c: Context) => {
   const arn = c.req.param("arn");
-  const keys = c.req.query("keys")?.split(",") || [];
+  const keysParam = c.req.query("keys");
+  if (!keysParam) return c.json({ error: "keys query parameter is required" }, 400);
+  const keys = keysParam.split(",").filter(Boolean);
+  if (keys.length === 0) return c.json({ error: "keys must be a non-empty comma-separated list" }, 400);
   await cw().send(new UntagResourceCommand({ ResourceARN: arn, TagKeys: keys }));
   return c.json({ untagged: true });
 });

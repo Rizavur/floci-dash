@@ -198,7 +198,10 @@ router.post("/secrets/:id/tags", async (c: Context) => {
 
 router.delete("/secrets/:id/tags", async (c: Context) => {
   const id = c.req.param("id");
-  const keys = c.req.query("keys")?.split(",") || [];
+  const keysParam = c.req.query("keys");
+  if (!keysParam) return c.json({ error: "keys query parameter is required" }, 400);
+  const keys = keysParam.split(",").filter(Boolean);
+  if (keys.length === 0) return c.json({ error: "keys must be a non-empty comma-separated list" }, 400);
   await sm().send(new UntagResourceCommand({ SecretId: id, TagKeys: keys }));
   return c.json({ untagged: true });
 });
