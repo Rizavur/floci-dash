@@ -30,8 +30,7 @@ export default function ServiceGrid({ services }: Props) {
               {category}
             </p>
             {/* Responsive auto-fill grid — matches the existing fd-grid-responsive breakpoints */}
-            <div className="tw-grid tw-grid-cols-[repeat(auto-fill,minmax(220px,1fr))] tw-gap-3
-                            max-sm:tw-grid-cols-[repeat(auto-fill,minmax(140px,1fr))] max-sm:tw-gap-2">
+            <div className="tw-grid tw-grid-cols-[repeat(auto-fill,minmax(220px,1fr))] tw-gap-3 max-sm:tw-grid-cols-[repeat(auto-fill,minmax(140px,1fr))] max-sm:tw-gap-2">
               {keys.map((key) => (
                 <ServiceCard key={key} serviceKey={key} status={services[key]} />
               ))}
