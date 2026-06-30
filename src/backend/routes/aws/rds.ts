@@ -432,12 +432,22 @@ router.delete("/parameter-groups/:name", async (c: Context) => {
 
 router.get("/parameter-groups/:name/parameters", async (c: Context) => {
   const name = c.req.param("name");
-  const result = await rds().send(
-    new DescribeDBParametersCommand({
-      DBParameterGroupName: name,
-    })
-  );
-  const parameters = (result.Parameters || []).map((p) => ({
+  const client = rds();
+  const allParameters: any[] = [];
+  let marker: string | undefined;
+  // Paginate — parameter groups can contain hundreds of parameters
+  do {
+    const result = await client.send(
+      new DescribeDBParametersCommand({
+        DBParameterGroupName: name,
+        Marker: marker,
+      })
+    );
+    allParameters.push(...(result.Parameters || []));
+    marker = result.Marker;
+  } while (marker);
+
+  const parameters = allParameters.map((p) => ({
     name: p.ParameterName,
     value: p.ParameterValue,
     description: p.Description,
@@ -529,12 +539,21 @@ router.delete("/cluster-parameter-groups/:name", async (c: Context) => {
 
 router.get("/cluster-parameter-groups/:name/parameters", async (c: Context) => {
   const name = c.req.param("name");
-  const result = await rds().send(
-    new DescribeDBClusterParametersCommand({
-      DBClusterParameterGroupName: name,
-    })
-  );
-  const parameters = (result.Parameters || []).map((p) => ({
+  const client = rds();
+  const allParameters: any[] = [];
+  let marker: string | undefined;
+  do {
+    const result = await client.send(
+      new DescribeDBClusterParametersCommand({
+        DBClusterParameterGroupName: name,
+        Marker: marker,
+      })
+    );
+    allParameters.push(...(result.Parameters || []));
+    marker = result.Marker;
+  } while (marker);
+
+  const parameters = allParameters.map((p) => ({
     name: p.ParameterName,
     value: p.ParameterValue,
     description: p.Description,
