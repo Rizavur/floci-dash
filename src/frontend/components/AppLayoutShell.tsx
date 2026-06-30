@@ -111,9 +111,11 @@ export default function AppLayoutShell({ children }: Props) {
     ];
   }, [health]);
 
+  // Subscribe reactively so nav rebuilds when favorites/recents change
+  const favorites = useFavorites((s) => s.favorites);
+  const recentlyVisited = useRecentlyVisited((s) => s.recentlyVisited);
+
   const navItems = useMemo(() => {
-    const { favorites } = useFavorites.getState();
-    const { recentlyVisited } = useRecentlyVisited.getState();
     const items: SideNavigationProps.Item[] = [
       { type: "link" as const, text: "Dashboard", href: "/#/" },
       { type: "divider" as const },
@@ -292,7 +294,7 @@ export default function AppLayoutShell({ children }: Props) {
     items.push({ type: "link" as const, text: "Settings", href: "/#/settings" });
 
     return items;
-  }, [health, active, query, navAllExpanded]);
+  }, [health, active, query, navAllExpanded, favorites, recentlyVisited]);
 
   const handleFollow = (e: CustomEvent<{ href: string }>) => {
     e.preventDefault();
