@@ -5,4 +5,4 @@
  * to prevent any collision with Cloudscape's global class names.
  * Cloudscape's own styles remain unaffected.
  */
-@import "tailwindcss" prefix(tw-);
+@import "tailwindcss" prefix(tw);
