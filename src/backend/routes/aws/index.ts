@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import type { Context } from "hono";
+import { awsRouterError } from "../../clients/aws-errors";
 import s3Routes from "./s3";
 import s3ConfigRoutes from "./s3-config";
 import s3ObjectRoutes from "./s3-objects";
@@ -69,6 +70,11 @@ import rdsdataRoutes from "./rdsdata";
 import memorydbRoutes from "./memorydb";
 
 const router = new Hono();
+
+// Map AWS SDK errors to proper HTTP status codes instead of letting them
+// propagate as raw 500s. This catches any unhandled SDK error from any
+// service route in this router.
+router.onError((err, c) => awsRouterError(err, c));
 
 // s3ObjectRoutes must be registered before s3Routes so that specific wildcard
 // routes (/*/tags, /*/attributes, /*/head) are matched before the catch-all
