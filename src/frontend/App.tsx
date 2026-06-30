@@ -82,26 +82,26 @@ export default function App() {
                 <ErrorBoundary>
                   <Suspense fallback={<DashboardSkeleton />}>
                     <Routes>
-                    <Route path="/" element={<DashboardHome />} />
-                    <Route path="/services/s3" element={<S3Page />} />
-                    <Route path="/services/ec2" element={<EC2Page />} />
-                    <Route path="/services/sqs" element={<SQSPage />} />
-                    <Route path="/services/sns" element={<SNSPage />} />
-                    <Route path="/services/events" element={<EventsPage />} />
-                    <Route path="/services/lambda" element={<LambdaPage />} />
-                    <Route path="/services/cloudwatch" element={<CloudWatchPage />} />
-                    <Route path="/services/monitoring" element={<CloudWatchPage />} />
-                    <Route path="/services/iam" element={<IAMPage />} />
-                    <Route path="/services/secretsmanager" element={<SecretsManagerPage />} />
-                    <Route path="/services/cloudformation" element={<CloudFormationPage />} />
-                    <Route path="/services/kms" element={<KMSPage />} />
-                    <Route path="/services/:service" element={<ServicePage />} />
-                    <Route path="/settings" element={<Settings />} />
-                  </Routes>
-                </Suspense>
-              </ErrorBoundary>
-            </AppLayoutShell>
-          </ErrorBoundary>
+                      <Route path="/" element={<DashboardHome />} />
+                      <Route path="/services/s3" element={<S3Page />} />
+                      <Route path="/services/ec2" element={<EC2Page />} />
+                      <Route path="/services/sqs" element={<SQSPage />} />
+                      <Route path="/services/sns" element={<SNSPage />} />
+                      <Route path="/services/events" element={<EventsPage />} />
+                      <Route path="/services/lambda" element={<LambdaPage />} />
+                      <Route path="/services/cloudwatch" element={<CloudWatchPage />} />
+                      <Route path="/services/monitoring" element={<CloudWatchPage />} />
+                      <Route path="/services/iam" element={<IAMPage />} />
+                      <Route path="/services/secretsmanager" element={<SecretsManagerPage />} />
+                      <Route path="/services/cloudformation" element={<CloudFormationPage />} />
+                      <Route path="/services/kms" element={<KMSPage />} />
+                      <Route path="/services/:service" element={<ServicePage />} />
+                      <Route path="/settings" element={<Settings />} />
+                    </Routes>
+                  </Suspense>
+                </ErrorBoundary>
+              </AppLayoutShell>
+            </ErrorBoundary>
           </HashRouter>
         </ToastProviderWithErrorReporter>
       </ToastProvider>

@@ -278,9 +278,7 @@ router.get("/platform-apps/attributes", async (c: Context) => {
 router.put("/platform-apps/attributes", async (c: Context) => {
   const body = await c.req.json<{ arn: string; attributes: Record<string, string> }>();
   if (!body.arn) return c.json({ error: "arn is required" }, 400);
-  if (!body.attributes || typeof body.attributes !== "object") {
-    return c.json({ error: "attributes object is required" }, 400);
-  }
+  if (!body.attributes) return c.json({ error: "attributes object is required" }, 400);
   const client = getClient();
   await client.send(
     new SetPlatformApplicationAttributesCommand({
@@ -306,9 +304,7 @@ router.get("/platform-apps/endpoints/attributes", async (c: Context) => {
 router.put("/platform-apps/endpoints/attributes", async (c: Context) => {
   const body = await c.req.json<{ arn: string; attributes: Record<string, string> }>();
   if (!body.arn) return c.json({ error: "arn is required" }, 400);
-  if (!body.attributes || typeof body.attributes !== "object") {
-    return c.json({ error: "attributes object is required" }, 400);
-  }
+  if (!body.attributes) return c.json({ error: "attributes object is required" }, 400);
   const client = getClient();
   await client.send(
     new SetEndpointAttributesCommand({
