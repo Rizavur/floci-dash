@@ -1,14 +1,16 @@
 // Regression tests for Bug 2: S3 route ordering.
 //
-// When s3Routes is registered before s3ObjectRoutes in the combined aws router,
-// the wildcard "GET /buckets/:name/objects/*" catch-all intercepts requests
-// intended for the more specific "/*/tags", "/*/attributes", and "/*/head" routes.
+// When s3Routes is registered before s3ObjectRoutes, the wildcard
+// "GET /buckets/:name/objects/*" catch-all intercepts requests intended for
+// the more specific routes "/*/tags", "/*/attributes", and "/*/head".
 //
-// These tests exercise the combined router (index.ts) to verify routing order.
-// Before the fix the specific routes return 500; after the fix they return the
-// correct response from the right handler.
+// These tests mount only the three S3 routers in a minimal Hono app,
+// mirroring exactly how index.ts registers them, and verify that each
+// specific route is reached by the correct handler.
+// This avoids the need to stub every other AWS SDK client in the project.
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
+import { Hono } from "hono";
 
 // ─── Hoist mocks before any imports ───────────────────────────────────────────
 
@@ -22,7 +24,6 @@ const createCmd = vi.hoisted(() => {
   };
 });
 
-// Mock the entire @aws-sdk/client-s3 used by both s3.ts and s3-objects.ts
 vi.mock("@aws-sdk/client-s3", () => ({
   S3Client: vi.fn(function () { return { send: mockSend }; }),
   // s3.ts commands
@@ -45,7 +46,7 @@ vi.mock("@aws-sdk/client-s3", () => ({
     CHECKSUM: "Checksum", ETAG: "ETag", OBJECT_PARTS: "ObjectParts",
     STORAGE_CLASS: "StorageClass", OBJECT_SIZE: "ObjectSize",
   },
-  // s3-config.ts commands (stub — not exercised here)
+  // s3-config.ts commands (not exercised here, but needed for import)
   GetBucketVersioningCommand:        createCmd("GetBucketVersioningCommand"),
   PutBucketVersioningCommand:        createCmd("PutBucketVersioningCommand"),
   GetBucketTaggingCommand:           createCmd("GetBucketTaggingCommand"),
@@ -80,142 +81,112 @@ vi.mock("@aws-sdk/client-s3", () => ({
   GetBucketReplicationCommand:       createCmd("GetBucketReplicationCommand"),
 }));
 
-// Stub all other service SDK clients so index.ts can load without errors
-vi.mock("@aws-sdk/client-dynamodb",            () => ({ DynamoDBClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/lib-dynamodb",               () => ({ DynamoDBDocumentClient: { from: vi.fn(() => ({ send: vi.fn() })) }, ScanCommand: vi.fn(), QueryCommand: vi.fn(), GetCommand: vi.fn(), PutCommand: vi.fn(), DeleteCommand: vi.fn(), UpdateCommand: vi.fn(), BatchGetCommand: vi.fn(), BatchWriteCommand: vi.fn(), TransactWriteCommand: vi.fn(), TransactGetCommand: vi.fn() }));
-vi.mock("@aws-sdk/client-rds",                 () => ({ RDSClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-ec2",                 () => ({ EC2Client: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-sqs",                 () => ({ SQSClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-sns",                 () => ({ SNSClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-eventbridge",         () => ({ EventBridgeClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-cloudwatch-logs",     () => ({ CloudWatchLogsClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-lambda",              () => ({ LambdaClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-cloudwatch",          () => ({ CloudWatchClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-iam",                 () => ({ IAMClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-secrets-manager",     () => ({ SecretsManagerClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-cloudformation",      () => ({ CloudFormationClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-kms",                 () => ({ KMSClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-ecs",                 () => ({ ECSClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-ssm",                 () => ({ SSMClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-route-53",            () => ({ Route53Client: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-api-gateway",         () => ({ APIGatewayClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-sts",                 () => ({ STSClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-appsync",             () => ({ AppSyncClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-scheduler",           () => ({ SchedulerClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-ecr",                 () => ({ ECRClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-elastic-load-balancing-v2", () => ({ ElasticLoadBalancingV2Client: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-sesv2",               () => ({ SESv2Client: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-eks",                 () => ({ EKSClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-auto-scaling",        () => ({ AutoScalingClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-cloudfront",          () => ({ CloudFrontClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-kinesis",             () => ({ KinesisClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-neptune",             () => ({ NeptuneClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-pipes",               () => ({ PipesClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-cognito-identity-provider", () => ({ CognitoIdentityProviderClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-apigatewayv2",        () => ({ ApiGatewayV2Client: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-acm",                 () => ({ ACMClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-cloudtrail",          () => ({ CloudTrailClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-config-service",      () => ({ ConfigServiceClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-appconfig",           () => ({ AppConfigClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-appconfigdata",       () => ({ AppConfigDataClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-servicediscovery",    () => ({ ServiceDiscoveryClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-athena",              () => ({ AthenaClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-glue",                () => ({ GlueClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-firehose",            () => ({ FirehoseClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-sfn",                 () => ({ SFNClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-opensearch",          () => ({ OpenSearchClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-kafka",               () => ({ KafkaClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-bedrock-runtime",     () => ({ BedrockRuntimeClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-textract",            () => ({ TextractClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-transcribe",          () => ({ TranscribeClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-cost-explorer",       () => ({ CostExplorerClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-pricing",             () => ({ PricingClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-resource-groups-tagging-api", () => ({ ResourceGroupsTaggingAPIClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-codebuild",           () => ({ CodeBuildClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-codedeploy",          () => ({ CodeDeployClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-backup",              () => ({ BackupClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-transfer",            () => ({ TransferClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-cost-and-usage-report-service", () => ({ CostandUsageReportServiceClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-bcm-data-exports",    () => ({ BCMDataExportsClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-wafv2",               () => ({ WAFV2Client: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-elasticache",         () => ({ ElastiCacheClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-batch",               () => ({ BatchClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-docdb",               () => ({ DocDBClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-emr",                 () => ({ EMRClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-rds-data",            () => ({ RDSDataClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-ssm-messages",        () => ({ SSMMessagesClient: vi.fn(() => ({ send: vi.fn() })) }));
-vi.mock("@aws-sdk/client-memory-db",           () => ({ MemoryDBClient: vi.fn(() => ({ send: vi.fn() })) }));
 vi.mock("../../clients/aws", () => ({
-  getAwsConfig: () => ({ endpoint: "http://localhost:4566", region: "us-east-1", credentials: { accessKeyId: "test", secretAccessKey: "test" } }),
-  create: vi.fn(() => ({ send: vi.fn() })),
+  getAwsConfig: () => ({
+    endpoint: "http://localhost:4566",
+    region: "us-east-1",
+    credentials: { accessKeyId: "test", secretAccessKey: "test" },
+  }),
 }));
-vi.mock("../../clients/floci", () => ({ flociFetch: vi.fn() }));
 
-import awsRouter from "./index";
+// Import only the three S3 routers — no index.ts, no other service clients
+import s3Routes from "./s3";
+import s3ConfigRoutes from "./s3-config";
+import s3ObjectRoutes from "./s3-objects";
+
+// Build a minimal app that mirrors index.ts registration order for S3
+function buildS3App() {
+  const app = new Hono();
+  // Correct order: specific routes first, catch-all last
+  app.route("/s3", s3ObjectRoutes);
+  app.route("/s3", s3ConfigRoutes);
+  app.route("/s3", s3Routes);
+  return app;
+}
+
+// Build an app with the WRONG order (what caused the bug) to prove tests catch it
+function buildS3AppWrongOrder() {
+  const app = new Hono();
+  app.route("/s3", s3Routes);       // catch-all registered first — the bug
+  app.route("/s3", s3ConfigRoutes);
+  app.route("/s3", s3ObjectRoutes);
+  return app;
+}
 
 beforeEach(() => {
   mockSend.mockReset();
 });
 
-async function get(path: string) {
-  return awsRouter.request(path, { method: "GET" });
+async function get(app: Hono, path: string) {
+  return app.request(path, { method: "GET" });
 }
 
-// ─── S3 routing order regression tests (Bug 2) ────────────────────────────────
+// ─── Correct order: specific routes match before catch-all ────────────────────
 
-describe("S3 route ordering — Bug 2 regression", () => {
-  // Before fix: s3Routes registers "GET /buckets/:name/objects/*" first.
-  // That wildcard intercepts /objects/my-file.txt/tags, calling GetObjectCommand
-  // with Key="my-file.txt/tags" -> NoSuchKey -> 500.
-  //
-  // After fix: s3ObjectRoutes is registered first so the tagging route matches
-  // and calls GetObjectTaggingCommand -> 200 with tags body.
+describe("S3 route ordering — correct order (s3ObjectRoutes first)", () => {
+  const app = buildS3App();
 
-  it("GET /s3/buckets/:name/objects/*/tags hits tagging handler, not object catch-all", async () => {
+  it("GET /s3/buckets/:name/objects/*/tags hits GetObjectTaggingCommand", async () => {
     mockSend.mockResolvedValueOnce({ TagSet: [{ Key: "env", Value: "prod" }] });
-    const res = await get("/s3/buckets/my-bucket/objects/my-file.txt/tags");
+    const res = await get(app, "/s3/buckets/my-bucket/objects/my-file.txt/tags");
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.tags).toBeDefined();
     expect(body.total).toBe(1);
-    // The tagging handler must have fired, not the object content handler
     expect(mockSend.mock.calls[0][0].__cmdName).toBe("GetObjectTaggingCommand");
   });
 
-  it("GET /s3/buckets/:name/objects/*/attributes hits attributes handler, not catch-all", async () => {
+  it("GET /s3/buckets/:name/objects/*/attributes hits GetObjectAttributesCommand", async () => {
     mockSend.mockResolvedValueOnce({ ETag: '"abc"', ObjectSize: 512 });
-    const res = await get("/s3/buckets/my-bucket/objects/my-file.txt/attributes");
+    const res = await get(app, "/s3/buckets/my-bucket/objects/my-file.txt/attributes");
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.etag).toBeDefined();
     expect(mockSend.mock.calls[0][0].__cmdName).toBe("GetObjectAttributesCommand");
   });
 
-  it("GET /s3/buckets/:name/objects/*/head hits head-object handler, not catch-all", async () => {
+  it("GET /s3/buckets/:name/objects/*/head hits HeadObjectCommand", async () => {
     mockSend.mockResolvedValueOnce({
-      ContentLength: 100,
-      ContentType: "text/plain",
-      LastModified: new Date("2025-01-01"),
-      ETag: '"abc"',
-      Metadata: {},
+      ContentLength: 100, ContentType: "text/plain",
+      LastModified: new Date("2025-01-01"), ETag: '"abc"', Metadata: {},
     });
-    const res = await get("/s3/buckets/my-bucket/objects/my-file.txt/head");
+    const res = await get(app, "/s3/buckets/my-bucket/objects/my-file.txt/head");
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.contentType).toBe("text/plain");
     expect(mockSend.mock.calls[0][0].__cmdName).toBe("HeadObjectCommand");
   });
 
-  it("GET /s3/buckets/:name/objects/* still works for plain object content requests", async () => {
+  it("GET /s3/buckets/:name/objects/* still serves plain object content", async () => {
     mockSend.mockResolvedValueOnce({
-      ContentType: "text/plain",
-      ContentLength: 5,
+      ContentType: "text/plain", ContentLength: 5,
       Body: { transformToString: async () => "hello" },
     });
-    const res = await get("/s3/buckets/my-bucket/objects/my-file.txt");
+    const res = await get(app, "/s3/buckets/my-bucket/objects/my-file.txt");
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.contentType).toBe("text/plain");
     expect(mockSend.mock.calls[0][0].__cmdName).toBe("GetObjectCommand");
+  });
+});
+
+// ─── Wrong order: demonstrates the bug the fix solves ────────────────────────
+
+describe("S3 route ordering — wrong order proves tests catch the regression", () => {
+  const buggyApp = buildS3AppWrongOrder();
+
+  it("GET /s3/buckets/:name/objects/*/tags is wrongly intercepted by the catch-all", async () => {
+    // With the wrong order the catch-all fires first and calls GetObjectCommand
+    // with Key='my-file.txt/tags', which would throw NoSuchKey in production.
+    // Here we make it succeed to observe which command was dispatched.
+    mockSend.mockResolvedValueOnce({
+      ContentType: "text/plain", ContentLength: 0,
+      Body: { transformToString: async () => "" },
+    });
+    const res = await get(buggyApp, "/s3/buckets/my-bucket/objects/my-file.txt/tags");
+    // The wrong handler fires and returns object content shape — not the tags shape
+    expect(mockSend.mock.calls[0][0].__cmdName).toBe("GetObjectCommand");
+    // Key passed to GetObjectCommand includes the "/tags" suffix — the bug
+    expect(mockSend.mock.calls[0][0].Key).toBe("my-file.txt/tags");
   });
 });

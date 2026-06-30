@@ -13,7 +13,6 @@ const NOT_FOUND_ERRORS = new Set([
   "StackNotFoundException",
   "FunctionNotFoundException",
   "QueueDoesNotExist",
-  "TopicArnInvalid",
   "NoSuchEntityException",
 ]);
 
@@ -38,6 +37,7 @@ const VALIDATION_ERRORS = new Set([
   "InvalidParameterValueException",
   "MalformedQueryString",
   "InvalidQueryParameter",
+  "TopicArnInvalid",          // malformed ARN — a validation error, not "not found"
 ]);
 
 /**

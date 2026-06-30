@@ -86,7 +86,7 @@ export default function LambdaPage() {
       }
       breadcrumbs={
         <BreadcrumbGroup
-          items={[{ text: "Dashboard", href: "#/" }, { text: "Lambda", href: "#/services/lambda" }]}
+          items={[{ text: "Dashboard", href: "/#/" }, { text: "Lambda", href: "/#/services/lambda" }]}
           onFollow={(e) => { e.preventDefault(); navigate(e.detail.href.replace("/#", "") || "/"); }}
         />
       }
