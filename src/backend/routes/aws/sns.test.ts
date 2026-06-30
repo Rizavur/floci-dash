@@ -39,9 +39,13 @@ vi.mock("@aws-sdk/client-sns", () => ({
   ListPlatformApplicationsCommand: createCmd("ListPlatformApplicationsCommand"),
   CreatePlatformApplicationCommand: createCmd("CreatePlatformApplicationCommand"),
   DeletePlatformApplicationCommand: createCmd("DeletePlatformApplicationCommand"),
+  GetPlatformApplicationAttributesCommand: createCmd("GetPlatformApplicationAttributesCommand"),
+  SetPlatformApplicationAttributesCommand: createCmd("SetPlatformApplicationAttributesCommand"),
   ListEndpointsByPlatformApplicationCommand: createCmd("ListEndpointsByPlatformApplicationCommand"),
   CreatePlatformEndpointCommand: createCmd("CreatePlatformEndpointCommand"),
   DeleteEndpointCommand: createCmd("DeleteEndpointCommand"),
+  GetEndpointAttributesCommand: createCmd("GetEndpointAttributesCommand"),
+  SetEndpointAttributesCommand: createCmd("SetEndpointAttributesCommand"),
 }));
 
 vi.mock("../../clients/aws", () => ({
@@ -402,6 +406,116 @@ describe("SNS Routes", () => {
     it("DELETE /platform-apps/endpoints — 400 when arn missing", async () => {
       const res = await del("/platform-apps/endpoints");
       expect(res.status).toBe(400);
+    });
+  });
+
+  describe("Platform app attributes (BACK-12)", () => {
+    it("GET /platform-apps/attributes — returns attributes", async () => {
+      mockSend.mockResolvedValueOnce({ Attributes: { EventEndpointCreated: "arn:aws:sns:..." } });
+      const res = await get("/platform-apps/attributes?arn=arn:aws:sns:...:app/GCM/my-app");
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.attributes).toBeDefined();
+      expect(mockSend.mock.calls[0][0].__cmdName).toBe("GetPlatformApplicationAttributesCommand");
+      expect(mockSend.mock.calls[0][0].PlatformApplicationArn).toBe("arn:aws:sns:...:app/GCM/my-app");
+    });
+
+    it("GET /platform-apps/attributes — 400 when arn missing", async () => {
+      const res = await get("/platform-apps/attributes");
+      expect(res.status).toBe(400);
+    });
+
+    it("PUT /platform-apps/attributes — updates attributes", async () => {
+      mockSend.mockResolvedValueOnce({});
+      const res = await put("/platform-apps/attributes", {
+        arn: "arn:aws:sns:...:app/GCM/my-app",
+        attributes: { EventEndpointCreated: "arn:aws:sns:...:my-topic" },
+      });
+      expect(res.status).toBe(200);
+      expect((await res.json()).updated).toBe(true);
+      expect(mockSend.mock.calls[0][0].__cmdName).toBe("SetPlatformApplicationAttributesCommand");
+    });
+
+    it("PUT /platform-apps/attributes — 400 when arn missing", async () => {
+      const res = await put("/platform-apps/attributes", { attributes: {} });
+      expect(res.status).toBe(400);
+    });
+
+    it("PUT /platform-apps/attributes — 400 when attributes missing", async () => {
+      const res = await put("/platform-apps/attributes", { arn: "arn:aws:sns:...:app/GCM/x" });
+      expect(res.status).toBe(400);
+    });
+  });
+
+  describe("Platform endpoint attributes (BACK-12)", () => {
+    it("GET /platform-apps/endpoints/attributes — returns attributes", async () => {
+      mockSend.mockResolvedValueOnce({ Attributes: { Enabled: "true", Token: "tok" } });
+      const res = await get("/platform-apps/endpoints/attributes?arn=arn:aws:sns:...:endpoint/GCM/my-app/abc");
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.attributes.Enabled).toBe("true");
+      expect(mockSend.mock.calls[0][0].__cmdName).toBe("GetEndpointAttributesCommand");
+    });
+
+    it("GET /platform-apps/endpoints/attributes — 400 when arn missing", async () => {
+      const res = await get("/platform-apps/endpoints/attributes");
+      expect(res.status).toBe(400);
+    });
+
+    it("PUT /platform-apps/endpoints/attributes — updates attributes", async () => {
+      mockSend.mockResolvedValueOnce({});
+      const res = await put("/platform-apps/endpoints/attributes", {
+        arn: "arn:aws:sns:...:endpoint/GCM/my-app/abc",
+        attributes: { Enabled: "false" },
+      });
+      expect(res.status).toBe(200);
+      expect((await res.json()).updated).toBe(true);
+      expect(mockSend.mock.calls[0][0].__cmdName).toBe("SetEndpointAttributesCommand");
+    });
+
+    it("PUT /platform-apps/endpoints/attributes — 400 when arn missing", async () => {
+      const res = await put("/platform-apps/endpoints/attributes", { attributes: {} });
+      expect(res.status).toBe(400);
+    });
+
+    it("PUT /platform-apps/endpoints/attributes — 400 when attributes missing", async () => {
+      const res = await put("/platform-apps/endpoints/attributes", { arn: "arn:x" });
+      expect(res.status).toBe(400);
+    });
+  });
+
+  describe("Confirm subscription (BACK-12)", () => {
+    it("POST /subscriptions/confirm — confirms a subscription", async () => {
+      mockSend.mockResolvedValueOnce({ SubscriptionArn: "arn:aws:sns:...:sub-confirmed" });
+      const res = await post("/subscriptions/confirm", {
+        topicArn: "arn:aws:sns:us-east-1:123456789012:my-topic",
+        token: "abc123token",
+      });
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.confirmed).toBe(true);
+      expect(body.subscriptionArn).toBe("arn:aws:sns:...:sub-confirmed");
+      expect(mockSend.mock.calls[0][0].__cmdName).toBe("ConfirmSubscriptionCommand");
+      expect(mockSend.mock.calls[0][0].TopicArn).toBe("arn:aws:sns:us-east-1:123456789012:my-topic");
+      expect(mockSend.mock.calls[0][0].Token).toBe("abc123token");
+    });
+
+    it("POST /subscriptions/confirm — 400 when topicArn missing", async () => {
+      const res = await post("/subscriptions/confirm", { token: "abc" });
+      expect(res.status).toBe(400);
+    });
+
+    it("POST /subscriptions/confirm — 400 when token missing", async () => {
+      const res = await post("/subscriptions/confirm", { topicArn: "arn:x" });
+      expect(res.status).toBe(400);
+    });
+
+    it("POST /subscriptions/confirm — passes authenticateOnUnsubscribe when provided", async () => {
+      mockSend.mockResolvedValueOnce({ SubscriptionArn: "arn:..." });
+      await post("/subscriptions/confirm", {
+        topicArn: "arn:x", token: "tok", authenticateOnUnsubscribe: "true",
+      });
+      expect(mockSend.mock.calls[0][0].AuthenticateOnUnsubscribe).toBe("true");
     });
   });
 

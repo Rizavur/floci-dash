@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 // shouldShellThrow controls whether the AppLayoutShell mock throws.
@@ -42,8 +42,15 @@ vi.mock("./pages/Settings", () => ({ default: () => <div>settings-page</div> }))
 
 import App from "./App";
 
+let consoleErrorSpy: ReturnType<typeof vi.spyOn> | null = null;
+
 beforeEach(() => {
   shouldShellThrow = false;
+});
+
+afterEach(() => {
+  consoleErrorSpy?.mockRestore();
+  consoleErrorSpy = null;
 });
 
 describe("App", () => {
@@ -56,12 +63,12 @@ describe("App", () => {
     // Make AppLayoutShell throw during render to simulate a crash in nav,
     // health-check hooks, or Cloudscape SideNavigation.
     shouldShellThrow = true;
-    // Suppress React's error-boundary console output in tests.
-    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    // Suppress React's error-boundary console output; restored in afterEach
+    // so it's guaranteed to run even if the assertion below fails.
+    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     // After the fix (outer ErrorBoundary wrapping AppLayoutShell), render must
     // NOT throw — it catches the error and shows the fallback UI instead.
     render(<App />);
     expect(screen.getByText("Something went wrong")).toBeTruthy();
-    consoleError.mockRestore();
   });
 });
