@@ -86,16 +86,23 @@ router.get("/buckets/:name/objects/*/raw", async (c: Context) => {
   const path = new URL(c.req.url).pathname;
   const key = sanitizeS3Key(decodeURIComponent(path.split("/objects/")[1]?.replace(/\/raw$/, "") || ""));
   if (!key) return c.json({ error: "Object key is required" }, 400);
-  const result = await s3().send(new GetObjectCommand({ Bucket: bucket, Key: key }));
-  const contentType = result.ContentType || "application/octet-stream";
-  const bytes = result.Body ? await result.Body.transformToByteArray() : new Uint8Array();
-  return new Response(Buffer.from(bytes), {
-    headers: {
-      "Content-Type": contentType,
-      "Content-Length": String(result.ContentLength || bytes.length),
-      "Cache-Control": "no-cache",
-    },
-  });
+  try {
+    const result = await s3().send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+    const contentType = result.ContentType || "application/octet-stream";
+    const bytes = result.Body ? await result.Body.transformToByteArray() : new Uint8Array();
+    return new Response(Buffer.from(bytes), {
+      headers: {
+        "Content-Type": contentType,
+        "Content-Length": String(result.ContentLength || bytes.length),
+        "Cache-Control": "no-cache",
+      },
+    });
+  } catch (err: any) {
+    if (err.$metadata?.httpStatusCode === 404 || err.name === "NoSuchKey") {
+      return c.json({ error: "Object not found", bucket, key }, 404);
+    }
+    throw err;
+  }
 });
 
 // Get object metadata + content (supports keys with slashes)
@@ -104,42 +111,49 @@ router.get("/buckets/:name/objects/*", async (c: Context) => {
   const path = new URL(c.req.url).pathname;
   const key = sanitizeS3Key(decodeURIComponent(path.split("/objects/")[1] || ""));
   if (!key) return c.json({ error: "Object key is required" }, 400);
-  const result = await s3().send(new GetObjectCommand({ Bucket: bucket, Key: key }));
-  const contentType = result.ContentType || "application/octet-stream";
-  let body: string;
-  let bodyEncoding = "utf-8";
-  if (result.Body) {
-    // Binary types: return base64 so frontend can render inline or download
-    const isBinaryType =
-      /^(image|audio|video)\//.test(contentType) ||
-      contentType === "application/octet-stream" ||
-      contentType === "application/pdf";
-    if (isBinaryType) {
-      const bytes = await result.Body.transformToByteArray();
-      body = Buffer.from(bytes).toString("base64");
-      bodyEncoding = "base64";
-    } else {
-      try {
-        body = await result.Body.transformToString("utf-8");
-      } catch {
+  try {
+    const result = await s3().send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+    const contentType = result.ContentType || "application/octet-stream";
+    let body: string;
+    let bodyEncoding = "utf-8";
+    if (result.Body) {
+      // Binary types: return base64 so frontend can render inline or download
+      const isBinaryType =
+        /^(image|audio|video)\//.test(contentType) ||
+        contentType === "application/octet-stream" ||
+        contentType === "application/pdf";
+      if (isBinaryType) {
         const bytes = await result.Body.transformToByteArray();
         body = Buffer.from(bytes).toString("base64");
         bodyEncoding = "base64";
+      } else {
+        try {
+          body = await result.Body.transformToString("utf-8");
+        } catch {
+          const bytes = await result.Body.transformToByteArray();
+          body = Buffer.from(bytes).toString("base64");
+          bodyEncoding = "base64";
+        }
       }
+    } else {
+      body = "";
     }
-  } else {
-    body = "";
+    return c.json({
+      bucket,
+      key,
+      contentType,
+      size: result.ContentLength,
+      lastModified: result.LastModified?.toISOString(),
+      etag: result.ETag?.replace(/"/g, ""),
+      body,
+      bodyEncoding,
+    });
+  } catch (err: any) {
+    if (err.$metadata?.httpStatusCode === 404 || err.name === "NoSuchKey") {
+      return c.json({ error: "Object not found", bucket, key }, 404);
+    }
+    throw err;
   }
-  return c.json({
-    bucket,
-    key,
-    contentType,
-    size: result.ContentLength,
-    lastModified: result.LastModified?.toISOString(),
-    etag: result.ETag?.replace(/"/g, ""),
-    body,
-    bodyEncoding,
-  });
 });
 
 // Upload one or more files via multipart/form-data.
