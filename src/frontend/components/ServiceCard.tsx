@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { Box } from "@cloudscape-design/components";
 import { getServiceLabel } from "../types/services";
 import { useFavorites } from "../stores/favorites";
 
@@ -8,7 +7,7 @@ interface Props {
   status: "running" | "available";
 }
 
-const STAR_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8 1l2.2 4.5L15 6.3l-3.5 3.4.8 4.9L8 12.4 3.7 14.6l.8-4.9L1 6.3l4.8-.8z"/></svg>';
+const STAR_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/></svg>';
 
 export default function ServiceCard({ serviceKey, status }: Props) {
   const navigate = useNavigate();
@@ -18,23 +17,16 @@ export default function ServiceCard({ serviceKey, status }: Props) {
   const fav = isFavorite(serviceKey);
 
   const handleClick = () => navigate(`/services/${serviceKey}`);
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      navigate(`/services/${serviceKey}`);
-    }
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(); }
   };
-
-  const handleStarClick = (e: React.MouseEvent) => {
+  const handleStar = (e: React.MouseEvent) => {
     e.stopPropagation();
     toggleFavorite(serviceKey);
   };
-
-  const handleStarKeyDown = (e: React.KeyboardEvent) => {
+  const handleStarKey = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       toggleFavorite(serviceKey);
     }
   };
@@ -46,53 +38,43 @@ export default function ServiceCard({ serviceKey, status }: Props) {
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       aria-label={`Open ${label}`}
-      className={[
-        "fd-accent-card",
-        isRunning ? "fd-accent-success" : "fd-accent-warning",
-        // Tailwind: lift + shadow on hover; GPU-composited transition avoids layout shift
-        "tw-cursor-pointer tw-select-none tw-outline-none",
-        "tw-transition-all tw-duration-150 tw-ease-out",
-        "hover:tw--translate-y-px hover:tw-shadow-md",
-        "tw-flex tw-items-center tw-gap-3",
-      ].join(" ")}
+      className="tw-group tw-relative tw-flex tw-items-center tw-gap-2.5 tw-cursor-pointer tw-select-none tw-outline-none tw-transition-all tw-duration-100"
+      style={{
+        padding: "9px 12px 9px 10px",
+        background: "var(--sh-surface)",
+        border: "1px solid var(--sh-line)",
+        borderLeft: `2px solid ${isRunning ? "var(--sh-ok)" : "var(--sh-line)"}`,
+        borderRadius: "5px",
+        fontFamily: "var(--font-sans)",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = "var(--sh-elevated)";
+        e.currentTarget.style.borderLeftColor = isRunning ? "var(--sh-ok)" : "var(--sh-dim)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = "var(--sh-surface)";
+        e.currentTarget.style.borderLeftColor = isRunning ? "var(--sh-ok)" : "var(--sh-line)";
+      }}
     >
-      {/* Status dot */}
-      <span
-        className="tw-w-2.5 tw-h-2.5 tw-rounded-full tw-shrink-0"
-        style={{
-          backgroundColor: "currentColor",
-          boxShadow: "0 0 6px currentColor",
-        }}
-      />
-
       {/* Label */}
-      <div className="tw-flex-1 tw-min-w-0">
-        <Box variant="p" fontWeight="bold">{label}</Box>
-      </div>
+      <span className="tw-flex-1 tw-truncate tw-text-[12px] tw-font-medium"
+            style={{ color: isRunning ? "var(--sh-ink)" : "var(--sh-dim)" }}>
+        {label}
+      </span>
 
-      {/* Favourite star */}
+      {/* Star */}
       <button
-        onClick={handleStarClick}
-        onKeyDown={handleStarKeyDown}
-        aria-label={fav ? `Remove ${label} from favorites` : `Add ${label} to favorites`}
-        className={[
-          "tw-shrink-0 tw-p-1 tw-rounded",
-          "tw-bg-transparent tw-border-0 tw-cursor-pointer",
-          "tw-transition-opacity tw-duration-150",
-          fav
-            ? "tw-opacity-100"
-            : "tw-opacity-40 hover:tw-opacity-100",
-        ].join(" ")}
+        onClick={handleStar}
+        onKeyDown={handleStarKey}
+        aria-label={fav ? `Unstar ${label}` : `Star ${label}`}
+        className="tw-flex-shrink-0 tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-100 tw-p-0.5 tw-rounded tw-bg-transparent tw-border-0 tw-cursor-pointer"
         style={{
-          color: fav
-            ? "var(--color-text-status-warning)"
-            : "var(--color-text-body-secondary)",
+          opacity: fav ? 1 : undefined,
+          color: fav ? "var(--sh-warn)" : "var(--sh-faint)",
         }}
       >
-        <span
-          dangerouslySetInnerHTML={{ __html: STAR_SVG }}
-          className="tw-block tw-w-3.5 tw-h-3.5"
-        />
+        <span dangerouslySetInnerHTML={{ __html: STAR_SVG }}
+              style={{ width: 11, height: 11, display: "block" }} />
       </button>
     </div>
   );

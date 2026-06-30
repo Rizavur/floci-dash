@@ -1,3 +1,41 @@
+/* ─── Shell design tokens ───────────────────────────────────────────────── */
+/* Applied by AppLayoutShell on the root <div id="app-shell">               */
+/* Dark is the default; .light overrides for light mode.                    */
+
+#app-shell {
+  --sh-bg:       #0d1117;
+  --sh-surface:  #161b22;
+  --sh-elevated: #21262d;
+  --sh-line:     #30363d;
+  --sh-line-sub: #21262d;
+  --sh-ink:      #e6edf3;
+  --sh-dim:      #8b949e;
+  --sh-faint:    #484f58;
+  --sh-accent:   #2dd4bf;
+  --sh-ok:       #2dd4bf;
+  --sh-warn:     #e3b341;
+  --sh-fail:     #f85149;
+  --sh-accent-bg: rgba(45, 212, 191, 0.08);
+  --sh-hover:    #21262d;
+}
+
+#app-shell.light {
+  --sh-bg:       #f6f8fa;
+  --sh-surface:  #ffffff;
+  --sh-elevated: #eaeef2;
+  --sh-line:     #d0d7de;
+  --sh-line-sub: #eaeef2;
+  --sh-ink:      #1f2328;
+  --sh-dim:      #57606a;
+  --sh-faint:    #adb5bd;
+  --sh-accent:   #0e8a7f;
+  --sh-ok:       #1a7f37;
+  --sh-warn:     #9a6700;
+  --sh-fail:     #cf222e;
+  --sh-accent-bg: rgba(14, 138, 127, 0.08);
+  --sh-hover:    #f0f3f5;
+}
+
 /* ─── Dark-mode-safe utility classes ─── */
 /* Use these instead of hardcoded hex colors in inline styles */
 

@@ -4,5 +4,41 @@
  * All Tailwind utilities use the `tw-` prefix (e.g. tw-flex, tw-grid-cols-4)
  * to prevent any collision with Cloudscape's global class names.
  * Cloudscape's own styles remain unaffected.
+ *
+ * Design tokens live in @theme so Tailwind generates bg-*, text-*, border-*
+ * utilities from them (accessed as tw-bg-surface, tw-text-muted, etc.).
  */
 @import "tailwindcss" prefix(tw);
+
+@variant dark (.dark &);
+
+@theme {
+  /* ── Surface layers (dark-first) ──────────────────────────── */
+  --color-base:     #0d1117;   /* app bg */
+  --color-surface:  #161b22;   /* sidebar, cards */
+  --color-elevated: #21262d;   /* hover, inputs */
+  --color-overlay:  #2d333b;   /* modals, dropdowns */
+
+  /* ── Borders ───────────────────────────────────────────────── */
+  --color-line:     #30363d;   /* standard divider */
+  --color-line-sub: #21262d;   /* subtle divider */
+
+  /* ── Text ──────────────────────────────────────────────────── */
+  --color-ink:      #e6edf3;   /* primary headings + values */
+  --color-dim:      #8b949e;   /* secondary labels */
+  --color-faint:    #484f58;   /* placeholder, disabled */
+
+  /* ── Accent — teal ──────────────────────────────────────────── */
+  --color-accent:     #2dd4bf;
+  --color-accent-dim: #0f7b72; /* darker shade for borders */
+
+  /* ── Status ─────────────────────────────────────────────────── */
+  --color-ok:   #2dd4bf;   /* running */
+  --color-warn: #e3b341;   /* warning */
+  --color-fail: #f85149;   /* error */
+
+  /* ── Font stacks ─────────────────────────────────────────────── */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, 'Cascadia Code',
+               Consolas, 'Courier New', monospace;
+}
