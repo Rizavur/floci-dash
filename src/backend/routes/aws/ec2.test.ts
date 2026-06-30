@@ -296,6 +296,68 @@ describe("EC2 Routes", () => {
       expect(mockSend.mock.calls[0][0].InstanceIds).toEqual(["i-001"]);
     });
 
+    // ── BACK-05 regression: lifecycle routes must NOT swallow all errors ──────
+    // Before the fix, all errors (including non-idempotent ones like
+    // InvalidInstanceID.NotFound) were silently caught and the route
+    // returned { started/stopped/rebooting: true } regardless.
+
+    it("POST /instances/:id/start — re-throws non-idempotent errors (BACK-05)", async () => {
+      const notFound = Object.assign(new Error("InvalidInstanceID.NotFound"), {
+        name: "InvalidInstanceID.NotFound",
+        $metadata: { httpStatusCode: 400 },
+      });
+      mockSend.mockRejectedValueOnce(notFound);
+      const res = await post("/instances/i-bad/start");
+      // Must NOT return 200 with started:true — the instance does not exist
+      expect(res.status).not.toBe(200);
+    });
+
+    it("POST /instances/:id/stop — re-throws non-idempotent errors (BACK-05)", async () => {
+      const notFound = Object.assign(new Error("InvalidInstanceID.NotFound"), {
+        name: "InvalidInstanceID.NotFound",
+        $metadata: { httpStatusCode: 400 },
+      });
+      mockSend.mockRejectedValueOnce(notFound);
+      const res = await post("/instances/i-bad/stop");
+      expect(res.status).not.toBe(200);
+    });
+
+    it("POST /instances/:id/reboot — re-throws non-idempotent errors (BACK-05)", async () => {
+      const notFound = Object.assign(new Error("InvalidInstanceID.NotFound"), {
+        name: "InvalidInstanceID.NotFound",
+        $metadata: { httpStatusCode: 400 },
+      });
+      mockSend.mockRejectedValueOnce(notFound);
+      const res = await post("/instances/i-bad/reboot");
+      expect(res.status).not.toBe(200);
+    });
+
+    it("POST /instances/:id/start — still succeeds when already running (IncorrectInstanceState)", async () => {
+      // IncorrectInstanceState = "already running" — idempotent, should return 200
+      const alreadyRunning = Object.assign(new Error("IncorrectInstanceState"), {
+        name: "IncorrectInstanceState",
+        $metadata: { httpStatusCode: 400 },
+      });
+      mockSend.mockRejectedValueOnce(alreadyRunning);
+      const res = await post("/instances/i-001/start");
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.started).toBe(true);
+    });
+
+    it("POST /instances/:id/stop — still succeeds when already stopped (IncorrectInstanceState)", async () => {
+      const alreadyStopped = Object.assign(new Error("IncorrectInstanceState"), {
+        name: "IncorrectInstanceState",
+        $metadata: { httpStatusCode: 400 },
+      });
+      mockSend.mockRejectedValueOnce(alreadyStopped);
+      const res = await post("/instances/i-001/stop");
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.stopped).toBe(true);
+    });
+    // ─────────────────────────────────────────────────────────────────────────
+
     it("GET /instances/:id/status — returns status info", async () => {
       mockSend.mockResolvedValueOnce({
         InstanceStatuses: [
