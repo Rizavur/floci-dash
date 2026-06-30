@@ -6,14 +6,14 @@ import { api } from "../lib/client";
 export function useLambdaFunctions() {
   return useQuery({
     queryKey: ["aws", "lambda", "functions"],
-    queryFn: () => api<{ functions: any[]; total: number }>("/lambda/functions"),
+    queryFn: () => api<{ functions: any[]; total: number }>("/aws/lambda/functions"),
   });
 }
 
 export function useLambdaFunction(name: string | null) {
   return useQuery({
     queryKey: ["aws", "lambda", "functions", name],
-    queryFn: () => api<{ configuration: any; code: any }>(`/lambda/functions/${name}`),
+    queryFn: () => api<{ configuration: any; code: any }>(`/aws/lambda/functions/${name}`),
     enabled: !!name,
   });
 }
@@ -61,7 +61,7 @@ export function useInvokeFunction() {
 export function useLambdaVersions(name: string | null) {
   return useQuery({
     queryKey: ["aws", "lambda", "functions", name, "versions"],
-    queryFn: () => api<{ versions: any[]; total: number }>(`/lambda/functions/${name}/versions`),
+    queryFn: () => api<{ versions: any[]; total: number }>(`/aws/lambda/functions/${name}/versions`),
     enabled: !!name,
   });
 }
@@ -80,7 +80,7 @@ export function usePublishVersion() {
 export function useLambdaAliases(name: string | null) {
   return useQuery({
     queryKey: ["aws", "lambda", "functions", name, "aliases"],
-    queryFn: () => api<{ aliases: any[]; total: number }>(`/lambda/functions/${name}/aliases`),
+    queryFn: () => api<{ aliases: any[]; total: number }>(`/aws/lambda/functions/${name}/aliases`),
     enabled: !!name,
   });
 }
@@ -92,7 +92,7 @@ export function useEventSourceMappings(functionName?: string) {
     queryKey: ["aws", "lambda", "event-source-mappings", functionName],
     queryFn: () =>
       api<{ eventSourceMappings: any[]; total: number }>(
-        `/lambda/event-source-mappings${functionName ? `?functionName=${functionName}` : ""}`
+        `/aws/lambda/event-source-mappings${functionName ? `?functionName=${functionName}` : ""}`
       ),
   });
 }
@@ -110,14 +110,14 @@ export function useDeleteEventSourceMapping() {
 export function useLambdaLayers() {
   return useQuery({
     queryKey: ["aws", "lambda", "layers"],
-    queryFn: () => api<{ layers: any[]; total: number }>("/lambda/layers"),
+    queryFn: () => api<{ layers: any[]; total: number }>("/aws/lambda/layers"),
   });
 }
 
 export function useLambdaLayerVersions(name: string | null) {
   return useQuery({
     queryKey: ["aws", "lambda", "layers", name, "versions"],
-    queryFn: () => api<{ versions: any[]; total: number }>(`/lambda/layers/${name}/versions`),
+    queryFn: () => api<{ versions: any[]; total: number }>(`/aws/lambda/layers/${name}/versions`),
     enabled: !!name,
   });
 }
@@ -138,7 +138,7 @@ export function useDeleteLayerVersion() {
 export function useLambdaTags(arn: string | null) {
   return useQuery({
     queryKey: ["aws", "lambda", "tags", arn],
-    queryFn: () => api<{ tags: Record<string, string> }>(`/lambda/tags/${arn}`),
+    queryFn: () => api<{ tags: Record<string, string> }>(`/aws/lambda/tags/${arn}`),
     enabled: !!arn,
   });
 }
@@ -148,7 +148,7 @@ export function useLambdaTags(arn: string | null) {
 export function useFunctionUrl(name: string | null) {
   return useQuery({
     queryKey: ["aws", "lambda", "functions", name, "url"],
-    queryFn: () => api<{ url: string; authType: string; cors: any; invokeMode: string }>(`/lambda/functions/${name}/url`),
+    queryFn: () => api<{ url: string; authType: string; cors: any; invokeMode: string }>(`/aws/lambda/functions/${name}/url`),
     enabled: !!name,
   });
 }
@@ -158,7 +158,7 @@ export function useFunctionUrl(name: string | null) {
 export function useFunctionConcurrency(name: string | null) {
   return useQuery({
     queryKey: ["aws", "lambda", "functions", name, "concurrency"],
-    queryFn: () => api<{ reservedConcurrentExecutions: number | undefined }>(`/lambda/functions/${name}/concurrency`),
+    queryFn: () => api<{ reservedConcurrentExecutions: number | undefined }>(`/aws/lambda/functions/${name}/concurrency`),
     enabled: !!name,
   });
 }
