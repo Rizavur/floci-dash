@@ -349,15 +349,21 @@ router.delete("/tags/:arn", async (c: Context) => {
 
 router.get("/functions/:name/url", async (c: Context) => {
   const name = c.req.param("name");
-  const result = await lambda().send(
-    new GetFunctionUrlConfigCommand({ FunctionName: name })
-  );
-  return c.json({
-    url: result.FunctionUrl,
-    authType: result.AuthType,
-    cors: result.Cors,
-    invokeMode: result.InvokeMode,
-  });
+  // ResourceNotFoundException is normal — most functions have no URL configured.
+  // Return null fields instead of propagating an error the UI treats as a crash.
+  try {
+    const result = await lambda().send(
+      new GetFunctionUrlConfigCommand({ FunctionName: name })
+    );
+    return c.json({
+      url: result.FunctionUrl ?? null,
+      authType: result.AuthType ?? null,
+      cors: result.Cors ?? null,
+      invokeMode: result.InvokeMode ?? null,
+    });
+  } catch {
+    return c.json({ url: null, authType: null, cors: null, invokeMode: null });
+  }
 });
 
 router.delete("/functions/:name/url", async (c: Context) => {
