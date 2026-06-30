@@ -226,9 +226,10 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
   const [tab, setTab] = useState("config");
   const [invokePayload, setInvokePayload] = useState('{\n  "key": "value"\n}');
   const invokeFunction = useInvokeFunction();
-  const { data: versions } = useLambdaVersions(name);
-  const { data: aliases } = useLambdaAliases(name);
-  const { data: esm } = useEventSourceMappings(name);
+  const deleteFunction = useDeleteFunction();
+  const { data: versions, isLoading: versionsLoading } = useLambdaVersions(name);
+  const { data: aliases, isLoading: aliasesLoading } = useLambdaAliases(name);
+  const { data: esm, isLoading: esmLoading } = useEventSourceMappings(name);
   const { data: urlConfig } = useFunctionUrl(name);
   const { data: concurrency } = useFunctionConcurrency(name);
   const publishVersion = usePublishVersion();
@@ -385,7 +386,7 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
             { id: "description", header: "Description", cell: (item: any) => item.description || "-" },
           ]}
           emptyMessage="No published versions"
-          loading={false}
+          loading={versionsLoading}
         />
       ),
     },
@@ -403,7 +404,7 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
             { id: "description", header: "Description", cell: (item: any) => item.description || "-" },
           ]}
           emptyMessage="No aliases"
-          loading={false}
+          loading={aliasesLoading}
         />
       ),
     },
@@ -424,7 +425,7 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
             { id: "lastResult", header: "Last processing result", cell: (item: any) => item.lastProcessingResult || "-" },
           ]}
           emptyMessage="No event source mappings"
-          loading={false}
+          loading={esmLoading}
         />
       ),
     },
@@ -441,7 +442,7 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
               <Button onClick={() => publishVersion.mutate({ name })} loading={publishVersion.isPending}>
                 Publish version
               </Button>
-              <DeleteButton itemName={name} resourceType="function" loading={false} onDelete={async () => { onBack(); }} />
+              <DeleteButton itemName={name} resourceType="function" loading={deleteFunction.isPending} onDelete={async () => { await deleteFunction.mutateAsync(name); onBack(); }} />
             </SpaceBetween>
           }
         >
