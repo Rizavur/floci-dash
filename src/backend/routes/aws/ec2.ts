@@ -172,11 +172,21 @@ router.delete("/instances/:id", async (c: Context) => {
   return c.json({ id, terminated: true });
 });
 
+// IncorrectInstanceState means the instance is already in the target state
+// (e.g. already running when start is called). That is idempotent and safe
+// to ignore. All other errors (instance not found, permissions, etc.) are
+// re-thrown so the router's onError handler returns a structured response.
+function isIdempotentInstanceError(err: unknown): boolean {
+  return (err as any)?.name === "IncorrectInstanceState";
+}
+
 router.post("/instances/:id/start", async (c: Context) => {
   const id = c.req.param("id");
   try {
     await ec2().send(new StartInstancesCommand({ InstanceIds: [id!] }));
-  } catch { /* instance may already be running — no-op */ }
+  } catch (err) {
+    if (!isIdempotentInstanceError(err)) throw err;
+  }
   return c.json({ id, started: true });
 });
 
@@ -184,7 +194,9 @@ router.post("/instances/:id/stop", async (c: Context) => {
   const id = c.req.param("id");
   try {
     await ec2().send(new StopInstancesCommand({ InstanceIds: [id!] }));
-  } catch { /* instance may already be stopped — no-op */ }
+  } catch (err) {
+    if (!isIdempotentInstanceError(err)) throw err;
+  }
   return c.json({ id, stopped: true });
 });
 
@@ -192,7 +204,9 @@ router.post("/instances/:id/reboot", async (c: Context) => {
   const id = c.req.param("id");
   try {
     await ec2().send(new RebootInstancesCommand({ InstanceIds: [id!] }));
-  } catch { /* reboot may not be supported — no-op */ }
+  } catch (err) {
+    if (!isIdempotentInstanceError(err)) throw err;
+  }
   return c.json({ id, rebooting: true });
 });
 
