@@ -263,6 +263,81 @@ router.delete("/platform-apps/endpoints", async (c: Context) => {
   return c.json({ deleted: true });
 });
 
+// ── Platform application attributes ───────────────────────────────────────
+
+router.get("/platform-apps/attributes", async (c: Context) => {
+  const arn = c.req.query("arn");
+  if (!arn) return c.json({ error: "arn query parameter required" }, 400);
+  const client = getClient();
+  const result = await client.send(
+    new GetPlatformApplicationAttributesCommand({ PlatformApplicationArn: arn })
+  );
+  return c.json({ arn, attributes: result.Attributes || {} });
+});
+
+router.put("/platform-apps/attributes", async (c: Context) => {
+  const body = await c.req.json<{ arn: string; attributes: Record<string, string> }>();
+  if (!body.arn) return c.json({ error: "arn is required" }, 400);
+  if (!body.attributes || typeof body.attributes !== "object") {
+    return c.json({ error: "attributes object is required" }, 400);
+  }
+  const client = getClient();
+  await client.send(
+    new SetPlatformApplicationAttributesCommand({
+      PlatformApplicationArn: body.arn,
+      Attributes: body.attributes,
+    })
+  );
+  return c.json({ arn: body.arn, updated: true });
+});
+
+// ── Platform endpoint attributes ───────────────────────────────────────────
+
+router.get("/platform-apps/endpoints/attributes", async (c: Context) => {
+  const arn = c.req.query("arn");
+  if (!arn) return c.json({ error: "arn query parameter required" }, 400);
+  const client = getClient();
+  const result = await client.send(
+    new GetEndpointAttributesCommand({ EndpointArn: arn })
+  );
+  return c.json({ arn, attributes: result.Attributes || {} });
+});
+
+router.put("/platform-apps/endpoints/attributes", async (c: Context) => {
+  const body = await c.req.json<{ arn: string; attributes: Record<string, string> }>();
+  if (!body.arn) return c.json({ error: "arn is required" }, 400);
+  if (!body.attributes || typeof body.attributes !== "object") {
+    return c.json({ error: "attributes object is required" }, 400);
+  }
+  const client = getClient();
+  await client.send(
+    new SetEndpointAttributesCommand({
+      EndpointArn: body.arn,
+      Attributes: body.attributes,
+    })
+  );
+  return c.json({ arn: body.arn, updated: true });
+});
+
+// ── Confirm subscription ───────────────────────────────────────────────────
+// Called when a subscriber clicks the confirmation link in their email.
+
+router.post("/subscriptions/confirm", async (c: Context) => {
+  const body = await c.req.json<{ topicArn: string; token: string; authenticateOnUnsubscribe?: string }>();
+  if (!body.topicArn || !body.token) {
+    return c.json({ error: "topicArn and token are required" }, 400);
+  }
+  const client = getClient();
+  const result = await client.send(
+    new ConfirmSubscriptionCommand({
+      TopicArn: body.topicArn,
+      Token: body.token,
+      AuthenticateOnUnsubscribe: body.authenticateOnUnsubscribe,
+    })
+  );
+  return c.json({ subscriptionArn: result.SubscriptionArn, confirmed: true });
+});
+
 router.get("/inspect/sms", async (c: Context) => {
   const data = await flociFetch("/_aws/sns");
   return c.json(data);
