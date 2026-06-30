@@ -359,6 +359,28 @@ describe("RDS Routes", () => {
       expect(body.parameters[0].name).toBe("max_connections");
     });
 
+    it("GET /parameter-groups/:name/parameters — paginates across multiple pages (BACK-13)", async () => {
+      // First page returns a Marker, triggering a second SDK call
+      mockSend
+        .mockResolvedValueOnce({
+          Parameters: [{ ParameterName: "max_connections", ParameterValue: "100" }],
+          Marker: "page2",
+        })
+        .mockResolvedValueOnce({
+          Parameters: [{ ParameterName: "max_allowed_packet", ParameterValue: "16777216" }],
+          // No Marker — last page
+        });
+      const res = await get("/parameter-groups/pg-001/parameters");
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.total).toBe(2);
+      expect(body.parameters[0].name).toBe("max_connections");
+      expect(body.parameters[1].name).toBe("max_allowed_packet");
+      // Confirm two SDK calls were made with the correct Marker on the second
+      expect(mockSend).toHaveBeenCalledTimes(2);
+      expect(mockSend.mock.calls[1][0].Marker).toBe("page2");
+    });
+
     it("PATCH /parameter-groups/:name/parameters — modifies parameters", async () => {
       mockSend.mockResolvedValueOnce({});
       const res = await patch("/parameter-groups/pg-001/parameters", {
@@ -429,6 +451,24 @@ describe("RDS Routes", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body.total).toBe(1);
+    });
+
+    it("GET /cluster-parameter-groups/:name/parameters — paginates across multiple pages (BACK-13)", async () => {
+      mockSend
+        .mockResolvedValueOnce({
+          Parameters: [{ ParameterName: "timezone", ParameterValue: "UTC" }],
+          Marker: "page2",
+        })
+        .mockResolvedValueOnce({
+          Parameters: [{ ParameterName: "character_set_server", ParameterValue: "utf8mb4" }],
+        });
+      const res = await get("/cluster-parameter-groups/cpg-001/parameters");
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.total).toBe(2);
+      expect(body.parameters[1].name).toBe("character_set_server");
+      expect(mockSend).toHaveBeenCalledTimes(2);
+      expect(mockSend.mock.calls[1][0].Marker).toBe("page2");
     });
 
     it("PATCH /cluster-parameter-groups/:name/parameters — modifies parameters", async () => {
