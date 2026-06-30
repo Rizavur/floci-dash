@@ -17,9 +17,7 @@ export default function ServiceCard({ serviceKey, status }: Props) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const fav = isFavorite(serviceKey);
 
-  const handleClick = () => {
-    navigate(`/services/${serviceKey}`);
-  };
+  const handleClick = () => navigate(`/services/${serviceKey}`);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -48,50 +46,53 @@ export default function ServiceCard({ serviceKey, status }: Props) {
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       aria-label={`Open ${label}`}
-      className={`fd-accent-card ${isRunning ? "fd-accent-success" : "fd-accent-warning"}`}
-      style={{
-        cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        outline: "none",
-        userSelect: "none",
-        transition: "all 0.15s ease",
-      }}
-      onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.transform = ""; }}
+      className={[
+        "fd-accent-card",
+        isRunning ? "fd-accent-success" : "fd-accent-warning",
+        // Tailwind: lift + shadow on hover; GPU-composited transition avoids layout shift
+        "tw-cursor-pointer tw-select-none tw-outline-none",
+        "tw-transition-all tw-duration-150 tw-ease-out",
+        "hover:tw--translate-y-px hover:tw-shadow-md",
+        "tw-flex tw-items-center tw-gap-3",
+      ].join(" ")}
     >
+      {/* Status dot */}
       <span
+        className="tw-w-2.5 tw-h-2.5 tw-rounded-full tw-shrink-0"
         style={{
-          width: 10,
-          height: 10,
-          borderRadius: "50%",
           backgroundColor: "currentColor",
           boxShadow: "0 0 6px currentColor",
-          flexShrink: 0,
         }}
       />
-      <div style={{ flex: 1 }}>
+
+      {/* Label */}
+      <div className="tw-flex-1 tw-min-w-0">
         <Box variant="p" fontWeight="bold">{label}</Box>
       </div>
+
+      {/* Favourite star */}
       <button
         onClick={handleStarClick}
         onKeyDown={handleStarKeyDown}
         aria-label={fav ? `Remove ${label} from favorites` : `Add ${label} to favorites`}
+        className={[
+          "tw-shrink-0 tw-p-1 tw-rounded",
+          "tw-bg-transparent tw-border-0 tw-cursor-pointer",
+          "tw-transition-opacity tw-duration-150",
+          fav
+            ? "tw-opacity-100"
+            : "tw-opacity-40 hover:tw-opacity-100",
+        ].join(" ")}
         style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: 4,
-          color: fav ? "var(--color-text-status-warning)" : "var(--color-text-body-secondary)",
-          opacity: fav ? 1 : 0.4,
-          transition: "opacity 0.15s",
-          flexShrink: 0,
+          color: fav
+            ? "var(--color-text-status-warning)"
+            : "var(--color-text-body-secondary)",
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.opacity = fav ? "1" : "0.4"; }}
       >
-        <span dangerouslySetInnerHTML={{ __html: STAR_SVG }} style={{ width: 14, height: 14, display: "block" }} />
+        <span
+          dangerouslySetInnerHTML={{ __html: STAR_SVG }}
+          className="tw-block tw-w-3.5 tw-h-3.5"
+        />
       </button>
     </div>
   );
