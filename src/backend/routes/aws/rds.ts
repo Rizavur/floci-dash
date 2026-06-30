@@ -542,6 +542,7 @@ router.get("/cluster-parameter-groups/:name/parameters", async (c: Context) => {
   const client = rds();
   const allParameters: any[] = [];
   let marker: string | undefined;
+  // Paginate — cluster parameter groups can contain hundreds of parameters
   do {
     const result = await client.send(
       new DescribeDBClusterParametersCommand({

@@ -308,8 +308,8 @@ describe("EC2 Routes", () => {
       });
       mockSend.mockRejectedValueOnce(notFound);
       const res = await post("/instances/i-bad/start");
-      // Must NOT return 200 with started:true — the instance does not exist
-      expect(res.status).not.toBe(200);
+      // Bare router re-throws; Hono's default error handler returns 500
+      expect(res.status).toBe(500);
     });
 
     it("POST /instances/:id/stop — re-throws non-idempotent errors (BACK-05)", async () => {
@@ -319,7 +319,7 @@ describe("EC2 Routes", () => {
       });
       mockSend.mockRejectedValueOnce(notFound);
       const res = await post("/instances/i-bad/stop");
-      expect(res.status).not.toBe(200);
+      expect(res.status).toBe(500);
     });
 
     it("POST /instances/:id/reboot — re-throws non-idempotent errors (BACK-05)", async () => {
@@ -329,7 +329,7 @@ describe("EC2 Routes", () => {
       });
       mockSend.mockRejectedValueOnce(notFound);
       const res = await post("/instances/i-bad/reboot");
-      expect(res.status).not.toBe(200);
+      expect(res.status).toBe(500);
     });
 
     it("POST /instances/:id/start — still succeeds when already running (IncorrectInstanceState)", async () => {
