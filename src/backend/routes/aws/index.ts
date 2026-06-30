@@ -70,9 +70,12 @@ import memorydbRoutes from "./memorydb";
 
 const router = new Hono();
 
-router.route("/s3", s3Routes);
-router.route("/s3", s3ConfigRoutes);
+// s3ObjectRoutes must be registered before s3Routes so that specific wildcard
+// routes (/*/tags, /*/attributes, /*/head) are matched before the catch-all
+// GET /buckets/:name/objects/* in s3Routes.
 router.route("/s3", s3ObjectRoutes);
+router.route("/s3", s3ConfigRoutes);
+router.route("/s3", s3Routes);
 router.route("/dynamodb", dynamodbRoutes);
 router.route("/dynamodb", dynamodbAdvancedRoutes);
 router.route("/rds", rdsRoutes);
