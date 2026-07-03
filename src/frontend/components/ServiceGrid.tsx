@@ -79,7 +79,7 @@ export default function ServiceGrid({ services, activeServices, resourceCounts }
             </div>
 
             {/* Service cards */}
-            <div className="tw:grid tw:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] tw:gap-1.5 tw:max-sm:grid-cols-[repeat(auto-fill,minmax(130px,1fr))]">
+            <div className="tw:grid tw:grid-cols-[repeat(auto-fill,minmax(190px,1fr))] tw:gap-2 tw:max-sm:grid-cols-[repeat(auto-fill,minmax(140px,1fr))]">
               {keys.map((key) => (
                 <ServiceCard
                   key={key}
