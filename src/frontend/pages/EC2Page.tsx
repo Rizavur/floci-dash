@@ -21,6 +21,7 @@ import {
 } from "../components/ui";
 import EC2Terminal from "../components/EC2Terminal";
 import EC2NetworkTopology from "../components/EC2NetworkTopology";
+import { useHealth } from "../hooks/useSystem";
 import {
   useEC2Instances,
   useEC2RunInstance,
@@ -74,9 +75,13 @@ import StatusBadge from "../components/StatusBadge";
 
 export default function EC2Page() {
   const navigate = useNavigate();
+  const { data: health } = useHealth();
   const [selectedTab, setSelectedTab] = useState("instances");
   const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
   const [selectedVpc, setSelectedVpc] = useState<string | null>(null);
+
+  const ec2Status = health?.services?.ec2;
+  const statusText = ec2Status === "running" ? "running" : ec2Status === "available" ? "available" : "connected";
 
   if (selectedInstance) {
     return <EC2InstanceDetail id={selectedInstance} onBack={() => setSelectedInstance(null)} />;
@@ -174,7 +179,7 @@ export default function EC2Page() {
             }}
           />
           <Header variant="h1" description="Amazon Elastic Compute Cloud">
-            EC2 <StatusBadge status="available" />
+            EC2 <StatusBadge status={statusText as any} />
           </Header>
         </SpaceBetween>
       }

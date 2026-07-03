@@ -38,6 +38,7 @@ import {
 import ResourceTable from "../components/ResourceTable";
 import DeleteButton from "../components/DeleteButton";
 import StatusBadge from "../components/StatusBadge";
+import { useHealth } from "../hooks/useSystem";
 
 const RUNTIMES = [
   "nodejs22.x", "nodejs20.x", "nodejs18.x",
@@ -49,8 +50,12 @@ const RUNTIMES = [
 
 export default function LambdaPage() {
   const navigate = useNavigate();
+  const { data: health } = useHealth();
   const [selectedTab, setSelectedTab] = useState("functions");
   const [selectedFunction, setSelectedFunction] = useState<string | null>(null);
+
+  const lambdaStatus = health?.services?.lambda;
+  const statusText = lambdaStatus === "running" ? "running" : lambdaStatus === "available" ? "available" : "connected";
 
   if (selectedFunction) {
     return (
@@ -81,7 +86,7 @@ export default function LambdaPage() {
           variant="h1"
           description="Serverless compute — run code without provisioning servers"
         >
-          Lambda <StatusBadge status="available" />
+          Lambda <StatusBadge status={statusText as any} />
         </Header>
       }
       breadcrumbs={
