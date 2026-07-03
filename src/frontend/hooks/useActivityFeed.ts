@@ -6,7 +6,7 @@ const MAX_ENTRIES = 50;
 export interface ActivityEntry {
   id: string;
   timestamp: number;
-  action: "create" | "delete" | "navigate";
+  action: "create" | "delete" | "update" | "navigate";
   service: string;
   resource?: string;
   description: string;

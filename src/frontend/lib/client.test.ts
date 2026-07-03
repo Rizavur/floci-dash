@@ -1,4 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+const mockAddActivity = vi.fn();
+vi.mock("../hooks/useActivityFeed", () => ({
+  addActivity: (...args: any[]) => mockAddActivity(...args),
+}));
+
 import { api } from "./client";
 
 describe("api", () => {
@@ -73,5 +79,44 @@ describe("api", () => {
     const call = fetchMock.mock.calls[0][1];
     expect(call.method).toBe("POST");
     expect(call.body).toBe('{"a":1}');
+  });
+
+  describe("activity logging", () => {
+    beforeEach(() => {
+      mockAddActivity.mockClear();
+    });
+
+    it("logs an activity entry for a recognized AWS mutation", async () => {
+      mockFetch(new Response("{}", { status: 200 }));
+      await api("/aws/s3/buckets", { method: "POST" });
+      expect(mockAddActivity).toHaveBeenCalledWith(
+        expect.objectContaining({ service: "s3", action: "create", description: "Created S3 bucket" }),
+      );
+    });
+
+    it("does not log activity for GET requests", async () => {
+      mockFetch(new Response("{}", { status: 200 }));
+      await api("/aws/s3/buckets");
+      expect(mockAddActivity).not.toHaveBeenCalled();
+    });
+
+    it("does not log activity for non-AWS paths", async () => {
+      mockFetch(new Response("{}", { status: 200 }));
+      await api("/system/health", { method: "POST" });
+      expect(mockAddActivity).not.toHaveBeenCalled();
+    });
+
+    it("does not log activity when the request fails", async () => {
+      mockFetch(new Response(JSON.stringify({ message: "nope" }), { status: 400 }));
+      await expect(api("/aws/s3/buckets", { method: "POST" })).rejects.toThrow();
+      expect(mockAddActivity).not.toHaveBeenCalled();
+    });
+
+    it("never lets a logging failure break the response", async () => {
+      mockAddActivity.mockImplementation(() => { throw new Error("boom"); });
+      mockFetch(new Response(JSON.stringify({ ok: true }), { status: 200 }));
+      const result = await api<{ ok: boolean }>("/aws/s3/buckets", { method: "POST" });
+      expect(result).toEqual({ ok: true });
+    });
   });
 });

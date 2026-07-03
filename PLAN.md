@@ -1474,6 +1474,20 @@ finished the migration and removed Cloudscape entirely.
 | 24.7 | Remove `@cloudscape-design/*` packages and the global-styles CSS import; verify production build | Done | 2026-07-04 |
 | 24.8 | Update AGENTS.md, README.md, and this tracker to reflect the new all-Tailwind design system | Done | 2026-07-04 |
 
+### Phase 15: Dashboard Home Improvements
+
+Follow-up polish pass on `DashboardHome.tsx` and its supporting components, focused on making
+the page feel less generic and more genuinely useful, without any backend changes.
+
+| # | Task | Status | Date |
+|---|------|--------|------|
+| 25.1 | Add automatic, app-wide activity logging: `lib/activityLog.ts` parses `(method, path)` into a friendly description (e.g. `POST /aws/s3/buckets` → "Created S3 bucket"); wired into the single `api()` fetch wrapper in `lib/client.ts` so every service's create/update/delete calls populate the Activity feed with zero per-page changes | Done | 2026-07-04 |
+| 25.2 | Redesign `StatCard` with an icon badge and an optional progress bar; add icons to the 4 dashboard stat cards and a running/active proportion bar | Done | 2026-07-04 |
+| 25.3 | Add `components/categoryIcons.tsx` mapping each service category to a Heroicon; show it in `ServiceGrid` category headers alongside an "N active" badge | Done | 2026-07-04 |
+| 25.4 | Differentiate `ServiceCard` visually by real usage: services with provisioned resources get an accent border, tinted background, and a resource-count badge instead of every running service looking identical | Done | 2026-07-04 |
+| 25.5 | Redesign the Activity feed: always visible with an empty state, action-specific icon + color (create/delete/update/navigate), and highlight favorited/active services in Quick Access | Done | 2026-07-04 |
+| 25.6 | Add tests: `activityLog.test.ts`, `client.test.ts` activity-logging cases, `ServiceCard.test.tsx`, `ServiceGrid.test.tsx`, `StatCard.test.tsx`. Verify `make typecheck` and `make test` pass | Done | 2026-07-04 |
+
 ---
 
 ## Floci Repo Notes
