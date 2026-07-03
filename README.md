@@ -11,7 +11,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white" alt="React" />
-  <img src="https://img.shields.io/badge/Cloudscape_Design-3.x-ff9900?logo=amazon-aws&logoColor=white" alt="Cloudscape" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4.x-06b6d4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
   <img src="https://img.shields.io/badge/Hono-4.x-e36002?logo=hono&logoColor=white" alt="Hono" />
   <img src="https://img.shields.io/badge/Docker-ready-2496ed?logo=docker&logoColor=white" alt="Docker" />
   <img src="https://github.com/ofsazib/floci-dash/actions/workflows/ci.yml/badge.svg" alt="CI" />
@@ -42,7 +42,7 @@
 
 ## Features
 
-- **AWS Console look and feel** — Built with [Cloudscape Design System](https://cloudscape.design/), the same component library used by the real AWS Management Console
+- **AWS Console look and feel** — Custom industrial dark-mode design system built with Tailwind CSS v4, styled after the real AWS Management Console
 - **62 Floci services** — Full navigation, status, and resource management with 65+ backend routes covering all major AWS services
 - **Deep resource management** — Browse, create, and delete resources for implemented services (S3, DynamoDB, EC2, RDS, SQS, SNS, EventBridge, CloudWatch Logs, CloudWatch Metrics, Lambda, IAM, Secrets Manager, CloudFormation, KMS, ECS, SSM, Route 53, API Gateway)
 - **EC2 web terminal** — Interactive bash shell inside running EC2 instances directly from the browser (xterm.js + Docker Engine API with PTY)
@@ -61,7 +61,7 @@
 - **Single container** — One Docker image for the entire dashboard (React SPA + Node.js API)
 - **Error boundaries** — React error boundary wrapping the entire app, catches rendering errors gracefully with a recovery message
 - **Toast notifications** — Global API error interceptor that surfaces network and server errors via non-intrusive toast notifications
-- **Content Security Policy** — Strict CSP headers applied in production (self-only scripts, inline styles allowed for Cloudscape, no inline event handlers)
+- **Content Security Policy** — Strict CSP headers applied in production (self-only scripts, inline styles allowed, no inline event handlers)
 - **Input sanitization** — All user inputs sanitized on the backend (control character stripping, path traversal prevention, JSON validation, length limits)
 - **Docker health checks** — Container health monitoring via `/api/healthz` endpoint, used by Docker Compose for dependency ordering
 - **Optimized Docker image** — Multi-stage build with pnpm cache mounts and `pnpm prune --prod` for minimal production image size
@@ -179,7 +179,7 @@ docker run -p 3000:3000 -p 4566:4566 \
 ┌─────────────────────────────────────────────────┐
 │                   Browser                        │
 │         Floci Dash (React SPA)              │
-│      Cloudscape Design + TanStack Query          │
+│      Tailwind CSS v4 + TanStack Query            │
 └──────────────────┬──────────────────────────────┘
                    │ /api/*
 ┌──────────────────▼──────────────────────────────┐
@@ -481,7 +481,7 @@ You'll need Floci running separately (e.g., `docker run -p 4566:4566 ghcr.io/hec
 |-------|-----------|
 | Language | TypeScript 5.x |
 | Frontend | React 19, Vite 6 |
-| UI Components | Cloudscape Design System 3.x |
+| UI Components | Custom Tailwind CSS v4 design system |
 | Data Fetching | TanStack Query 5 |
 | State | Zustand 5 |
 | Routing | React Router 7 (HashRouter) |
@@ -508,7 +508,7 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 ## Related
 
 - **[Floci](https://github.com/floci-io/floci)** — The local AWS emulator this dashboard manages
-- **[Cloudscape Design System](https://cloudscape.design/)** — AWS open-source design system
+- **[Tailwind CSS](https://tailwindcss.com/)** — Utility-first CSS framework powering the custom design system
 
 ## Contributing
 

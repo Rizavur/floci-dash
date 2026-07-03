@@ -7,7 +7,7 @@ import {
   Container,
   Header,
   Icon,
-} from "@cloudscape-design/components";
+} from "./ui";
 import { useEC2Vpcs } from "../hooks/useEC2";
 import { useEC2Subnets } from "../hooks/useEC2";
 import { useEC2Instances } from "../hooks/useEC2";

@@ -19,7 +19,7 @@ import {
   ColumnLayout,
   Container,
   type TabsProps,
-} from "@cloudscape-design/components";
+} from "../components/ui";
 import {
   useLambdaFunctions,
   useLambdaFunction,

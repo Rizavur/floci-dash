@@ -25,7 +25,7 @@ import {
   Checkbox,
   type SelectProps,
   type TabsProps,
-} from "@cloudscape-design/components";
+} from "../../components/ui";
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";

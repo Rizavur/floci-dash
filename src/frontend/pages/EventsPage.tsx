@@ -19,7 +19,7 @@ import {
   Textarea,
   Link,
   Toggle,
-} from "@cloudscape-design/components";
+} from "../components/ui";
 import StatCard from "../components/StatCard";
 import StatusBadge from "../components/StatusBadge";
 import { useToast } from "../components/Toast";

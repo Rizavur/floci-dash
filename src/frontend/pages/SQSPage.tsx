@@ -22,7 +22,7 @@ import {
   Textarea,
   Toggle,
   Link,
-} from "@cloudscape-design/components";
+} from "../components/ui";
 import { useHealth } from "../hooks/useSystem";
 import StatusBadge from "../components/StatusBadge";
 import { TableSkeleton } from "../components/LoadingSkeleton";

@@ -20,7 +20,7 @@ import {
   Textarea,
   Select,
   Link,
-} from "@cloudscape-design/components";
+} from "../components/ui";
 import StatCard from "../components/StatCard";
 import { useToast } from "../components/Toast";
 import { useConfirmDialog } from "../components/ConfirmDialog";

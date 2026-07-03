@@ -90,7 +90,7 @@ The tracker uses these status values: `Done`, `In Progress`, `Pending`, `Blocked
 
 Floci Dash is a Dockerized, full-stack web app providing an AWS Console-style UI for the Floci local AWS emulator. This project is open source — write code and docs accordingly.
 
-- **Frontend:** React 19 + Cloudscape Design System + TanStack Query + React Router (HashRouter)
+- **Frontend:** React 19 + Tailwind CSS v4 (custom design system, see `components/ui/`) + TanStack Query + React Router (HashRouter)
 - **Backend:** Node.js 22 + Hono + @aws-sdk/client-* (all AWS SDK calls go through the backend, never the browser)
 - **Infra:** Single Docker container, docker-compose pairs with Floci on port 4566
 
@@ -109,6 +109,7 @@ Floci Dash is a Dockerized, full-stack web app providing an AWS Console-style UI
 src/
   frontend/          React SPA (Vite, port 5173 dev)
     components/      Shared UI (AppLayoutShell, ServiceCard, ResourceTable, etc.)
+      ui/            Drop-in Tailwind replacement for the old Cloudscape component API
     pages/           Routes (DashboardHome, S3Page, ServicePage, Settings)
     hooks/           TanStack Query hooks (useS3, useDynamoDB, etc.)
     lib/             client.ts (fetch wrapper), utils.ts
@@ -166,13 +167,29 @@ import { StarIcon as StarIconOutline } from "@heroicons/react/24/outline";
 | `24/solid` | Large controls, page-level actions |
 | `24/outline` | Paired with `16/solid` for toggleable states (starred/unstarred) |
 
-Set rendered size with Tailwind: `className="tw-w-4 tw-h-4"`. Do not set `width`/`height` directly on the icon component.
+Set rendered size with Tailwind: `className="tw:w-4 tw:h-4"`. Do not set `width`/`height` directly on the icon component.
 
 ### Design system
-- Custom shell (`AppLayoutShell`) uses Tailwind with `tw-` prefix + CSS variables in `#app-shell`.
-- Cloudscape remains in service pages for tables, forms, and modals — do not remove it from those.
-- Dark mode: toggle `awsui-dark-mode` on `document.body` (Cloudscape) **and** `.light` class on `#app-shell` (custom shell).
-- Design tokens live in `src/frontend/styles/tailwind.css` (`@theme`) and `src/frontend/styles/dashboard.css` (`#app-shell` variables).
+Cloudscape Design System has been fully removed. The entire app (shell + every
+service page) uses a single custom Tailwind v4 design system.
+
+- Tailwind v4 is configured with a `tw:` prefix (v4 variant-style syntax, e.g. `tw:flex`, `tw:md:hidden`,
+  `tw:group-hover:opacity-100` — the prefix always comes first, before variants). See
+  `src/frontend/styles/tailwind.css`.
+- `src/frontend/components/ui/` is a drop-in replacement component library that mirrors the
+  Cloudscape component API (`Box`, `SpaceBetween`, `Header`, `Container`, `ContentLayout`,
+  `BreadcrumbGroup`, `Button`, `Form`, `FormField`, `Input`, `Textarea`, `Select`, `Checkbox`,
+  `Toggle`, `FileUpload`, `Modal`, `Table`, `TextFilter`, `Tabs`, `Alert`, `Flashbar`, `Skeleton`,
+  `Spinner`, `StatusIndicator`, `Badge`, `Link`, `Icon`) so existing call sites work unchanged —
+  import everything from `"../components/ui"` (adjust relative path per file location). Extend
+  this kit instead of reaching for a new UI library or writing one-off styled components.
+- Custom shell (`AppLayoutShell`) + shared primitives use CSS variables defined on `#app-shell`
+  in `src/frontend/styles/dashboard.css` (`--sh-bg`, `--sh-surface`, `--sh-ink`, `--sh-accent`, etc.).
+- Dark mode: toggle `.light` class on `#app-shell`. The `awsui-dark-mode` class is still toggled on
+  `document.body` for backward compatibility — several `fd-*` utility classes in `dashboard.css`
+  (`fd-tag-chip`, `fd-accent-card`, `fd-skeleton`, etc.) still key off it for their dark/light variant.
+- Design tokens live in `src/frontend/styles/tailwind.css` (`@theme`) and `src/frontend/styles/dashboard.css`
+  (`#app-shell` variables).
 
 ## General conventions
 

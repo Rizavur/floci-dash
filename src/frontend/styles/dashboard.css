@@ -24,6 +24,11 @@
   --sh-fail:     #f85149;
   --sh-accent-bg: rgba(45, 212, 191, 0.08);
   --sh-hover:    #21262d;
+  --sh-ok-bg:    rgba(45, 212, 191, 0.08);
+  --sh-warn-bg:  rgba(227, 179, 65, 0.1);
+  --sh-fail-bg:  rgba(248, 81, 73, 0.1);
+  --sh-info:     #2dd4bf;
+  --sh-info-bg:  rgba(45, 212, 191, 0.08);
 }
 
 #app-shell.light {
@@ -41,6 +46,11 @@
   --sh-fail:     #cf222e;
   --sh-accent-bg: rgba(14, 138, 127, 0.08);
   --sh-hover:    #f0f3f5;
+  --sh-ok-bg:    rgba(26, 127, 55, 0.08);
+  --sh-warn-bg:  rgba(154, 103, 0, 0.08);
+  --sh-fail-bg:  rgba(207, 34, 46, 0.08);
+  --sh-info:     #0e8a7f;
+  --sh-info-bg:  rgba(14, 138, 127, 0.08);
 }
 
 /* ─── Dark-mode-safe utility classes ─── */

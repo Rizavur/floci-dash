@@ -18,7 +18,7 @@ import {
   Container,
   Icon,
   type TabsProps,
-} from "@cloudscape-design/components";
+} from "../components/ui";
 import EC2Terminal from "../components/EC2Terminal";
 import EC2NetworkTopology from "../components/EC2NetworkTopology";
 import {

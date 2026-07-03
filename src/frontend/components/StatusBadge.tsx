@@ -1,4 +1,4 @@
-import { StatusIndicator } from "@cloudscape-design/components";
+import { StatusIndicator } from "./ui";
 
 interface Props {
   status: "running" | "available" | "error" | "connected";

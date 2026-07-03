@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Modal, Form, FormField, Input, Button, SpaceBetween, Box } from "@cloudscape-design/components";
+import { Modal, Form, FormField, Input, Button, SpaceBetween, Box } from "./ui";
 
 interface Field {
   name: string;
