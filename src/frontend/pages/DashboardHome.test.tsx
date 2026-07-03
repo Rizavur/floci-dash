@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createWrapper } from "../../test/helpers";
 import React from "react";
@@ -34,7 +34,10 @@ beforeEach(() => {
     data: {
       version: "1.5.22",
       stats: { total: 50, running: 30, available: 20 },
-      services: { s3: "running", ec2: "running" },
+      services: {
+        s3: "running", ec2: "running", dynamodb: "running", lambda: "available",
+        rds: "available", sqs: "running", sns: "available", kms: "available", iam: "available",
+      },
     },
   });
   mockActive.mockReturnValue({
@@ -93,12 +96,13 @@ describe("DashboardHome", () => {
     expect(screen.getAllByText(/SQS/i).length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders quick access buttons", () => {
+  it("renders a favorites section with suggested defaults when nothing is starred", () => {
     render(<DashboardHome />, { wrapper: createWrapper() });
-    // Quick access buttons show the service label (e.g. "S3", "Lambda", "RDS")
-    expect(screen.getAllByText("Lambda").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("RDS").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("KMS").length).toBeGreaterThanOrEqual(1);
+    const favoritesSection = screen.getByText("Favorites").closest("div")!.parentElement!;
+    expect(within(favoritesSection).getByText("Lambda")).toBeTruthy();
+    expect(within(favoritesSection).getByText("RDS")).toBeTruthy();
+    expect(within(favoritesSection).getByText("KMS")).toBeTruthy();
+    expect(screen.getByText(/Suggested/i)).toBeTruthy();
   });
 
   it("does not show resource counts section when all counts are zero", () => {
@@ -107,25 +111,14 @@ describe("DashboardHome", () => {
     expect(screen.queryByText("Resource Counts")).toBeNull();
   });
 
-  it("navigates to S3 when S3 quick-access button is clicked", async () => {
+  it("navigates to S3 when the S3 favorite card is clicked", async () => {
     const user = userEvent.setup();
     render(<DashboardHome />, { wrapper: createWrapper() });
-    // The quick-access section renders native <button> elements labelled by text content.
-    // ServiceCard uses role="button" on a div with aria-label="Open S3", so
-    // getByRole("button", { name: "S3" }) uniquely targets the quick-access button.
-    const btn = screen.getByRole("button", { name: "S3" });
-    await user.click(btn);
+    // S3 renders both in Favorites and in the full catalogue below; scope to Favorites.
+    const favoritesSection = screen.getByText("Favorites").closest("div")!.parentElement!;
+    const card = within(favoritesSection).getByRole("button", { name: /^Open S3/ });
+    await user.click(card);
     expect(mockNavigate).toHaveBeenCalledWith("/services/s3");
-  });
-
-  it("shows Activity section after navigation via quick-access button", async () => {
-    const user = userEvent.setup();
-    render(<DashboardHome />, { wrapper: createWrapper() });
-    // trackNav adds an activity entry before calling navigate
-    await user.click(screen.getByRole("button", { name: "S3" }));
-    // After clicking, addActivity fires and the "Activity" section appears
-    expect(screen.getByText("Activity")).toBeTruthy();
-    expect(screen.getByText(/Opened S3/i)).toBeTruthy();
   });
 
   it("shows only services with non-zero counts in resource counts", () => {
