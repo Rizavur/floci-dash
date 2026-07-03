@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Table, Box, Button, SpaceBetween, TextFilter, Header } from "@cloudscape-design/components";
+import { Table, Box, Button, SpaceBetween, TextFilter, Header } from "./ui";
 import EmptyState from "./EmptyState";
 
 interface Column {

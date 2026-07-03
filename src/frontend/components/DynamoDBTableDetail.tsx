@@ -15,7 +15,7 @@ import {
   Spinner,
   Tabs,
   type SelectProps,
-} from "@cloudscape-design/components";
+} from "./ui";
 import {
   useDynamoDBTableDetail,
   useDynamoDBDeleteItem,

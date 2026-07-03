@@ -1,4 +1,4 @@
-import { Box, Skeleton, SpaceBetween } from "@cloudscape-design/components";
+import { Box, Skeleton, SpaceBetween } from "./ui";
 
 interface TableSkeletonProps {
   rows?: number;

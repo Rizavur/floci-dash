@@ -18,7 +18,7 @@ import {
   Modal,
   type ToggleProps,
   type SelectProps,
-} from "@cloudscape-design/components";
+} from "./ui";
 import {
   useS3BucketVersioning,
   useS3UpdateVersioning,

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@cloudscape-design/components";
+import { Button } from "./ui";
 import { useConfirmDialog } from "./ConfirmDialog";
 
 interface Props {

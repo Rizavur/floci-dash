@@ -59,7 +59,7 @@ An AWS Console-style web dashboard for Floci, the local AWS emulator. The dashbo
 | Language | TypeScript 5.x |
 | UI Framework | React 19 |
 | Build Tool | Vite 6 |
-| Design System | Cloudscape Design System 3.x |
+| Design System | Custom Tailwind CSS v4 design system (`src/frontend/components/ui/`) — Cloudscape Design System was fully removed, see Progress Tracker |
 | Routing | React Router 7 (HashRouter) |
 | Data Fetching | TanStack Query 5 |
 | State | Zustand 5 |
@@ -1453,6 +1453,26 @@ Implement the 4 Floci services not yet covered by the dashboard. Each follows th
 | 23.3 | **Amazon EMR** — Clusters (run/describe/terminate), steps (add/describe/cancel), instance groups/fleets, security configs. Install `@aws-sdk/client-emr`, routes/emr.ts, hooks/useEMR.ts, EMRDashboard component, tests | Done | 2026-06-20 |
 | 23.4 | **RDS Data API** — ExecuteStatement, ExecuteSql, BeginTransaction, CommitTransaction, RollbackTransaction. Install `@aws-sdk/rds-data`, routes/rdsdata.ts, hooks/useRDSData.ts, RDSDataDashboard component, tests | Done | 2026-06-20 |
 | 23.5 | Verify: typecheck + all tests pass + coverage thresholds met. Update README with newly implemented services and remove from "Coming soon" | Done | 2026-06-20 |
+
+### Phase 14: Full Cloudscape → Tailwind Migration
+
+The design overhaul (Phase started around commit `063c4c7`) originally replaced only the
+outer shell (`AppLayoutShell`, `ServiceGrid`, `ServiceCard`, `StatCard`, `DashboardHome`) with
+Tailwind, while `ServicePage.tsx`, all 53 `pages/services/*.tsx` dashboards, and most
+top-level pages (S3, EC2, IAM, SQS, SNS, KMS, Settings, CloudFormation, CloudWatch, Events,
+SecretsManager, Lambda) still rendered through `@cloudscape-design/components`. This phase
+finished the migration and removed Cloudscape entirely.
+
+| # | Task | Status | Date |
+|---|------|--------|------|
+| 24.1 | Fix Tailwind v4 prefix syntax bug (`tw-flex` → `tw:flex`) that left the entire custom shell unstyled | Done | 2026-07-04 |
+| 24.2 | Build `src/frontend/components/ui/` — a drop-in replacement component library matching the Cloudscape component API (`Box`, `SpaceBetween`, `Header`, `Container`, `ContentLayout`, `BreadcrumbGroup`, `Button`, `Form`, `FormField`, `Input`, `Textarea`, `Select`, `Checkbox`, `Toggle`, `FileUpload`, `Modal`, `Table`, `TextFilter`, `Tabs`, `Alert`, `Flashbar`, `Skeleton`, `Spinner`, `StatusIndicator`, `Badge`, `Link`, `Icon`), styled with the `--sh-*` design tokens | Done | 2026-07-04 |
+| 24.3 | Swap shared primitives (`ResourceTable`, `CreateModal`, `ConfirmDialog`, `DeleteButton`, `LoadingSkeleton`, `StatusBadge`, `Toast`) and `ServicePage.tsx` to import from the new `ui` kit | Done | 2026-07-04 |
+| 24.4 | Swap all 11 remaining Cloudscape-based top-level pages + 5 shared sub-components (`S3BucketConfig`, `DynamoDBTableDetail`, `DynamoDBAdvanced`, `EC2Terminal`, `EC2NetworkTopology`) to the `ui` kit | Done | 2026-07-04 |
+| 24.5 | Swap all 53 `pages/services/*.tsx` dashboards to the `ui` kit | Done | 2026-07-04 |
+| 24.6 | Extend the `ui` kit to cover every prop/behavior actually used (Select as accessible button+listbox, Table row selection, Tabs ARIA roles, etc.) until `make typecheck` and `make test` pass with zero regressions | Done | 2026-07-04 |
+| 24.7 | Remove `@cloudscape-design/*` packages and the global-styles CSS import; verify production build | Done | 2026-07-04 |
+| 24.8 | Update AGENTS.md, README.md, and this tracker to reflect the new all-Tailwind design system | Done | 2026-07-04 |
 
 ---
 

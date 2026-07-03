@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Modal, Button, Box, SpaceBetween } from "@cloudscape-design/components";
+import { Modal, Button, Box, SpaceBetween } from "./ui";
 
 interface ConfirmOptions {
   title: string;

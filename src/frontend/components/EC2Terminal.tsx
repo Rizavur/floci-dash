@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
-import { Box, Button, SpaceBetween, StatusIndicator } from "@cloudscape-design/components";
+import { Box, Button, SpaceBetween, StatusIndicator } from "./ui";
 
 interface EC2TerminalProps {
   instanceId: string;

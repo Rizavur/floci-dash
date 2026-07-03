@@ -1,5 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
-import { Alert, Button, Box, SpaceBetween } from "@cloudscape-design/components";
+import { Alert, Button, Box, SpaceBetween } from "./ui";
 
 interface Props {
   children: ReactNode;

@@ -18,7 +18,7 @@ import {
   Tabs,
   Select,
   type ToggleProps,
-} from "@cloudscape-design/components";
+} from "./ui";
 import {
   useDynamoDBTTL,
   useDynamoDBUpdateTTL,

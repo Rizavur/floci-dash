@@ -4,7 +4,7 @@ import {
   Header,
   BreadcrumbGroup,
   SpaceBetween,
-} from "@cloudscape-design/components";
+} from "../components/ui";
 import { useHealth } from "../hooks/useSystem";
 import { getServiceLabel } from "../types/services";
 import StatusBadge from "../components/StatusBadge";

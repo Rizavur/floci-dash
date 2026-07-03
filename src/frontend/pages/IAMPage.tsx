@@ -21,7 +21,7 @@ import {
   Container,
   Textarea,
   Alert,
-} from "@cloudscape-design/components";
+} from "../components/ui";
 import DeleteButton from "../components/DeleteButton";
 import StatusBadge from "../components/StatusBadge";
 import { useToast } from "../components/Toast";

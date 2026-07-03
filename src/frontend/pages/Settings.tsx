@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ContentLayout, Header, Container, Toggle, Select, SpaceBetween, Box, Input, Button, FormField, Alert } from "@cloudscape-design/components";
+import { ContentLayout, Header, Container, Toggle, Select, SpaceBetween, Box, Input, Button, FormField, Alert } from "../components/ui";
 import { useSettings } from "../stores/settings";
 import { api } from "../lib/client";
 

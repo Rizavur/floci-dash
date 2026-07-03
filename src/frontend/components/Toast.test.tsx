@@ -47,17 +47,15 @@ describe("Toast", () => {
   });
 
   it("runs removeItem when the dismiss control is clicked", () => {
-    const { container } = render(
+    render(
       <ToastProvider>
         <Consumer />
       </ToastProvider>,
     );
     fireEvent.click(screen.getByText("fire"));
-    // The Flashbar dismiss button has no accessible name, so target the actual
-    // <button> by class (a wrapper div shares the class prefix).
-    const dismiss = container.querySelector<HTMLButtonElement>('button[class*="dismiss-button"]');
+    const dismiss = screen.getByRole("button", { name: /dismiss/i });
     expect(dismiss).not.toBeNull();
-    expect(() => fireEvent.click(dismiss!)).not.toThrow();
+    expect(() => fireEvent.click(dismiss)).not.toThrow();
   });
 
   it("provides a no-op default when used outside a provider", () => {

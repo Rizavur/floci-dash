@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import { Flashbar, type FlashbarProps } from "@cloudscape-design/components";
+import { Flashbar, type FlashbarProps } from "./ui";
 
 interface ToastItem {
   id: string;

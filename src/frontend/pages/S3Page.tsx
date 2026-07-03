@@ -20,7 +20,7 @@ import {
   ColumnLayout,
   Container,
   FileUpload,
-} from "@cloudscape-design/components";
+} from "../components/ui";
 import { useHealth } from "../hooks/useSystem";
 import StatusBadge from "../components/StatusBadge";
 import { DetailSkeleton } from "../components/LoadingSkeleton";
