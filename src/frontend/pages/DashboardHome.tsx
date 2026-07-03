@@ -1,9 +1,9 @@
-import { useNavigate } from "react-router-dom";
 import {
   Squares2X2Icon,
   SignalIcon,
   FireIcon,
   CubeIcon,
+  StarIcon,
   PlusCircleIcon,
   TrashIcon,
   PencilSquareIcon,
@@ -14,6 +14,7 @@ import { useResourceCounts } from "../hooks/useResourceCounts";
 import { useActivityFeed, type ActivityEntry } from "../hooks/useActivityFeed";
 import { useFavorites } from "../stores/favorites";
 import ServiceGrid from "../components/ServiceGrid";
+import ServiceCard from "../components/ServiceCard";
 import StatCard from "../components/StatCard";
 import EmptyState from "../components/EmptyState";
 
@@ -39,17 +40,8 @@ const ACTIVITY_STYLE: Record<ActivityEntry["action"], { icon: typeof PlusCircleI
   navigate: { icon: ArrowRightCircleIcon, color: "var(--sh-faint)" },
 };
 
-const QUICK_ACTIONS = [
-  { label: "S3",       path: "/services/s3",        key: "s3"        },
-  { label: "DynamoDB", path: "/services/dynamodb",   key: "dynamodb"  },
-  { label: "EC2",      path: "/services/ec2",        key: "ec2"       },
-  { label: "Lambda",   path: "/services/lambda",     key: "lambda"    },
-  { label: "RDS",      path: "/services/rds",        key: "rds"       },
-  { label: "SQS",      path: "/services/sqs",        key: "sqs"       },
-  { label: "SNS",      path: "/services/sns",        key: "sns"       },
-  { label: "KMS",      path: "/services/kms",        key: "kms"       },
-  { label: "IAM",      path: "/services/iam",        key: "iam"       },
-] as const;
+// Shown as a starting point in the Favorites section before the user has starred anything.
+const DEFAULT_FAVORITES = ["s3", "dynamodb", "ec2", "lambda", "rds", "sqs", "sns", "kms", "iam"];
 
 // ── Section heading ───────────────────────────────────────────────────────
 
@@ -71,17 +63,11 @@ function SectionHead({ title, action }: { title: string; action?: React.ReactNod
 // ── Page ──────────────────────────────────────────────────────────────────
 
 export default function DashboardHome() {
-  const navigate = useNavigate();
   const { data: health, isLoading, isError, error } = useHealth();
   const { data: active } = useActiveServices();
   const { data: resourceCounts } = useResourceCounts();
-  const { entries, addActivity, clearActivity } = useActivityFeed();
+  const { entries, clearActivity } = useActivityFeed();
   const favorites = useFavorites((s) => s.favorites);
-
-  const trackNav = (path: string, service: string) => {
-    addActivity({ action: "navigate", service, description: `Opened ${service.toUpperCase()}` });
-    navigate(path);
-  };
 
   if (isLoading) {
     return (
@@ -127,6 +113,9 @@ export default function DashboardHome() {
 
   const runningPct = health.stats.total > 0 ? (health.stats.running / health.stats.total) * 100 : 0;
   const activePct = health.stats.total > 0 ? ((active?.activeCount ?? 0) / health.stats.total) * 100 : 0;
+
+  const hasFavorites = favorites.some((k) => k in health.services);
+  const favoriteKeys = (hasFavorites ? favorites : DEFAULT_FAVORITES).filter((k) => k in health.services);
 
   return (
     <div className="tw:p-6 tw:max-w-[1280px] tw:mx-auto" style={{ fontFamily: "var(--font-ui)" }}>
@@ -187,60 +176,43 @@ export default function DashboardHome() {
         />
       </div>
 
-      {/* ── Resource breakdown ───────────────────────────────── */}
-      {nonZeroCounts.length > 0 && (
-        <div className="tw:mb-8">
-          <SectionHead title="Resource Counts" />
-          <div className="tw:grid tw:grid-cols-2 tw:sm:grid-cols-3 tw:lg:grid-cols-5 tw:gap-2">
-            {nonZeroCounts.map(([service, count]) => (
-              <StatCard
-                key={service}
-                label={service.toUpperCase()}
-                value={count}
-                variant="info"
-                size="sm"
-                progress={maxCount ? (count / maxCount) * 100 : 0}
+      {/* ── Favorites ──────────────────────────────────────────── */}
+      <div className="tw:mb-8">
+        <SectionHead
+          title="Favorites"
+          action={
+            !hasFavorites ? (
+              <span style={{ fontSize: 11, color: "var(--sh-faint)" }}>
+                Suggested — star a service below to pin your own
+              </span>
+            ) : undefined
+          }
+        />
+        {favoriteKeys.length === 0 ? (
+          <div style={{
+            background: "var(--sh-surface)",
+            border: "1px dashed var(--sh-line)",
+            borderRadius: "6px",
+            padding: "20px",
+            textAlign: "center",
+          }}>
+            <p style={{ fontSize: 12, color: "var(--sh-faint)", margin: 0 }}>
+              No favorites yet. Click the <StarIcon className="tw:w-3 tw:h-3 tw:inline tw:align-[-2px]" /> on any service below to pin it here.
+            </p>
+          </div>
+        ) : (
+          <div className="tw:grid tw:grid-cols-[repeat(auto-fill,minmax(190px,1fr))] tw:gap-2">
+            {favoriteKeys.map((key) => (
+              <ServiceCard
+                key={key}
+                serviceKey={key}
+                status={health.services[key]}
+                isActive={activeSet.has(key)}
+                resourceCount={resourceCounts?.[key]}
               />
             ))}
           </div>
-        </div>
-      )}
-
-      {/* ── Quick actions ─────────────────────────────────────── */}
-      <div className="tw:mb-8">
-        <SectionHead title="Quick Access" />
-        <div className="tw:flex tw:flex-wrap tw:gap-2">
-          {QUICK_ACTIONS.map(({ label, path, key }) => {
-            const highlighted = favorites.includes(key) || activeSet.has(key);
-            return (
-              <button
-                key={label}
-                onClick={() => trackNav(path, label.toLowerCase())}
-                className="tw:relative tw:cursor-pointer tw:text-[12px] tw:font-medium tw:px-3 tw:py-1.5 tw:rounded-[5px] tw:border tw:transition-colors tw:duration-100"
-                style={{
-                  background: highlighted ? "var(--sh-accent)" : "var(--sh-elevated)",
-                  color: highlighted ? "#0d1117" : "var(--sh-dim)",
-                  border: `1px solid ${highlighted ? "var(--sh-accent)" : "var(--sh-line)"}`,
-                  fontFamily: "var(--font-ui)",
-                }}
-                onMouseEnter={(e) => {
-                  if (!highlighted) {
-                    e.currentTarget.style.color = "var(--sh-ink)";
-                    e.currentTarget.style.borderColor = "var(--sh-dim)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!highlighted) {
-                    e.currentTarget.style.color = "var(--sh-dim)";
-                    e.currentTarget.style.borderColor = "var(--sh-line)";
-                  }
-                }}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
+        )}
       </div>
 
       {/* ── Activity feed ─────────────────────────────────────── */}
@@ -317,6 +289,25 @@ export default function DashboardHome() {
           </div>
         )}
       </div>
+
+      {/* ── Resource breakdown ───────────────────────────────── */}
+      {nonZeroCounts.length > 0 && (
+        <div className="tw:mb-8">
+          <SectionHead title="Resource Counts" />
+          <div className="tw:grid tw:grid-cols-2 tw:sm:grid-cols-3 tw:lg:grid-cols-5 tw:gap-2">
+            {nonZeroCounts.map(([service, count]) => (
+              <StatCard
+                key={service}
+                label={service.toUpperCase()}
+                value={count}
+                variant="info"
+                size="sm"
+                progress={maxCount ? (count / maxCount) * 100 : 0}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Services catalogue ───────────────────────────────── */}
       <div>
