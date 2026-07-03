@@ -56,7 +56,7 @@
 - **Improved empty states** — Consistent empty state component with icon, description, and action hint across all tables and pages
 - **Notification bell** — Visual badge in the top nav when services are unhealthy, with a modal listing non-running services
 - **Global search** — Search bar in the top nav to quickly find and navigate to any service
-- **Dashboard home** — Live stat cards (total/active/running services), resource count summaries per service, quick actions with responsive grid, recent activity feed (localStorage-backed), breadcrumbs, and the full service grid
+- **Dashboard home** — Live stat cards with icons and progress bars (total/active/running services), resource count summaries per service, quick actions that highlight favorited/active services, an automatic activity feed that logs every create/update/delete across the app, breadcrumbs, and a service grid where active (resourced) services stand out with an accent border, category icon, and resource-count badge
 - **Zero host dependencies** — Everything runs in Docker, no Node.js or AWS CLI needed locally
 - **Single container** — One Docker image for the entire dashboard (React SPA + Node.js API)
 - **Error boundaries** — React error boundary wrapping the entire app, catches rendering errors gracefully with a recovery message
