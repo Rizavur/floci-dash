@@ -47,6 +47,7 @@ import {
   useDeleteLogStream,
   useLogEvents,
   usePutLogEvents,
+  useFilterLogEvents,
   useSubscriptionFilters,
   usePutSubscriptionFilter,
   useDeleteSubscriptionFilter,
@@ -717,6 +718,16 @@ function CloudWatchLogGroupDetail({
 
   const tabs: TabsProps.Tab[] = [
     {
+      id: "search",
+      label: "Search Log Events",
+      content: (
+        <CloudWatchLogGroupSearch
+          logGroupName={name}
+          onSelectStream={(s) => setSelectedStream(s)}
+        />
+      ),
+    },
+    {
       id: "streams",
       label: "Log Streams",
       content: (
@@ -761,6 +772,174 @@ function CloudWatchLogGroupDetail({
         onChange={({ detail }) => setSelectedTab(detail.activeTabId)}
         tabs={tabs}
       />
+    </SpaceBetween>
+  );
+}
+
+// ─── Log Group Search (FilterLogEvents across all streams) ────
+
+
+function CloudWatchLogGroupSearch({
+  logGroupName,
+  onSelectStream,
+}: {
+  logGroupName: string;
+  onSelectStream: (logStreamName: string) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [limit, setLimit] = useState(LOG_VIEW_LIMIT_OPTIONS[2]); // 500
+  const ALL_STREAMS: SelectProps.Option = { label: "All streams", value: "" };
+  const [streamScope, setStreamScope] = useState<SelectProps.Option>(ALL_STREAMS);
+  const search = useFilterLogEvents(logGroupName);
+  const { data: streamsData } = useLogStreams(logGroupName);
+
+  const streamOptions: SelectProps.Option[] = [
+    ALL_STREAMS,
+    ...((streamsData?.logStreams || []).map((s) => ({
+      label: s.logStreamName,
+      value: s.logStreamName,
+    }))),
+  ];
+
+  function runSearch() {
+    search.mutate({
+      filterPattern: query.trim() || undefined,
+      limit: parseInt((limit.value || "500") as string),
+      logStreamNames: streamScope.value ? [streamScope.value] : undefined,
+    });
+  }
+
+  const events = ((search.data as any)?.events || []) as Array<{
+    eventId?: string;
+    timestamp?: number;
+    message: string;
+    logStreamName?: string;
+  }>;
+
+  return (
+    <SpaceBetween size="m">
+      <Box variant="p" color="text-body-secondary">
+        Search log events across all streams in this log group. Enter plain text to match, or
+        use CloudWatch filter pattern syntax (e.g. <code>?ERROR ?WARN</code>).
+      </Box>
+
+      {/* Native form submit gives us "press Enter to search" for free. */}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          runSearch();
+        }}
+      >
+        <SpaceBetween direction="horizontal" size="xs">
+          <Input
+            value={query}
+            onChange={({ detail }) => setQuery(detail.value)}
+            placeholder='Search messages, e.g. ERROR or "connection timed out"'
+          />
+          <Select
+            selectedOption={streamScope}
+            onChange={({ detail }) => setStreamScope(detail.selectedOption)}
+            options={streamOptions}
+            ariaLabel="Log stream scope"
+          />
+          <Select
+            selectedOption={limit}
+            onChange={({ detail }) => setLimit(detail.selectedOption)}
+            options={LOG_VIEW_LIMIT_OPTIONS}
+            ariaLabel="Result limit"
+          />
+          <Button type="submit" variant="primary" loading={search.isPending}>
+            Search
+          </Button>
+        </SpaceBetween>
+      </form>
+
+      {search.isError && (
+        <Alert type="error" dismissible>
+          {(search.error as Error)?.message || "Failed to search log events"}
+        </Alert>
+      )}
+
+      {search.isSuccess && events.length === 0 && (
+        <Box textAlign="center" padding="xl" color="text-body-secondary">
+          No matching log events found.
+        </Box>
+      )}
+
+      {events.length > 0 && (
+        <div
+          style={{
+            maxHeight: "600px",
+            overflowY: "auto",
+            backgroundColor: "var(--sh-surface)",
+            border: "1px solid var(--sh-line)",
+            borderRadius: "4px",
+            fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace",
+            fontSize: 12,
+            lineHeight: "1.6",
+          }}
+        >
+          {events.map((event, idx) => {
+            const stream = event.logStreamName || null;
+            return (
+              <div
+                key={event.eventId || idx}
+                title={stream ? `Open stream: ${stream}` : undefined}
+                onClick={() => stream && onSelectStream(stream)}
+                style={{
+                  display: "flex",
+                  padding: "2px 8px",
+                  borderBottom: "1px solid var(--sh-line-sub)",
+                  cursor: stream ? "pointer" : "default",
+                }}
+                onMouseEnter={(e) => {
+                  if (stream) e.currentTarget.style.background = "var(--sh-hover)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                }}
+              >
+                <span
+                  style={{
+                    color: "var(--sh-accent)",
+                    minWidth: "140px",
+                    flexShrink: 0,
+                    userSelect: "none",
+                  }}
+                >
+                  {event.timestamp ? new Date(event.timestamp).toISOString() : "—"}
+                </span>
+                <span
+                  style={{
+                    minWidth: "160px",
+                    flexShrink: 0,
+                    color: "var(--sh-dim)",
+                    userSelect: "none",
+                    textDecoration: stream ? "underline" : undefined,
+                  }}
+                >
+                  {stream || "—"}
+                </span>
+                <span
+                  style={{
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-all",
+                    color: "var(--sh-ink)",
+                  }}
+                >
+                  {event.message}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {events.length > 0 && (
+        <Box textAlign="center" fontSize="body-s" color="text-body-secondary">
+          {events.length} matching events
+        </Box>
+      )}
     </SpaceBetween>
   );
 }
@@ -1046,8 +1225,8 @@ function CloudWatchLogStreamDetail({
         style={{
           maxHeight: "600px",
           overflowY: "auto",
-          backgroundColor: "var(--color-background-container-content, #ffffff)",
-          border: "1px solid var(--color-border-divider-default, #e9ebed)",
+          backgroundColor: "var(--sh-surface)",
+          border: "1px solid var(--sh-line)",
           borderRadius: "4px",
           fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace",
           fontSize: 12,
@@ -1068,12 +1247,12 @@ function CloudWatchLogStreamDetail({
               display: "flex",
               padding: "2px 8px",
               borderBottom:
-                "1px solid var(--color-border-divider-default, #1a2a3a)",
+                "1px solid var(--sh-line-sub)",
             }}
           >
             <span
               style={{
-                color: "var(--color-text-link-default, #0073bb)",
+                color: "var(--sh-accent)",
                 minWidth: "140px",
                 flexShrink: 0,
                 userSelect: "none",
@@ -1087,7 +1266,7 @@ function CloudWatchLogStreamDetail({
               style={{
                 whiteSpace: "pre-wrap",
                 wordBreak: "break-all",
-                color: "var(--color-text-body-default, #16191f)",
+                color: "var(--sh-ink)",
               }}
             >
               {event.message}
@@ -1116,6 +1295,7 @@ function CloudWatchRetentionConfig({ logGroupName }: { logGroupName: string }) {
   const { data, isLoading } = useLogGroups();
   const putRetention = usePutRetentionPolicy();
   const deleteRetention = useDeleteRetentionPolicy();
+  const { showToast } = useToast();
 
   const logGroup = (data?.logGroups || []).find(
     (g) => g.logGroupName === logGroupName
@@ -1142,6 +1322,27 @@ function CloudWatchRetentionConfig({ logGroupName }: { logGroupName: string }) {
     return <StatusIndicator type="loading">Loading retention settings...</StatusIndicator>;
   }
 
+  const selectedDays = parseInt((selectedRetention.value || "0") as string);
+  // "Never expire" (0) sorts as infinite; shrinking from infinite, or to a smaller
+  // finite value, is the only path that can delete log events immediately.
+  const currentEffective = currentRetention ?? Infinity;
+  const nextEffective = selectedDays === 0 ? Infinity : selectedDays;
+  const isReducing = nextEffective < currentEffective;
+
+  function handleSave() {
+    const onSuccess = () => showToast("success", "Retention policy updated");
+    const onError = (err: unknown) =>
+      showToast("error", (err as Error)?.message || "Failed to update retention policy");
+    if (selectedDays === 0) {
+      deleteRetention.mutate(logGroupName, { onSuccess, onError });
+    } else {
+      putRetention.mutate(
+        { logGroupName, retentionInDays: selectedDays },
+        { onSuccess, onError }
+      );
+    }
+  }
+
   return (
     <SpaceBetween size="m">
       <Box variant="p">
@@ -1160,6 +1361,13 @@ function CloudWatchRetentionConfig({ logGroupName }: { logGroupName: string }) {
         />
       </FormField>
 
+      {isReducing && (
+        <Alert type="warning">
+          Lowering retention deletes log events older than the new period immediately —
+          this can't be undone.
+        </Alert>
+      )}
+
       {putRetention.isError && (
         <Alert type="error" dismissible>
           {(putRetention.error as Error)?.message ||
@@ -1170,19 +1378,9 @@ function CloudWatchRetentionConfig({ logGroupName }: { logGroupName: string }) {
       <SpaceBetween direction="horizontal" size="xs">
         <Button
           variant="primary"
-          loading={putRetention.isPending}
+          loading={putRetention.isPending || deleteRetention.isPending}
           disabled={!selectedRetention.value}
-          onClick={() => {
-            const days = parseInt(selectedRetention.value as string);
-            if (days === 0) {
-              deleteRetention.mutate(logGroupName);
-            } else {
-              putRetention.mutate({
-                logGroupName,
-                retentionInDays: days,
-              });
-            }
-          }}
+          onClick={handleSave}
         >
           Save retention
         </Button>
@@ -1202,8 +1400,12 @@ function CloudWatchSubscriptionFilterList({
   const { data, isLoading, isError, error } = useSubscriptionFilters(logGroupName);
   const putFilter = usePutSubscriptionFilter();
   const deleteFilter = useDeleteSubscriptionFilter();
+  const { showToast } = useToast();
 
   const [showCreate, setShowCreate] = useState(false);
+  // Non-null while editing an existing filter (PutSubscriptionFilter upserts by name,
+  // so "edit" just resubmits with the same filterName instead of delete + recreate).
+  const [editingFilter, setEditingFilter] = useState<string | null>(null);
   const [form, setForm] = useState({
     filterName: "",
     filterPattern: "",
@@ -1222,6 +1424,18 @@ function CloudWatchSubscriptionFilterList({
 
   function resetForm() {
     setForm({ filterName: "", filterPattern: "", destinationArn: "", distribution: "" });
+    setEditingFilter(null);
+  }
+
+  function openEdit(item: (typeof items)[number]) {
+    setForm({
+      filterName: item.filterName,
+      filterPattern: item.filterPattern || "",
+      destinationArn: item.destinationArn,
+      distribution: item.distribution || "",
+    });
+    setEditingFilter(item.filterName);
+    setShowCreate(true);
   }
 
   function handleCreate() {
@@ -1234,7 +1448,13 @@ function CloudWatchSubscriptionFilterList({
         destinationArn: form.destinationArn,
         distribution: form.distribution || undefined,
       },
-      { onSuccess: () => { setShowCreate(false); resetForm(); } }
+      {
+        onSuccess: () => {
+          showToast("success", editingFilter ? "Subscription filter updated" : "Subscription filter created");
+          setShowCreate(false);
+          resetForm();
+        },
+      }
     );
   }
 
@@ -1281,20 +1501,28 @@ function CloudWatchSubscriptionFilterList({
             id: "actions",
             header: "",
             cell: (item: any) => (
-              <DeleteButton
-                itemName={item.filterName}
-                resourceType="subscription filter"
-                loading={
-                  deleteFilter.isPending &&
-                  deleteFilter.variables.filterName === item.filterName
-                }
-                onDelete={() =>
-                  deleteFilter.mutateAsync({
-                    logGroupName,
-                    filterName: item.filterName,
-                  })
-                }
-              />
+              <SpaceBetween direction="horizontal" size="xs">
+                <Button
+                  variant="icon"
+                  iconName="edit"
+                  ariaLabel={`Edit ${item.filterName}`}
+                  onClick={() => openEdit(item)}
+                />
+                <DeleteButton
+                  itemName={item.filterName}
+                  resourceType="subscription filter"
+                  loading={
+                    deleteFilter.isPending &&
+                    deleteFilter.variables.filterName === item.filterName
+                  }
+                  onDelete={() =>
+                    deleteFilter.mutateAsync({
+                      logGroupName,
+                      filterName: item.filterName,
+                    })
+                  }
+                />
+              </SpaceBetween>
             ),
           },
         ]}
@@ -1314,7 +1542,7 @@ function CloudWatchSubscriptionFilterList({
           setShowCreate(false);
           resetForm();
         }}
-        header="Create Subscription Filter"
+        header={editingFilter ? `Edit Subscription Filter — ${editingFilter}` : "Create Subscription Filter"}
         size="medium"
         footer={
           <Box float="right">
@@ -1334,7 +1562,7 @@ function CloudWatchSubscriptionFilterList({
                 disabled={!form.filterName || !form.destinationArn}
                 onClick={handleCreate}
               >
-                Create filter
+                {editingFilter ? "Save changes" : "Create filter"}
               </Button>
             </SpaceBetween>
           </Box>
@@ -1344,16 +1572,21 @@ function CloudWatchSubscriptionFilterList({
           {putFilter.isError && (
             <Alert type="error" dismissible>
               {(putFilter.error as Error)?.message ||
-                "Failed to create subscription filter"}
+                "Failed to save subscription filter"}
             </Alert>
           )}
           <SpaceBetween size="m">
             <FormField
               label="Filter name"
-              description="A name for this subscription filter."
+              description={
+                editingFilter
+                  ? "Filter names can't be changed once created."
+                  : "A name for this subscription filter."
+              }
             >
               <Input
                 value={form.filterName}
+                disabled={!!editingFilter}
                 onChange={({ detail }) =>
                   setForm((p) => ({ ...p, filterName: detail.value }))
                 }
@@ -1384,6 +1617,21 @@ function CloudWatchSubscriptionFilterList({
                 placeholder='?ERROR ?WARN'
               />
             </FormField>
+            <FormField
+              label="Distribution (optional)"
+              description="How to distribute events among destination shards, for Kinesis destinations."
+            >
+              <Select
+                selectedOption={
+                  DISTRIBUTION_OPTIONS.find((o) => o.value === form.distribution) ||
+                  DISTRIBUTION_OPTIONS[0]
+                }
+                onChange={({ detail }) =>
+                  setForm((p) => ({ ...p, distribution: detail.selectedOption.value || "" }))
+                }
+                options={DISTRIBUTION_OPTIONS}
+              />
+            </FormField>
           </SpaceBetween>
         </Form>
       </Modal>
@@ -1398,24 +1646,41 @@ function CloudWatchLogGroupTags({ logGroupName }: { logGroupName: string }) {
   const { data, isLoading, isError, error } = useLogGroupTags(logGroupName);
   const tagMutation = useTagLogGroup();
   const untagMutation = useUntagLogGroup();
+  const { showToast } = useToast();
 
   const [newKey, setNewKey] = useState("");
   const [newValue, setNewValue] = useState("");
 
   const tags = data?.tags || {};
   const tagEntries = Object.entries(tags).map(([key, value]) => ({ key, value }));
+  // Typing an existing key into the same form re-saves (upserts) that tag's value,
+  // so "edit" is just prefilling the add-tag inputs instead of a separate form.
+  const isEditing = newKey !== "" && Object.prototype.hasOwnProperty.call(tags, newKey);
 
   function handleAddTag() {
     if (!newKey) return;
     const updated = { ...tags, [newKey]: newValue };
     tagMutation.mutate(
       { logGroupName, tags: updated },
-      { onSuccess: () => { setNewKey(""); setNewValue(""); } }
+      {
+        onSuccess: () => {
+          showToast("success", isEditing ? "Tag updated" : "Tag added");
+          setNewKey("");
+          setNewValue("");
+        },
+        onError: (err) => showToast("error", (err as Error)?.message || "Failed to save tag"),
+      }
     );
   }
 
   function handleRemoveTag(key: string) {
-    untagMutation.mutate({ logGroupName, tags: [key] });
+    untagMutation.mutate(
+      { logGroupName, tags: [key] },
+      {
+        onSuccess: () => showToast("success", "Tag removed"),
+        onError: (err) => showToast("error", (err as Error)?.message || "Failed to remove tag"),
+      }
+    );
   }
 
   if (isLoading) {
@@ -1441,7 +1706,7 @@ function CloudWatchLogGroupTags({ logGroupName }: { logGroupName: string }) {
           <thead>
             <tr
               style={{
-                borderBottom: "2px solid var(--color-border-divider-default, #eaeded)",
+                borderBottom: "2px solid var(--sh-line)",
               }}
             >
               <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, fontSize: 11 }}>Key</th>
@@ -1455,19 +1720,27 @@ function CloudWatchLogGroupTags({ logGroupName }: { logGroupName: string }) {
                 key={key}
                 style={{
                   borderBottom:
-                    "1px solid var(--color-border-divider-default, #eaeded)",
+                    "1px solid var(--sh-line)",
                 }}
               >
                 <td style={{ padding: "8px 12px", fontFamily: "monospace" }}>{key}</td>
                 <td style={{ padding: "8px 12px" }}>{value}</td>
                 <td style={{ padding: "8px 12px" }}>
-                  <Button
-                    variant="icon"
-                    iconName="remove"
-                    ariaLabel={`Remove tag ${key}`}
-                    loading={untagMutation.isPending}
-                    onClick={() => handleRemoveTag(key)}
-                  />
+                  <SpaceBetween direction="horizontal" size="xs">
+                    <Button
+                      variant="icon"
+                      iconName="edit"
+                      ariaLabel={`Edit tag ${key}`}
+                      onClick={() => { setNewKey(key); setNewValue(value); }}
+                    />
+                    <Button
+                      variant="icon"
+                      iconName="remove"
+                      ariaLabel={`Remove tag ${key}`}
+                      loading={untagMutation.isPending}
+                      onClick={() => handleRemoveTag(key)}
+                    />
+                  </SpaceBetween>
                 </td>
               </tr>
             ))}
@@ -1475,7 +1748,10 @@ function CloudWatchLogGroupTags({ logGroupName }: { logGroupName: string }) {
         </table>
       )}
 
-      <SpaceBetween direction="horizontal" size="xs">
+      {/* alignItems="flex-end": Key/Value have labels above them, the buttons don't —
+          bottom-align so buttons line up with the input boxes instead of floating
+          above them at the row's vertical center. */}
+      <SpaceBetween direction="horizontal" size="xs" alignItems="flex-end">
         <FormField label="Key">
           <Input
             value={newKey}
@@ -1496,8 +1772,13 @@ function CloudWatchLogGroupTags({ logGroupName }: { logGroupName: string }) {
           disabled={!newKey}
           onClick={handleAddTag}
         >
-          Add tag
+          {isEditing ? "Save tag" : "Add tag"}
         </Button>
+        {isEditing && (
+          <Button variant="link" onClick={() => { setNewKey(""); setNewValue(""); }}>
+            Cancel
+          </Button>
+        )}
       </SpaceBetween>
     </SpaceBetween>
   );
@@ -1533,4 +1814,9 @@ const LOG_VIEW_LIMIT_OPTIONS: SelectProps.Option[] = [
   { label: "500", value: "500" },
   { label: "1000", value: "1000" },
   { label: "10000", value: "10000" },
+];
+
+const DISTRIBUTION_OPTIONS: SelectProps.Option[] = [
+  { label: "ByLogStream (default)", value: "" },
+  { label: "Random", value: "Random" },
 ];
