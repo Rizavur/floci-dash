@@ -221,24 +221,46 @@ router.post("/log-groups/:name/filter-events", async (c: Context) => {
     limit?: number;
     logStreamNames?: string[];
   }>();
-  const params: any = { logGroupName: name };
-  if (body.filterPattern) params.filterPattern = body.filterPattern;
-  if (body.startTime) params.startTime = body.startTime;
-  if (body.endTime) params.endTime = body.endTime;
-  if (body.limit) params.limit = body.limit;
-  if (body.logStreamNames) params.logStreamNames = body.logStreamNames;
-  const result = await logs().send(new FilterLogEventsCommand(params));
-  const events = (result.events || []).map((e) => ({
-    eventId: (e as any).eventId,
-    timestamp: e.timestamp,
-    message: e.message,
-    ingestionTime: e.ingestionTime,
-    logStreamName: e.logStreamName,
-  }));
+  const client = logs();
+
+  // floci's FilterLogEvents never tags a result with its source stream (its LogEvent
+  // model has no such field, unlike real AWS). Query per-stream ourselves instead —
+  // that way we always know which stream each result came from.
+  let streamNames = body.logStreamNames?.filter(Boolean);
+  if (!streamNames || streamNames.length === 0) {
+    const streamsResult = await client.send(new DescribeLogStreamsCommand({ logGroupName: name }));
+    streamNames = (streamsResult.logStreams || [])
+      .map((s) => s.logStreamName)
+      .filter((n): n is string => !!n);
+  }
+
+  const perStream = await Promise.all(
+    streamNames.map(async (streamName) => {
+      const params: any = { logGroupName: name, logStreamNames: [streamName] };
+      if (body.filterPattern) params.filterPattern = body.filterPattern;
+      if (body.startTime) params.startTime = body.startTime;
+      if (body.endTime) params.endTime = body.endTime;
+      if (body.limit) params.limit = body.limit;
+      const result = await client.send(new FilterLogEventsCommand(params));
+      return (result.events || []).map((e) => ({
+        eventId: (e as any).eventId,
+        timestamp: e.timestamp,
+        message: e.message,
+        ingestionTime: e.ingestionTime,
+        logStreamName: streamName,
+      }));
+    })
+  );
+
+  // Each per-stream call already returns its earliest matches sorted ascending and
+  // capped at `limit`, so the merged global top-`limit` (also earliest-first) is a
+  // valid k-way merge of those results — no stream's cap could hide an earlier match.
+  let events = perStream.flat().sort((a, b) => (a.timestamp ?? 0) - (b.timestamp ?? 0));
+  if (body.limit) events = events.slice(0, body.limit);
+
   return c.json({
     events,
-    searchedLogStreams: result.searchedLogStreams,
-    nextToken: result.nextToken,
+    searchedLogStreams: streamNames.map((n) => ({ logStreamName: n, searchedCompletely: true })),
   });
 });
 

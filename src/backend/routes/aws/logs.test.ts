@@ -196,17 +196,54 @@ describe("CloudWatch Logs Routes", () => {
       expect(res.status).toBe(400);
     });
 
-    it("POST /log-groups/:name/filter-events — filters events across streams", async () => {
+    it("POST /log-groups/:name/filter-events — fans out per stream and tags each result", async () => {
+      // No logStreamNames given: first discovers all streams, then filters each one
+      // individually (floci's FilterLogEvents never reports a result's source stream).
       mockSend.mockResolvedValueOnce({
-        events: [{ eventId: "evt-1", timestamp: 1000, message: "ERROR", logStreamName: "stream-1" }],
-        searchedLogStreams: [],
-        nextToken: undefined,
+        logStreams: [{ logStreamName: "stream-1" }, { logStreamName: "stream-2" }],
+      });
+      mockSend.mockResolvedValueOnce({
+        events: [{ eventId: "evt-1", timestamp: 2000, message: "ERROR in stream 1" }],
+      });
+      mockSend.mockResolvedValueOnce({
+        events: [{ eventId: "evt-2", timestamp: 1000, message: "ERROR in stream 2" }],
       });
       const res = await post("/log-groups/%2Faws%2Flambda%2Fmy-func/filter-events", { filterPattern: "ERROR" });
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.events).toHaveLength(1);
-      expect(body.events[0].message).toBe("ERROR");
+      expect(body.events).toHaveLength(2);
+      // Merged and sorted ascending by timestamp across streams.
+      expect(body.events[0]).toMatchObject({ message: "ERROR in stream 2", logStreamName: "stream-2" });
+      expect(body.events[1]).toMatchObject({ message: "ERROR in stream 1", logStreamName: "stream-1" });
+      expect(body.searchedLogStreams).toEqual([
+        { logStreamName: "stream-1", searchedCompletely: true },
+        { logStreamName: "stream-2", searchedCompletely: true },
+      ]);
+    });
+
+    it("POST /log-groups/:name/filter-events — searches only the given stream when specified", async () => {
+      mockSend.mockResolvedValueOnce({
+        events: [{ eventId: "evt-1", timestamp: 1000, message: "ERROR" }],
+      });
+      const res = await post("/log-groups/%2Faws%2Flambda%2Fmy-func/filter-events", {
+        filterPattern: "ERROR",
+        logStreamNames: ["stream-1"],
+      });
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(mockSend).toHaveBeenCalledTimes(1);
+      expect(body.events).toEqual([
+        { eventId: "evt-1", timestamp: 1000, message: "ERROR", ingestionTime: undefined, logStreamName: "stream-1" },
+      ]);
+    });
+
+    it("POST /log-groups/:name/filter-events — respects limit after merging", async () => {
+      mockSend.mockResolvedValueOnce({ logStreams: [{ logStreamName: "stream-1" }, { logStreamName: "stream-2" }] });
+      mockSend.mockResolvedValueOnce({ events: [{ eventId: "a", timestamp: 1 }, { eventId: "b", timestamp: 3 }] });
+      mockSend.mockResolvedValueOnce({ events: [{ eventId: "c", timestamp: 2 }] });
+      const res = await post("/log-groups/%2Faws%2Flambda%2Fmy-func/filter-events", { limit: 2 });
+      const body = await res.json();
+      expect(body.events.map((e: any) => e.eventId)).toEqual(["a", "c"]);
     });
   });
 
