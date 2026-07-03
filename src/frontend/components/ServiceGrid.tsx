@@ -26,7 +26,7 @@ export default function ServiceGrid({ services }: Props) {
         return (
           <div key={category}>
             {/* Category header */}
-            <div className="tw-flex tw-items-center tw-gap-2 tw-mb-2">
+            <div className="tw:flex tw:items-center tw:gap-2 tw:mb-2">
               <span style={{
                 fontSize: "10px",
                 fontWeight: 600,
@@ -47,7 +47,7 @@ export default function ServiceGrid({ services }: Props) {
             </div>
 
             {/* Service cards */}
-            <div className="tw-grid tw-grid-cols-[repeat(auto-fill,minmax(180px,1fr))] tw-gap-1.5 max-sm:tw-grid-cols-[repeat(auto-fill,minmax(130px,1fr))]">
+            <div className="tw:grid tw:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] tw:gap-1.5 tw:max-sm:grid-cols-[repeat(auto-fill,minmax(130px,1fr))]">
               {keys.map((key) => (
                 <ServiceCard key={key} serviceKey={key} status={services[key]} />
               ))}
