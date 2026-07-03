@@ -796,7 +796,7 @@ function S3ObjectViewer({ bucket, objectKey, onBack }: { bucket: string; objectK
     <SpaceBetween size="l">
       <SpaceBetween size="xs">
         <Button variant="link" onClick={onBack}>← Objects</Button>
-        <Box variant="h2">{objectKey}</Box>
+        <Header variant="h2">{objectKey}</Header>
       </SpaceBetween>
 
       <ColumnLayout columns={4} variant="text-grid">

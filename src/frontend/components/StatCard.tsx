@@ -68,7 +68,7 @@ export default function StatCard({
       {/* Header row: label + icon badge */}
       <div className="tw:flex tw:items-center tw:justify-between">
         <span style={{
-          fontSize: "11px",
+          fontSize: 11,
           fontWeight: 500,
           letterSpacing: "0.02em",
           color: "var(--sh-faint)",
@@ -94,7 +94,7 @@ export default function StatCard({
 
       {/* Value — monospace for numbers */}
       <span style={{
-        fontSize: isText ? "14px" : size === "sm" ? "20px" : "26px",
+        fontSize: isText ? 14 : size === "sm" ? 20 : 26,
         fontWeight: 600,
         lineHeight: 1,
         color: accent,
@@ -106,7 +106,7 @@ export default function StatCard({
       {/* Subtext */}
       {subtext && (
         <span style={{
-          fontSize: "11px",
+          fontSize: 11,
           color: "var(--sh-faint)",
           lineHeight: 1.4,
           whiteSpace: "nowrap",

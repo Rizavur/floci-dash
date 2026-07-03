@@ -221,7 +221,7 @@ function VpcCard({
                       alignItems: "center",
                       gap: "8px",
                       padding: "8px 12px",
-                      fontSize: "12px",
+                      fontSize: 12,
                     }}
                   >
                     <span className="fd-dot-success" style={{ width: 6, height: 6 }} />
@@ -246,17 +246,13 @@ function VpcCard({
               </Box>
               <SpaceBetween size="xs" direction="horizontal">
                 {routeTables.slice(0, 3).map((rt) => (
-                  <span
-                    key={rt.id}
-                    className="fd-tag-chip"
-                    style={{ fontSize: "11px" }}
-                  >
+                  <span key={rt.id} className="fd-tag-chip">
                     {rt.id}
                     {rt.associations?.some((a) => a.main) ? " (main)" : ""}
                   </span>
                 ))}
                 {routeTables.length > 3 && (
-                  <span style={{ fontSize: "11px", color: "var(--color-text-body-secondary)" }}>
+                  <span style={{ fontSize: 11, color: "var(--color-text-body-secondary)" }}>
                     +{routeTables.length - 3} more
                   </span>
                 )}
@@ -350,7 +346,7 @@ function InstanceRow({
         alignItems: "center",
         gap: "8px",
         padding: "6px 10px",
-        fontSize: "12px",
+        fontSize: 12,
         marginLeft: "8px",
       }}
     >

@@ -249,48 +249,48 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
         <Container>
           <ColumnLayout columns={3} variant="text-grid">
             <div>
-              <Box fontSize="body-s" color="text-label">Runtime</Box>
+              <Box variant="awsui-key-label">Runtime</Box>
               <Box fontSize="body-m">{cfg.runtime || "N/A"}</Box>
             </div>
             <div>
-              <Box fontSize="body-s" color="text-label">Handler</Box>
+              <Box variant="awsui-key-label">Handler</Box>
               <Box fontSize="body-m">{cfg.handler || "N/A"}</Box>
             </div>
             <div>
-              <Box fontSize="body-s" color="text-label">Timeout</Box>
+              <Box variant="awsui-key-label">Timeout</Box>
               <Box fontSize="body-m">{cfg.timeout || 3}s</Box>
             </div>
             <div>
-              <Box fontSize="body-s" color="text-label">Memory</Box>
+              <Box variant="awsui-key-label">Memory</Box>
               <Box fontSize="body-m">{cfg.memorySize || 128} MB</Box>
             </div>
             <div>
-              <Box fontSize="body-s" color="text-label">Code size</Box>
+              <Box variant="awsui-key-label">Code size</Box>
               <Box fontSize="body-m">{cfg.codeSize ? `${(cfg.codeSize / 1024).toFixed(1)} KB` : "N/A"}</Box>
             </div>
             <div>
-              <Box fontSize="body-s" color="text-label">Last modified</Box>
+              <Box variant="awsui-key-label">Last modified</Box>
               <Box fontSize="body-m">{cfg.lastModified ? new Date(cfg.lastModified).toLocaleString() : "N/A"}</Box>
             </div>
             <div>
-              <Box fontSize="body-s" color="text-label">State</Box>
+              <Box variant="awsui-key-label">State</Box>
               <StatusIndicator type={cfg.state === "Active" ? "success" : cfg.state === "Failed" ? "error" : "in-progress"}>
                 {cfg.state || "Active"}
               </StatusIndicator>
             </div>
             <div>
-              <Box fontSize="body-s" color="text-label">Reserved concurrency</Box>
+              <Box variant="awsui-key-label">Reserved concurrency</Box>
               <Box fontSize="body-m">{concurrency?.reservedConcurrentExecutions ?? "Not set"}</Box>
             </div>
             <div>
-              <Box fontSize="body-s" color="text-label">Architecture</Box>
+              <Box variant="awsui-key-label">Architecture</Box>
               <Box fontSize="body-m">{cfg.architectures?.join(", ") || "x86_64"}</Box>
             </div>
           </ColumnLayout>
 
           {cfg.environment && Object.keys(cfg.environment).length > 0 && (
             <Box padding={{ top: "l" }}>
-              <Box fontSize="body-s" color="text-label" padding={{ bottom: "xs" }}>Environment variables</Box>
+              <Box variant="awsui-key-label" padding={{ bottom: "xs" }}>Environment variables</Box>
               <ColumnLayout columns={2} variant="text-grid">
                 {Object.entries(cfg.environment).map(([k, v]) => (
                   <div key={k}>
@@ -304,7 +304,7 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
 
           {cfg.layers && cfg.layers.length > 0 && (
             <Box padding={{ top: "l" }}>
-              <Box fontSize="body-s" color="text-label" padding={{ bottom: "xs" }}>Layers</Box>
+              <Box variant="awsui-key-label" padding={{ bottom: "xs" }}>Layers</Box>
               {cfg.layers.map((l: any, i: number) => (
                 <Box key={i} fontSize="body-s">{l.arn} ({l.codeSize ? `${(l.codeSize / 1024).toFixed(1)} KB` : "unknown"})</Box>
               ))}
@@ -313,7 +313,7 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
 
           {urlConfig?.url && (
             <Box padding={{ top: "l" }}>
-              <Box fontSize="body-s" color="text-label" padding={{ bottom: "xs" }}>Function URL</Box>
+              <Box variant="awsui-key-label" padding={{ bottom: "xs" }}>Function URL</Box>
               <Box fontSize="body-s">
                 <a href={urlConfig.url} target="_blank" rel="noreferrer">{urlConfig.url}</a>
                 <span style={{ marginLeft: "8px", opacity: 0.7 }}>({urlConfig.authType})</span>
@@ -344,7 +344,7 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
                   background: "var(--color-background-container-secondary, #f2f3f3)",
                   padding: "12px",
                   borderRadius: "8px",
-                  fontSize: "13px",
+                  fontSize: 13,
                   overflow: "auto",
                 }}>
                   {typeof invokeFunction.data.payload === "string"

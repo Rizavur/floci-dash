@@ -759,7 +759,7 @@ function EC2KeyPairList() {
       <Modal visible={keyMaterial !== null} onDismiss={() => setKeyMaterial(null)} header="Key Pair Created" size="large">
         <Alert type="success">This is the only time the key material will be available. Save it now.</Alert>
         <Box padding={{ top: "m" }}>
-          <textarea readOnly value={keyMaterial || ""} style={{ width: "100%", height: "200px", fontFamily: "monospace", fontSize: "12px" }} />
+          <textarea readOnly value={keyMaterial || ""} style={{ width: "100%", height: "200px", fontFamily: "monospace", fontSize: 12 }} />
         </Box>
         <Box float="right" padding={{ top: "m" }}>
           <Button variant="primary" onClick={() => setKeyMaterial(null)}>I've saved the key</Button>

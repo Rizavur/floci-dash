@@ -534,15 +534,15 @@ export function STSDashboard() {
               <Container header={<Header variant="h2">Current Caller Identity</Header>}>
                 <ColumnLayout columns={3} variant="text-grid">
                   <div>
-                    <Box variant="h4" color="text-body-secondary">Account</Box>
+                    <Box variant="awsui-key-label">Account</Box>
                     <Box>{identity?.account || "—"}</Box>
                   </div>
                   <div>
-                    <Box variant="h4" color="text-body-secondary">User ID</Box>
+                    <Box variant="awsui-key-label">User ID</Box>
                     <Box>{identity?.userId || "—"}</Box>
                   </div>
                   <div>
-                    <Box variant="h4" color="text-body-secondary">ARN</Box>
+                    <Box variant="awsui-key-label">ARN</Box>
                     <Box>{identity?.arn || "—"}</Box>
                   </div>
                 </ColumnLayout>
@@ -568,29 +568,29 @@ export function STSDashboard() {
                 {assumeResult ? (
                   <ColumnLayout columns={2} variant="text-grid">
                     <div>
-                      <Box variant="h4" color="text-body-secondary">Access Key ID</Box>
+                      <Box variant="awsui-key-label">Access Key ID</Box>
                       <Box>{assumeResult.credentials?.accessKeyId || "—"}</Box>
                     </div>
                     <div>
-                      <Box variant="h4" color="text-body-secondary">Secret Access Key</Box>
+                      <Box variant="awsui-key-label">Secret Access Key</Box>
                       <Box>{assumeResult.credentials?.secretAccessKey || "—"}</Box>
                     </div>
                     <div>
-                      <Box variant="h4" color="text-body-secondary">Session Token</Box>
+                      <Box variant="awsui-key-label">Session Token</Box>
                       <Box>{assumeResult.credentials?.sessionToken || "—"}</Box>
                     </div>
                     <div>
-                      <Box variant="h4" color="text-body-secondary">Expiration</Box>
+                      <Box variant="awsui-key-label">Expiration</Box>
                       <Box>{assumeResult.credentials?.expiration ? new Date(assumeResult.credentials.expiration).toLocaleString() : "—"}</Box>
                     </div>
                     {assumeResult.assumedRoleUser && (
                       <>
                         <div>
-                          <Box variant="h4" color="text-body-secondary">Assumed Role ID</Box>
+                          <Box variant="awsui-key-label">Assumed Role ID</Box>
                           <Box>{assumeResult.assumedRoleUser.assumedRoleId || "—"}</Box>
                         </div>
                         <div>
-                          <Box variant="h4" color="text-body-secondary">Assumed Role ARN</Box>
+                          <Box variant="awsui-key-label">Assumed Role ARN</Box>
                           <Box>{assumeResult.assumedRoleUser.arn || "—"}</Box>
                         </div>
                       </>
@@ -669,19 +669,19 @@ export function STSDashboard() {
                 {sessionResult ? (
                   <ColumnLayout columns={2} variant="text-grid">
                     <div>
-                      <Box variant="h4" color="text-body-secondary">Access Key ID</Box>
+                      <Box variant="awsui-key-label">Access Key ID</Box>
                       <Box>{sessionResult.credentials?.accessKeyId || "—"}</Box>
                     </div>
                     <div>
-                      <Box variant="h4" color="text-body-secondary">Secret Access Key</Box>
+                      <Box variant="awsui-key-label">Secret Access Key</Box>
                       <Box>{sessionResult.credentials?.secretAccessKey || "—"}</Box>
                     </div>
                     <div>
-                      <Box variant="h4" color="text-body-secondary">Session Token</Box>
+                      <Box variant="awsui-key-label">Session Token</Box>
                       <Box>{sessionResult.credentials?.sessionToken || "—"}</Box>
                     </div>
                     <div>
-                      <Box variant="h4" color="text-body-secondary">Expiration</Box>
+                      <Box variant="awsui-key-label">Expiration</Box>
                       <Box>{sessionResult.credentials?.expiration ? new Date(sessionResult.credentials.expiration).toLocaleString() : "—"}</Box>
                     </div>
                   </ColumnLayout>

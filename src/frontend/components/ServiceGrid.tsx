@@ -47,7 +47,7 @@ export default function ServiceGrid({ services, activeServices, resourceCounts }
                 <Icon className="tw:w-2.5 tw:h-2.5" />
               </span>
               <span style={{
-                fontSize: "10px",
+                fontSize: 10,
                 fontWeight: 600,
                 letterSpacing: "0.07em",
                 textTransform: "uppercase",
@@ -58,7 +58,7 @@ export default function ServiceGrid({ services, activeServices, resourceCounts }
               </span>
               {activeCount > 0 && (
                 <span style={{
-                  fontSize: "9px",
+                  fontSize: 9,
                   fontWeight: 700,
                   fontFamily: "var(--font-mono)",
                   color: "var(--sh-accent)",
@@ -70,7 +70,7 @@ export default function ServiceGrid({ services, activeServices, resourceCounts }
                 </span>
               )}
               <span className="tw:ml-auto" style={{
-                fontSize: "10px",
+                fontSize: 10,
                 fontFamily: "var(--font-mono)",
                 color: running > 0 ? "var(--sh-ok)" : "var(--sh-faint)",
               }}>

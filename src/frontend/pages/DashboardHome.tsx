@@ -57,7 +57,7 @@ function SectionHead({ title, action }: { title: string; action?: React.ReactNod
   return (
     <div className="tw:flex tw:items-center tw:justify-between tw:mb-3">
       <h2 style={{
-        fontSize: "11px", fontWeight: 600, letterSpacing: "0.06em",
+        fontSize: 11, fontWeight: 600, letterSpacing: "0.06em",
         textTransform: "uppercase", color: "var(--sh-faint)",
         fontFamily: "var(--font-mono)", margin: 0,
       }}>
@@ -135,19 +135,19 @@ export default function DashboardHome() {
       <div className="tw:flex tw:items-baseline tw:justify-between tw:mb-8">
         <div>
           <h1 style={{
-            fontSize: "20px", fontWeight: 600, margin: 0,
+            fontSize: 20, fontWeight: 600, margin: 0,
             color: "var(--sh-ink)", letterSpacing: "-0.01em",
           }}>
             Dashboard
           </h1>
-          <p style={{ fontSize: "12px", color: "var(--sh-dim)", margin: "4px 0 0" }}>
+          <p style={{ fontSize: 12, color: "var(--sh-dim)", margin: "4px 0 0" }}>
             Floci v{health.version} — local AWS emulator
           </p>
         </div>
         <div className="tw:flex tw:items-center tw:gap-1.5">
           <span className="tw:w-1.5 tw:h-1.5 tw:rounded-full"
                 style={{ background: "var(--sh-ok)", boxShadow: "0 0 6px var(--sh-ok)" }} />
-          <span style={{ fontSize: "11px", color: "var(--sh-ok)", fontFamily: "var(--font-mono)" }}>
+          <span style={{ fontSize: 11, color: "var(--sh-ok)", fontFamily: "var(--font-mono)" }}>
             Connected
           </span>
         </div>
@@ -269,7 +269,7 @@ export default function DashboardHome() {
             padding: "20px",
             textAlign: "center",
           }}>
-            <p style={{ fontSize: "12px", color: "var(--sh-faint)", margin: 0 }}>
+            <p style={{ fontSize: 12, color: "var(--sh-faint)", margin: 0 }}>
               No recent activity. Creating or deleting resources will show up here.
             </p>
           </div>
@@ -294,21 +294,21 @@ export default function DashboardHome() {
                 >
                   <ActionIcon className="tw:w-3.5 tw:h-3.5 tw:flex-shrink-0" style={{ color: style.color }} />
                   <span style={{
-                    fontSize: "10px", fontWeight: 600, fontFamily: "var(--font-mono)",
+                    fontSize: 10, fontWeight: 600, fontFamily: "var(--font-mono)",
                     color: "var(--sh-accent)", minWidth: "32px",
                   }}>
                     {SERVICE_ICONS[entry.service] ?? entry.service.slice(0, 3).toUpperCase()}
                   </span>
-                  <span className="tw:flex-1 tw:truncate" style={{ fontSize: "12px", color: "var(--sh-dim)" }}>
+                  <span className="tw:flex-1 tw:truncate" style={{ fontSize: 12, color: "var(--sh-dim)" }}>
                     {entry.description}
                   </span>
                   {entry.resource && (
                     <span className="tw:truncate tw:hidden tw:sm:block"
-                          style={{ fontSize: "11px", color: "var(--sh-faint)", fontFamily: "var(--font-mono)", maxWidth: "140px" }}>
+                          style={{ fontSize: 11, color: "var(--sh-faint)", fontFamily: "var(--font-mono)", maxWidth: "140px" }}>
                       {entry.resource}
                     </span>
                   )}
-                  <span style={{ fontSize: "10px", color: "var(--sh-faint)", fontFamily: "var(--font-mono)", flexShrink: 0 }}>
+                  <span style={{ fontSize: 10, color: "var(--sh-faint)", fontFamily: "var(--font-mono)", flexShrink: 0 }}>
                     {formatTime(entry.timestamp)}
                   </span>
                 </div>
