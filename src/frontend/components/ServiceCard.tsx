@@ -75,7 +75,7 @@ export default function ServiceCard({ serviceKey, status, isActive, resourceCoun
         <span
           className="tw:flex-shrink-0"
           style={{
-            fontSize: "10px",
+            fontSize: 10,
             fontWeight: 700,
             fontFamily: "var(--font-mono)",
             color: "var(--sh-accent)",

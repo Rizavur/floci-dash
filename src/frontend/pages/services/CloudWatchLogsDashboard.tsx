@@ -1050,7 +1050,7 @@ function CloudWatchLogStreamDetail({
           border: "1px solid var(--color-border-divider-default, #e9ebed)",
           borderRadius: "4px",
           fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace",
-          fontSize: "12px",
+          fontSize: 12,
           lineHeight: "1.6",
         }}
         onScroll={() => {
@@ -1262,7 +1262,7 @@ function CloudWatchSubscriptionFilterList({
             id: "destination",
             header: "Destination ARN",
             cell: (item: any) => (
-              <span style={{ fontFamily: "monospace", fontSize: "12px" }}>
+              <span style={{ fontFamily: "monospace", fontSize: 12 }}>
                 {item.destinationArn}
               </span>
             ),
@@ -1444,9 +1444,9 @@ function CloudWatchLogGroupTags({ logGroupName }: { logGroupName: string }) {
                 borderBottom: "2px solid var(--color-border-divider-default, #eaeded)",
               }}
             >
-              <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600 }}>Key</th>
-              <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600 }}>Value</th>
-              <th style={{ padding: "8px 12px", width: "60px" }}></th>
+              <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, fontSize: 11 }}>Key</th>
+              <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, fontSize: 11 }}>Value</th>
+              <th style={{ padding: "8px 12px", width: "60px", fontSize: 11 }}></th>
             </tr>
           </thead>
           <tbody>

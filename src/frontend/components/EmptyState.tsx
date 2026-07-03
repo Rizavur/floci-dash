@@ -15,13 +15,13 @@ export default function EmptyState({ title, description, actionText, onAction, i
       fontFamily: "var(--font-ui)",
     }}>
       {icon && (
-        <span style={{ fontSize: "32px", lineHeight: 1 }}>{icon}</span>
+        <span style={{ fontSize: 32, lineHeight: 1 }}>{icon}</span>
       )}
-      <h3 style={{ fontSize: "14px", fontWeight: 600, margin: 0, color: "var(--sh-ink)" }}>
+      <h3 style={{ fontSize: 14, fontWeight: 600, margin: 0, color: "var(--sh-ink)" }}>
         {title}
       </h3>
       {description && (
-        <p style={{ fontSize: "12px", color: "var(--sh-dim)", margin: 0, maxWidth: "320px", lineHeight: 1.6 }}>
+        <p style={{ fontSize: 12, color: "var(--sh-dim)", margin: 0, maxWidth: "320px", lineHeight: 1.6 }}>
           {description}
         </p>
       )}
@@ -30,7 +30,7 @@ export default function EmptyState({ title, description, actionText, onAction, i
           onClick={onAction}
           style={{
             marginTop: "8px", padding: "8px 16px",
-            fontSize: "12px", fontWeight: 500, cursor: "pointer",
+            fontSize: 12, fontWeight: 500, cursor: "pointer",
             background: "var(--sh-accent)", color: "#0d1117",
             border: "none", borderRadius: "5px",
             fontFamily: "var(--font-ui)",
