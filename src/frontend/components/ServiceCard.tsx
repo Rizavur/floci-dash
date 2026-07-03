@@ -38,7 +38,7 @@ export default function ServiceCard({ serviceKey, status }: Props) {
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       aria-label={`Open ${label}`}
-      className="tw-group tw-relative tw-flex tw-items-center tw-gap-2.5 tw-cursor-pointer tw-select-none tw-outline-none tw-transition-all tw-duration-100"
+      className="tw:group tw:relative tw:flex tw:items-center tw:gap-2.5 tw:cursor-pointer tw:select-none tw:outline-none tw:transition-all tw:duration-100"
       style={{
         padding: "9px 12px 9px 10px",
         background: "var(--sh-surface)",
@@ -57,7 +57,7 @@ export default function ServiceCard({ serviceKey, status }: Props) {
       }}
     >
       {/* Label */}
-      <span className="tw-flex-1 tw-truncate tw-text-[12px] tw-font-medium"
+      <span className="tw:flex-1 tw:truncate tw:text-[12px] tw:font-medium"
             style={{ color: isRunning ? "var(--sh-ink)" : "var(--sh-dim)" }}>
         {label}
       </span>
@@ -67,15 +67,15 @@ export default function ServiceCard({ serviceKey, status }: Props) {
         onClick={handleStar}
         onKeyDown={handleStarKey}
         aria-label={fav ? `Unstar ${label}` : `Star ${label}`}
-        className="tw-flex-shrink-0 tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-100 tw-p-0.5 tw-rounded tw-bg-transparent tw-border-0 tw-cursor-pointer"
+        className="tw:flex-shrink-0 tw:opacity-0 tw:group-hover:opacity-100 tw:transition-opacity tw:duration-100 tw:p-0.5 tw:rounded tw:bg-transparent tw:border-0 tw:cursor-pointer"
         style={{
           opacity: fav ? 1 : undefined,
           color: fav ? "var(--sh-warn)" : "var(--sh-faint)",
         }}
       >
         {fav
-          ? <StarIcon className="tw-w-3 tw-h-3" />
-          : <StarIconOutline className="tw-w-3 tw-h-3" />
+          ? <StarIcon className="tw:w-3 tw:h-3" />
+          : <StarIconOutline className="tw:w-3 tw:h-3" />
         }
       </button>
     </div>

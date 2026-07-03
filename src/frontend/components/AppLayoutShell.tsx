@@ -22,7 +22,7 @@ import {
 } from "../types/services";
 
 // Shared icon size — all nav/UI icons at 14×14 px
-const IC = "tw-w-3.5 tw-h-3.5 tw-flex-shrink-0";
+const IC = "tw:w-3.5 tw:h-3.5 tw:flex-shrink-0";
 
 // ── Nav item component ─────────────────────────────────────────────────────
 
@@ -44,7 +44,7 @@ function NavItem({ label, serviceKey, status, active, fav, onNavigate, onToggleF
       tabIndex={0}
       onClick={() => onNavigate(serviceKey)}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onNavigate(serviceKey); } }}
-      className="tw-group tw-relative tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-cursor-pointer tw-select-none tw-rounded-[4px] tw-transition-colors tw-duration-100"
+      className="tw:group tw:relative tw:flex tw:items-center tw:gap-2 tw:px-3 tw:py-1.5 tw:cursor-pointer tw:select-none tw:rounded-[4px] tw:transition-colors tw:duration-100"
       style={{
         background: active ? "var(--sh-accent-bg)" : "transparent",
         color: active ? "var(--sh-accent)" : "var(--sh-dim)",
@@ -55,16 +55,16 @@ function NavItem({ label, serviceKey, status, active, fav, onNavigate, onToggleF
     >
       {/* Active indicator */}
       {active && (
-        <span className="tw-absolute tw-left-0 tw-top-1 tw-bottom-1 tw-w-[2px] tw-rounded-full"
+        <span className="tw:absolute tw:left-0 tw:top-1 tw:bottom-1 tw:w-[2px] tw:rounded-full"
               style={{ background: "var(--sh-accent)" }} />
       )}
 
       {/* Status dot */}
-      <span className="tw-w-1.5 tw-h-1.5 tw-rounded-full tw-flex-shrink-0"
+      <span className="tw:w-1.5 tw:h-1.5 tw:rounded-full tw:flex-shrink-0"
             style={{ background: isRunning ? "var(--sh-ok)" : "var(--sh-faint)" }} />
 
       {/* Label */}
-      <span className="tw-flex-1 tw-text-[12px] tw-leading-none tw-truncate tw-font-medium"
+      <span className="tw:flex-1 tw:text-[12px] tw:leading-none tw:truncate tw:font-medium"
             style={{ color: active ? "var(--sh-accent)" : "var(--sh-dim)", fontFamily: "var(--font-ui)" }}>
         {label}
       </span>
@@ -73,7 +73,7 @@ function NavItem({ label, serviceKey, status, active, fav, onNavigate, onToggleF
       {onToggleFav && (
         <button
           onClick={(e) => onToggleFav(e, serviceKey)}
-          className="tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-100 tw-p-0.5 tw-rounded"
+          className="tw:opacity-0 tw:group-hover:opacity-100 tw:transition-opacity tw:duration-100 tw:p-0.5 tw:rounded"
           style={{
             opacity: fav ? 1 : undefined,
             color: fav ? "var(--sh-warn)" : "var(--sh-faint)",
@@ -83,7 +83,7 @@ function NavItem({ label, serviceKey, status, active, fav, onNavigate, onToggleF
         >
           {fav
             ? <StarIcon className={IC} />
-            : <StarIconOutline className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0" />
+            : <StarIconOutline className="tw:w-3.5 tw:h-3.5 tw:flex-shrink-0" />
           }
         </button>
       )}
@@ -187,38 +187,38 @@ export default function AppLayoutShell({ children }: Props) {
     <div style={{ display: "flex", flexDirection: "column", height: "100%", fontFamily: "var(--font-ui)" }}>
 
       {/* ── Header ──────────────────────────────────────────────── */}
-      <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-3"
+      <div className="tw:flex tw:items-center tw:justify-between tw:px-4 tw:py-3"
            style={{ borderBottom: "1px solid var(--sh-line)" }}>
         <button
           onClick={() => navigate("/")}
-          className="tw-flex tw-items-center tw-gap-2 tw-cursor-pointer tw-bg-transparent tw-border-0 tw-p-0"
+          className="tw:flex tw:items-center tw:gap-2 tw:cursor-pointer tw:bg-transparent tw:border-0 tw:p-0"
         >
-          <span className="tw-inline-flex tw-items-center tw-justify-center tw-w-[22px] tw-h-[22px] tw-rounded-[5px] tw-text-[11px] tw-font-bold"
+          <span className="tw:inline-flex tw:items-center tw:justify-center tw:w-[22px] tw:h-[22px] tw:rounded-[5px] tw:text-[11px] tw:font-bold"
                 style={{ background: "var(--sh-accent)", color: "#0d1117" }}>
             F
           </span>
-          <span className="tw-text-[13px] tw-font-semibold" style={{ color: "var(--sh-ink)" }}>
+          <span className="tw:text-[13px] tw:font-semibold" style={{ color: "var(--sh-ink)" }}>
             Floci Dash
           </span>
         </button>
 
         {/* Health pill */}
-        <span className="tw-flex tw-items-center tw-gap-1 tw-text-[10px] tw-font-mono tw-px-1.5 tw-py-0.5 tw-rounded"
+        <span className="tw:flex tw:items-center tw:gap-1 tw:text-[10px] tw:font-mono tw:px-1.5 tw:py-0.5 tw:rounded"
               style={{
                 color: running === total && total > 0 ? "var(--sh-ok)" : "var(--sh-warn)",
                 background: "var(--sh-elevated)",
                 border: "1px solid var(--sh-line)",
               }}>
-          <span className="tw-w-1.5 tw-h-1.5 tw-rounded-full tw-flex-shrink-0"
+          <span className="tw:w-1.5 tw:h-1.5 tw:rounded-full tw:flex-shrink-0"
                 style={{ background: running === total && total > 0 ? "var(--sh-ok)" : "var(--sh-warn)" }} />
           {running}/{total}
         </span>
       </div>
 
       {/* ── Search ──────────────────────────────────────────────── */}
-      <div className="tw-px-3 tw-pt-3 tw-pb-2">
-        <div className="tw-relative">
-          <span className="tw-absolute tw-left-2.5 tw-top-1/2 tw--translate-y-1/2" style={{ color: "var(--sh-faint)" }}>
+      <div className="tw:px-3 tw:pt-3 tw:pb-2">
+        <div className="tw:relative">
+          <span className="tw:absolute tw:left-2.5 tw:top-1/2 tw:-translate-y-1/2" style={{ color: "var(--sh-faint)" }}>
             <MagnifyingGlassIcon className={IC} />
           </span>
           <input
@@ -228,7 +228,7 @@ export default function AppLayoutShell({ children }: Props) {
             value={navQuery}
             onChange={(e) => setNavQuery(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Escape") setNavQuery(""); }}
-            className="tw-w-full tw-pl-7 tw-pr-3 tw-py-1.5 tw-text-[12px] tw-rounded-[5px] tw-outline-none"
+            className="tw:w-full tw:pl-7 tw:pr-3 tw:py-1.5 tw:text-[12px] tw:rounded-[5px] tw:outline-none"
             style={{
               background: "var(--sh-elevated)",
               border: "1px solid var(--sh-line)",
@@ -240,13 +240,13 @@ export default function AppLayoutShell({ children }: Props) {
       </div>
 
       {/* ── Nav list (scrollable) ────────────────────────────────── */}
-      <nav className="tw-flex-1 tw-overflow-y-auto tw-px-2 tw-pb-2"
+      <nav className="tw:flex-1 tw:overflow-y-auto tw:px-2 tw:pb-2"
            style={{ scrollbarWidth: "none" }}>
 
         {/* Search results */}
         {searchResults !== null && (
           <div>
-            <p className="tw-px-2 tw-pt-2 tw-pb-1 tw-text-[10px] tw-uppercase tw-tracking-widest tw-font-semibold"
+            <p className="tw:px-2 tw:pt-2 tw:pb-1 tw:text-[10px] tw:uppercase tw:tracking-widest tw:font-semibold"
                style={{ color: "var(--sh-faint)", fontFamily: "var(--font-mono)" }}>
               {searchResults.length ? `${searchResults.length} match${searchResults.length !== 1 ? "es" : ""}` : "No matches"}
             </p>
@@ -267,7 +267,7 @@ export default function AppLayoutShell({ children }: Props) {
               role="button" tabIndex={0}
               onClick={() => { navigate("/"); setSidebarOpen(false); }}
               onKeyDown={(e) => { if (e.key === "Enter") { navigate("/"); setSidebarOpen(false); } }}
-              className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-mb-1 tw-cursor-pointer tw-rounded-[4px] tw-transition-colors tw-duration-100 tw-text-[12px] tw-font-medium"
+              className="tw:flex tw:items-center tw:gap-2 tw:px-3 tw:py-1.5 tw:mb-1 tw:cursor-pointer tw:rounded-[4px] tw:transition-colors tw:duration-100 tw:text-[12px] tw:font-medium"
               style={{
                 background: location.pathname === "/" ? "var(--sh-accent-bg)" : "transparent",
                 color: location.pathname === "/" ? "var(--sh-accent)" : "var(--sh-dim)",
@@ -276,15 +276,15 @@ export default function AppLayoutShell({ children }: Props) {
               onMouseEnter={(e) => { if (location.pathname !== "/") e.currentTarget.style.background = "var(--sh-hover)"; }}
               onMouseLeave={(e) => { if (location.pathname !== "/") e.currentTarget.style.background = "transparent"; }}
             >
-              <span className="tw-w-1.5 tw-h-1.5 tw-rounded-full"
+              <span className="tw:w-1.5 tw:h-1.5 tw:rounded-full"
                     style={{ background: location.pathname === "/" ? "var(--sh-accent)" : "var(--sh-faint)" }} />
               Dashboard
             </div>
 
             {/* Favorites */}
             {favorites.length > 0 && (
-              <div className="tw-mb-1">
-                <p className="tw-px-2 tw-pt-2 tw-pb-1 tw-text-[10px] tw-uppercase tw-tracking-widest tw-font-semibold"
+              <div className="tw:mb-1">
+                <p className="tw:px-2 tw:pt-2 tw:pb-1 tw:text-[10px] tw:uppercase tw:tracking-widest tw:font-semibold"
                    style={{ color: "var(--sh-faint)", fontFamily: "var(--font-mono)" }}>
                   Starred
                 </p>
@@ -301,8 +301,8 @@ export default function AppLayoutShell({ children }: Props) {
 
             {/* Recently visited */}
             {recentlyVisited.filter((k) => k in services).length > 0 && (
-              <div className="tw-mb-1">
-                <p className="tw-px-2 tw-pt-2 tw-pb-1 tw-text-[10px] tw-uppercase tw-tracking-widest tw-font-semibold"
+              <div className="tw:mb-1">
+                <p className="tw:px-2 tw:pt-2 tw:pb-1 tw:text-[10px] tw:uppercase tw:tracking-widest tw:font-semibold"
                    style={{ color: "var(--sh-faint)", fontFamily: "var(--font-mono)" }}>
                   Recent
                 </p>
@@ -319,7 +319,7 @@ export default function AppLayoutShell({ children }: Props) {
             )}
 
             {/* Divider before categories */}
-            <div className="tw-my-2 tw-mx-2" style={{ height: "1px", background: "var(--sh-line-sub)" }} />
+            <div className="tw:my-2 tw:mx-2" style={{ height: "1px", background: "var(--sh-line-sub)" }} />
 
             {/* Categories */}
             {orderedCategories.map((cat) => {
@@ -328,10 +328,10 @@ export default function AppLayoutShell({ children }: Props) {
               );
               const isOpen = !collapsed.has(cat);
               return (
-                <div key={cat} className="tw-mb-0.5">
+                <div key={cat} className="tw:mb-0.5">
                   <button
                     onClick={() => toggleCollapse(cat)}
-                    className="tw-flex tw-items-center tw-gap-1.5 tw-w-full tw-px-2 tw-py-1.5 tw-cursor-pointer tw-rounded-[3px]"
+                    className="tw:flex tw:items-center tw:gap-1.5 tw:w-full tw:px-2 tw:py-1.5 tw:cursor-pointer tw:rounded-[3px]"
                     style={{
                       background: "transparent", border: "none",
                       color: "var(--sh-faint)", fontFamily: "var(--font-mono)",
@@ -343,10 +343,10 @@ export default function AppLayoutShell({ children }: Props) {
                       className={IC}
                       style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }}
                     />
-                    <span className="tw-text-[10px] tw-uppercase tw-tracking-widest tw-font-semibold tw-truncate">
+                    <span className="tw:text-[10px] tw:uppercase tw:tracking-widest tw:font-semibold tw:truncate">
                       {cat}
                     </span>
-                    <span className="tw-ml-auto tw-text-[10px] tw-font-mono">{keys.length}</span>
+                    <span className="tw:ml-auto tw:text-[10px] tw:font-mono">{keys.length}</span>
                   </button>
 
                   {isOpen && (
@@ -367,11 +367,11 @@ export default function AppLayoutShell({ children }: Props) {
       </nav>
 
       {/* ── Footer ──────────────────────────────────────────────── */}
-      <div className="tw-flex tw-items-center tw-justify-between tw-px-3 tw-py-2"
+      <div className="tw:flex tw:items-center tw:justify-between tw:px-3 tw:py-2"
            style={{ borderTop: "1px solid var(--sh-line)" }}>
         <button
           onClick={() => navigate("/settings")}
-          className="tw-flex tw-items-center tw-gap-1.5 tw-text-[11px] tw-cursor-pointer tw-rounded-[4px] tw-px-2 tw-py-1 tw-bg-transparent tw-border-0 tw-transition-colors"
+          className="tw:flex tw:items-center tw:gap-1.5 tw:text-[11px] tw:cursor-pointer tw:rounded-[4px] tw:px-2 tw:py-1 tw:bg-transparent tw:border-0 tw:transition-colors"
           style={{ color: "var(--sh-faint)", fontFamily: "var(--font-ui)" }}
           onMouseEnter={(e) => { e.currentTarget.style.color = "var(--sh-dim)"; e.currentTarget.style.background = "var(--sh-hover)"; }}
           onMouseLeave={(e) => { e.currentTarget.style.color = "var(--sh-faint)"; e.currentTarget.style.background = "transparent"; }}
@@ -381,7 +381,7 @@ export default function AppLayoutShell({ children }: Props) {
 
         <button
           onClick={toggleDarkMode}
-          className="tw-flex tw-items-center tw-justify-center tw-w-7 tw-h-7 tw-rounded-[4px] tw-cursor-pointer tw-bg-transparent tw-border-0 tw-transition-colors"
+          className="tw:flex tw:items-center tw:justify-center tw:w-7 tw:h-7 tw:rounded-[4px] tw:cursor-pointer tw:bg-transparent tw:border-0 tw:transition-colors"
           style={{ color: "var(--sh-faint)" }}
           onMouseEnter={(e) => { e.currentTarget.style.background = "var(--sh-hover)"; e.currentTarget.style.color = "var(--sh-dim)"; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sh-faint)"; }}
@@ -413,7 +413,7 @@ export default function AppLayoutShell({ children }: Props) {
 
       {/* ── Sidebar (desktop) ─────────────────────────────────── */}
       <aside
-        className="tw-hidden md:tw-flex tw-flex-col"
+        className="tw:hidden tw:md:flex tw:flex-col"
         style={{
           width: 220,
           flexShrink: 0,
@@ -451,7 +451,7 @@ export default function AppLayoutShell({ children }: Props) {
 
         {/* Mobile topbar — hidden above md via Tailwind; inline flex as fallback
             (the sidebar's inline display:none fallback mirrors this) */}
-        <div className="md:tw-hidden"
+        <div className="tw:md:hidden"
              style={{
                display: window.innerWidth >= 768 ? "none" : "flex",
                alignItems: "center", gap: 12, padding: "12px 16px", flexShrink: 0,
@@ -459,15 +459,15 @@ export default function AppLayoutShell({ children }: Props) {
              }}>
           <button
             onClick={() => setSidebarOpen(true)}
-            className="tw-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded tw-cursor-pointer tw-bg-transparent tw-border-0"
+            className="tw:flex tw:items-center tw:justify-center tw:w-8 tw:h-8 tw:rounded tw:cursor-pointer tw:bg-transparent tw:border-0"
             style={{ color: "var(--sh-dim)" }}
           >
-            <Bars3Icon className="tw-w-4 tw-h-4" />
+            <Bars3Icon className="tw:w-4 tw:h-4" />
           </button>
-          <span className="tw-text-[13px] tw-font-semibold" style={{ color: "var(--sh-ink)" }}>
+          <span className="tw:text-[13px] tw:font-semibold" style={{ color: "var(--sh-ink)" }}>
             Floci Dash
           </span>
-          <span className="tw-ml-auto tw-font-mono tw-text-[11px]" style={{ color: "var(--sh-ok)" }}>
+          <span className="tw:ml-auto tw:font-mono tw:text-[11px]" style={{ color: "var(--sh-ok)" }}>
             v{version}
           </span>
         </div>

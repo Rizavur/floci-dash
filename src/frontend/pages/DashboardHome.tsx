@@ -37,7 +37,7 @@ const QUICK_ACTIONS = [
 
 function SectionHead({ title, action }: { title: string; action?: React.ReactNode }) {
   return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-mb-3">
+    <div className="tw:flex tw:items-center tw:justify-between tw:mb-3">
       <h2 style={{
         fontSize: "11px", fontWeight: 600, letterSpacing: "0.06em",
         textTransform: "uppercase", color: "var(--sh-faint)",
@@ -66,20 +66,20 @@ export default function DashboardHome() {
 
   if (isLoading) {
     return (
-      <div className="tw-p-8" style={{ fontFamily: "var(--font-ui)" }}>
-        <div className="tw-grid tw-grid-cols-2 lg:tw-grid-cols-4 tw-gap-3 tw-mb-8">
+      <div className="tw:p-8" style={{ fontFamily: "var(--font-ui)" }}>
+        <div className="tw:grid tw:grid-cols-2 tw:lg:grid-cols-4 tw:gap-3 tw:mb-8">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="fd-skeleton tw-h-[80px] tw-rounded-md" />
+            <div key={i} className="fd-skeleton tw:h-[80px] tw:rounded-md" />
           ))}
         </div>
-        <div className="fd-skeleton tw-h-[120px] tw-rounded-md" />
+        <div className="fd-skeleton tw:h-[120px] tw:rounded-md" />
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="tw-p-8">
+      <div className="tw:p-8">
         <EmptyState
           icon="⚠"
           title={(error as Error)?.message || "Cannot connect to Floci"}
@@ -103,10 +103,10 @@ export default function DashboardHome() {
     : [];
 
   return (
-    <div className="tw-p-6 tw-max-w-[1280px] tw-mx-auto" style={{ fontFamily: "var(--font-ui)" }}>
+    <div className="tw:p-6 tw:max-w-[1280px] tw:mx-auto" style={{ fontFamily: "var(--font-ui)" }}>
 
       {/* ── Page header ──────────────────────────────────────── */}
-      <div className="tw-flex tw-items-baseline tw-justify-between tw-mb-8">
+      <div className="tw:flex tw:items-baseline tw:justify-between tw:mb-8">
         <div>
           <h1 style={{
             fontSize: "20px", fontWeight: 600, margin: 0,
@@ -118,8 +118,8 @@ export default function DashboardHome() {
             Floci v{health.version} — local AWS emulator
           </p>
         </div>
-        <div className="tw-flex tw-items-center tw-gap-1.5">
-          <span className="tw-w-1.5 tw-h-1.5 tw-rounded-full"
+        <div className="tw:flex tw:items-center tw:gap-1.5">
+          <span className="tw:w-1.5 tw:h-1.5 tw:rounded-full"
                 style={{ background: "var(--sh-ok)", boxShadow: "0 0 6px var(--sh-ok)" }} />
           <span style={{ fontSize: "11px", color: "var(--sh-ok)", fontFamily: "var(--font-mono)" }}>
             Connected
@@ -128,7 +128,7 @@ export default function DashboardHome() {
       </div>
 
       {/* ── Stat strip ───────────────────────────────────────── */}
-      <div className="tw-grid tw-grid-cols-2 lg:tw-grid-cols-4 tw-gap-3 tw-mb-8">
+      <div className="tw:grid tw:grid-cols-2 tw:lg:grid-cols-4 tw:gap-3 tw:mb-8">
         <StatCard
           label="Services"
           value={health.stats.total}
@@ -157,9 +157,9 @@ export default function DashboardHome() {
 
       {/* ── Resource breakdown ───────────────────────────────── */}
       {nonZeroCounts.length > 0 && (
-        <div className="tw-mb-8">
+        <div className="tw:mb-8">
           <SectionHead title="Resource Counts" />
-          <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 lg:tw-grid-cols-5 tw-gap-2">
+          <div className="tw:grid tw:grid-cols-2 tw:sm:grid-cols-3 tw:lg:grid-cols-5 tw:gap-2">
             {nonZeroCounts.map(([service, count]) => (
               <StatCard
                 key={service}
@@ -174,14 +174,14 @@ export default function DashboardHome() {
       )}
 
       {/* ── Quick actions ─────────────────────────────────────── */}
-      <div className="tw-mb-8">
+      <div className="tw:mb-8">
         <SectionHead title="Quick Access" />
-        <div className="tw-flex tw-flex-wrap tw-gap-2">
+        <div className="tw:flex tw:flex-wrap tw:gap-2">
           {QUICK_ACTIONS.map(({ label, path, primary }) => (
             <button
               key={label}
               onClick={() => trackNav(path, label.toLowerCase())}
-              className="tw-cursor-pointer tw-text-[12px] tw-font-medium tw-px-3 tw-py-1.5 tw-rounded-[5px] tw-border tw-transition-colors tw-duration-100"
+              className="tw:cursor-pointer tw:text-[12px] tw:font-medium tw:px-3 tw:py-1.5 tw:rounded-[5px] tw:border tw:transition-colors tw:duration-100"
               style={{
                 background: primary ? "var(--sh-accent)" : "var(--sh-elevated)",
                 color: primary ? "#0d1117" : "var(--sh-dim)",
@@ -209,13 +209,13 @@ export default function DashboardHome() {
 
       {/* ── Activity feed ─────────────────────────────────────── */}
       {entries.length > 0 && (
-        <div className="tw-mb-8">
+        <div className="tw:mb-8">
           <SectionHead
             title="Activity"
             action={
               <button
                 onClick={clearActivity}
-                className="tw-text-[11px] tw-cursor-pointer tw-bg-transparent tw-border-0 tw-transition-colors tw-duration-100"
+                className="tw:text-[11px] tw:cursor-pointer tw:bg-transparent tw:border-0 tw:transition-colors tw:duration-100"
                 style={{ color: "var(--sh-faint)", fontFamily: "var(--font-ui)" }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = "var(--sh-dim)"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = "var(--sh-faint)"; }}
@@ -233,7 +233,7 @@ export default function DashboardHome() {
             {entries.slice(0, 8).map((entry, idx) => (
               <div
                 key={entry.id}
-                className="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-2"
+                className="tw:flex tw:items-center tw:gap-3 tw:px-4 tw:py-2"
                 style={{
                   borderTop: idx > 0 ? "1px solid var(--sh-line-sub)" : "none",
                 }}
@@ -244,11 +244,11 @@ export default function DashboardHome() {
                 }}>
                   {SERVICE_ICONS[entry.service] ?? entry.service.slice(0, 3).toUpperCase()}
                 </span>
-                <span className="tw-flex-1 tw-truncate" style={{ fontSize: "12px", color: "var(--sh-dim)" }}>
+                <span className="tw:flex-1 tw:truncate" style={{ fontSize: "12px", color: "var(--sh-dim)" }}>
                   {entry.description}
                 </span>
                 {entry.resource && (
-                  <span className="tw-truncate tw-hidden sm:tw-block"
+                  <span className="tw:truncate tw:hidden tw:sm:block"
                         style={{ fontSize: "11px", color: "var(--sh-faint)", fontFamily: "var(--font-mono)", maxWidth: "140px" }}>
                     {entry.resource}
                   </span>
