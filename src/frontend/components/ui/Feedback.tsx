@@ -113,9 +113,17 @@ interface AlertProps {
   /** Accepted for API compatibility; the icon already conveys the alert type visually. */
   statusIconAriaLabel?: string;
   children?: ReactNode;
+  /**
+   * Solid surface background + shadow instead of the default translucent
+   * tint. Inline alerts sit on an already-opaque page/card background, so
+   * the subtle tint reads fine; a floating toast (see Flashbar) has nothing
+   * behind it but the page content, so the translucent version blends into
+   * dark backgrounds and looks like unreadable black text on black.
+   */
+  elevated?: boolean;
 }
 
-export function Alert({ type = "info", header, dismissible, onDismiss, action, statusIconAriaLabel, children }: AlertProps) {
+export function Alert({ type = "info", header, dismissible, onDismiss, action, statusIconAriaLabel, children, elevated }: AlertProps) {
   const [dismissed, setDismissed] = useState(false);
   if (dismissed) return null;
   const s = ALERT_STYLE[type];
@@ -128,8 +136,9 @@ export function Alert({ type = "info", header, dismissible, onDismiss, action, s
         gap: 10,
         padding: "10px 12px",
         borderRadius: 8,
-        background: s.bg,
-        border: `1px solid ${s.fg}33`,
+        background: elevated ? "var(--sh-surface)" : s.bg,
+        border: `1px solid ${s.fg}${elevated ? "55" : "33"}`,
+        boxShadow: elevated ? "0 8px 24px rgba(0,0,0,0.35)" : undefined,
         fontSize: 12.5,
         fontFamily: "var(--font-ui)",
         color: "var(--sh-ink)",
@@ -170,7 +179,7 @@ export function Flashbar({ items }: { items: FlashbarProps.MessageDefinition[] }
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {items.map((item) => (
-        <Alert key={item.id} type={item.type} header={item.header} dismissible={item.dismissible} onDismiss={item.onDismiss}>
+        <Alert key={item.id} type={item.type} header={item.header} dismissible={item.dismissible} onDismiss={item.onDismiss} elevated>
           {item.content}
         </Alert>
       ))}
