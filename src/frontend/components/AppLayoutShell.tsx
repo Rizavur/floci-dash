@@ -105,7 +105,17 @@ export default function AppLayoutShell({ children }: Props) {
   const { toggleFavorite, isFavorite } = useFavorites();
   const recentlyVisited = useRecentlyVisited((s) => s.recentlyVisited);
   const [navQuery, setNavQuery] = useState("");
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  // Active service key, computed early so it can seed the collapsed-categories
+  // default below (needs to run before that useState's lazy initializer).
+  const activeKey = location.pathname.match(/^\/services\/([^/]+)/)?.[1] ?? "";
+  // With 67 services across 13 categories, having every category expanded by
+  // default makes the sidebar extremely long. Start with everything collapsed
+  // except whichever category the current page belongs to, so context isn't
+  // lost — users mostly navigate via Favorites/Recent/Search anyway.
+  const [collapsed, setCollapsed] = useState<Set<string>>(() => {
+    const activeCategory = SERVICE_CATEGORY_MAP[activeKey];
+    return new Set(CATEGORY_ORDER.filter((c) => c !== activeCategory));
+  });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -173,9 +183,6 @@ export default function AppLayoutShell({ children }: Props) {
       .filter((k) => (SERVICE_LABELS[k] || k).toLowerCase().includes(query))
       .sort((a, b) => (SERVICE_LABELS[a] || a).localeCompare(SERVICE_LABELS[b] || b));
   }, [query, services]);
-
-  // Active service key
-  const activeKey = location.pathname.match(/^\/services\/([^/]+)/)?.[1] ?? "";
 
   // Health summary
   const running = health?.stats.running ?? 0;
