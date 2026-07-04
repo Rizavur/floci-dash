@@ -136,6 +136,30 @@ describe("S3Page", () => {
     expect(mockCreateBucketMutate).toHaveBeenCalled();
   });
 
+  it("replaces spaces with hyphens while typing a bucket name", async () => {
+    const user = userEvent.setup();
+    render(<S3Page />, { wrapper: createWrapper() });
+    await clickButton(user, /create bucket/i);
+    await waitFor(() => {
+      expect(screen.getAllByPlaceholderText("my-bucket").length).toBeGreaterThan(0);
+    });
+    const input = screen.getAllByPlaceholderText("my-bucket")[0] as HTMLInputElement;
+    await user.type(input, "my new bucket");
+    expect(input.value).toBe("my-new-bucket");
+  });
+
+  it("submits the create bucket form on Enter", async () => {
+    const user = userEvent.setup();
+    render(<S3Page />, { wrapper: createWrapper() });
+    await clickButton(user, /create bucket/i);
+    await waitFor(() => {
+      expect(screen.getAllByPlaceholderText("my-bucket").length).toBeGreaterThan(0);
+    });
+    const input = screen.getAllByPlaceholderText("my-bucket")[0];
+    await user.type(input, "test-bucket-123{Enter}");
+    expect(mockCreateBucketMutate).toHaveBeenCalledWith("test-bucket-123", expect.anything());
+  });
+
   // ─── Object Browser Tests ──────────────────────────────
 
   it("renders object browser when bucket is selected", () => {
