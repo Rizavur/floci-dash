@@ -2,6 +2,7 @@
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -509,7 +510,7 @@ export function BCMDashboard() {
   const { data: tablesData } = useBCMTables();
   const createExport = useCreateBCMExport();
   const deleteExport = useDeleteBCMExport();
-  const [selectedExport, setSelectedExport] = useState<string | null>(null);
+  const [selectedExport, setSelectedExport] = useUrlSelection("export");
   const [showCreate, setShowCreate] = useState(false);
   const [exportName, setExportName] = useState("");
 

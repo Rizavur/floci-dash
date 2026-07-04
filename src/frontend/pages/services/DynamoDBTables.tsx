@@ -2,6 +2,7 @@
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -509,7 +510,7 @@ export function DynamoDBTables() {
   const createTable = useDynamoDBCreateTable();
   const deleteTable = useDynamoDBDeleteTable();
 
-  const [selectedTable, setSelectedTable] = useState<string | null>(null);
+  const [selectedTable, setSelectedTable] = useUrlSelection("table");
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState("");
   const [hashKey, setHashKey] = useState("");

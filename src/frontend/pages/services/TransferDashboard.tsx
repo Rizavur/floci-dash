@@ -2,6 +2,7 @@
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -510,7 +511,7 @@ export function TransferDashboard() {
   const deleteServer = useDeleteTransferServer();
   const startServer = useStartTransferServer();
   const stopServer = useStopTransferServer();
-  const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
+  const [selectedServerId, setSelectedServerId] = useUrlSelection("server");
   const { data: usersData } = useTransferUsers(selectedServerId);
   const createUser = useCreateTransferUser();
   const deleteUser = useDeleteTransferUser();

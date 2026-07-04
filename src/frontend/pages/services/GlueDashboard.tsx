@@ -2,6 +2,7 @@
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -507,7 +508,7 @@ const CLUSTER_PG_FAMILY_OPTIONS: SelectProps.Option[] = [
 export function GlueDashboard() {
   const { data: dbData, isLoading } = useGlueDatabases();
   const deleteDb = useDeleteGlueDatabase();
-  const [selectedDb, setSelectedDb] = useState<string | null>(null);
+  const [selectedDb, setSelectedDb] = useUrlSelection("database");
   const { data: tblData } = useGlueTables(selectedDb);
   const deleteTbl = useDeleteGlueTable(selectedDb || "");
 

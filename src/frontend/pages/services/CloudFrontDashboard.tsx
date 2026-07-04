@@ -2,6 +2,7 @@
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -508,7 +509,7 @@ export function CloudFrontDashboard() {
   const { data, isLoading } = useCloudFrontDistributions();
   const { data: cachePolicies } = useCloudFrontCachePolicies();
   const { data: functions } = useCloudFrontFunctions();
-  const [selectedDist, setSelectedDist] = useState<string | null>(null);
+  const [selectedDist, setSelectedDist] = useUrlSelection("distribution");
   const { data: invData } = useCloudFrontInvalidations(selectedDist);
   const createInvalidation = useCreateCloudFrontInvalidation(selectedDist || "");
   const [showInvalidation, setShowInvalidation] = useState(false);

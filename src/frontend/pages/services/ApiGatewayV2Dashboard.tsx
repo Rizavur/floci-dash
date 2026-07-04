@@ -2,6 +2,7 @@
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -507,7 +508,7 @@ const CLUSTER_PG_FAMILY_OPTIONS: SelectProps.Option[] = [
 export function ApiGatewayV2Dashboard() {
   const { data, isLoading } = useApiGatewayV2Apis();
   const deleteApi = useDeleteApiGatewayV2Api();
-  const [selectedApi, setSelectedApi] = useState<string | null>(null);
+  const [selectedApi, setSelectedApi] = useUrlSelection("api");
   const { data: routesData } = useApiGatewayV2Routes(selectedApi);
   const { data: integrationsData } = useApiGatewayV2Integrations(selectedApi);
   const { data: stagesData } = useApiGatewayV2Stages(selectedApi);

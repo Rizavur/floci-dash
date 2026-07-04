@@ -2,6 +2,7 @@
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -507,7 +508,7 @@ const CLUSTER_PG_FAMILY_OPTIONS: SelectProps.Option[] = [
 export function CognitoDashboard() {
   const { data, isLoading } = useCognitoUserPools();
   const deletePool = useDeleteCognitoUserPool();
-  const [selectedPool, setSelectedPool] = useState<string | null>(null);
+  const [selectedPool, setSelectedPool] = useUrlSelection("pool");
   const { data: usersData } = useCognitoUsers(selectedPool);
   const { data: groupsData } = useCognitoGroups(selectedPool);
   const { data: clientsData } = useCognitoUserPoolClients(selectedPool);

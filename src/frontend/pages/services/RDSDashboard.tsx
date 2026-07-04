@@ -2,6 +2,7 @@
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -506,8 +507,8 @@ const CLUSTER_PG_FAMILY_OPTIONS: SelectProps.Option[] = [
 
 export function RDSDashboard() {
   const [selectedTab, setSelectedTab] = useState("db-instances");
-  const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
-  const [selectedCluster, setSelectedCluster] = useState<string | null>(null);
+  const [selectedInstance, setSelectedInstance] = useUrlSelection("instance");
+  const [selectedCluster, setSelectedCluster] = useUrlSelection("cluster");
 
   if (selectedInstance) {
     return (
@@ -1281,7 +1282,7 @@ function RDSParameterGroupList() {
   const { data, isLoading, isError, error } = useRDSParameterGroups();
   const createPG = useRDSCreateParameterGroup();
   const deletePG = useRDSDeleteParameterGroup();
-  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [selectedGroup, setSelectedGroup] = useUrlSelection("paramGroup");
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -1649,7 +1650,7 @@ function RDSClusterParameterGroupList() {
   const createCPG = useRDSCreateClusterParameterGroup();
   const deleteCPG = useRDSDeleteClusterParameterGroup();
 
-  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [selectedGroup, setSelectedGroup] = useUrlSelection("clusterParamGroup");
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({
     name: "",

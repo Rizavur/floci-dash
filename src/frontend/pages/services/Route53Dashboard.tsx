@@ -2,6 +2,7 @@
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -509,7 +510,7 @@ export function Route53Dashboard() {
   const createZone = useCreateRoute53HostedZone();
   const deleteZone = useDeleteRoute53HostedZone();
   const [showCreate, setShowCreate] = useState(false);
-  const [selectedZone, setSelectedZone] = useState<string | null>(null);
+  const [selectedZone, setSelectedZone] = useUrlSelection("zone");
 
   const [form, setForm] = useState({ name: "", comment: "" });
 

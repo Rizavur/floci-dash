@@ -2,6 +2,7 @@
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -512,7 +513,7 @@ export function CodeDeployDashboard() {
   const createDeploymentConfig = useCreateCodeDeployDeploymentConfig();
   const createDeploymentGroup = useCreateCodeDeployDeploymentGroup();
   const createDeployment = useCreateCodeDeployDeployment();
-  const [selectedApp, setSelectedApp] = useState<string | null>(null);
+  const [selectedApp, setSelectedApp] = useUrlSelection("app");
   const [showCreateApp, setShowCreateApp] = useState(false);
   const [appName, setAppName] = useState("");
   const [showCreateConfig, setShowCreateConfig] = useState(false);
