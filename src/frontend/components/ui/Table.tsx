@@ -97,7 +97,7 @@ export function Table({
       ) : items.length === 0 ? (
         <div style={{ padding: "32px 16px" }}>{empty}</div>
       ) : (
-        <div style={{ overflowX: "auto" }}>
+        <div style={{ overflowX: "auto", overflowY: "hidden" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5, fontFamily: "var(--font-ui)" }}>
             <thead>
               <tr>

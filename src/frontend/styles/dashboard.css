@@ -309,6 +309,7 @@
 /* Responsive table wrapper — adds horizontal scroll on small screens */
 .fd-table-responsive {
   overflow-x: auto;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   margin: 0 -12px;
   padding: 0 12px;

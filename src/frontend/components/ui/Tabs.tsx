@@ -27,7 +27,7 @@ export function Tabs({ tabs, activeTabId, onChange }: TabsComponentProps) {
 
   return (
     <div>
-      <div role="tablist" style={{ display: "flex", gap: 4, borderBottom: "1px solid var(--sh-line)", overflowX: "auto" }}>
+      <div role="tablist" style={{ display: "flex", gap: 4, borderBottom: "1px solid var(--sh-line)", overflowX: "auto", overflowY: "hidden" }}>
         {tabs.map((tab) => {
           const isActive = tab.id === active;
           return (
