@@ -296,14 +296,17 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
           {cfg.environment && Object.keys(cfg.environment).length > 0 && (
             <Box padding={{ top: "l" }}>
               <Box variant="awsui-key-label" padding={{ bottom: "xs" }}>Environment variables</Box>
-              <ColumnLayout columns={2} variant="text-grid">
+              {/* A fixed-column grid misaligns once there's an odd count or a long
+                  value (e.g. a URL) — a single-column key/value list stays correct
+                  no matter how many variables there are or how long they are. */}
+              <SpaceBetween size="xs">
                 {Object.entries(cfg.environment).map(([k, v]) => (
-                  <div key={k}>
-                    <Box fontSize="body-s" fontWeight="bold">{k}</Box>
-                    <Box fontSize="body-s" color="text-body-secondary">{v as string}</Box>
+                  <div key={k} style={{ display: "flex", gap: 16, padding: "6px 0", borderBottom: "1px solid var(--sh-line-sub)" }}>
+                    <Box fontSize="body-s" fontWeight="bold" style={{ minWidth: 200, flexShrink: 0 }}>{k}</Box>
+                    <Box fontSize="body-s" color="text-body-secondary" style={{ wordBreak: "break-all" }}>{v as string}</Box>
                   </div>
                 ))}
-              </ColumnLayout>
+              </SpaceBetween>
             </Box>
           )}
 
