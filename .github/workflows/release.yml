@@ -96,6 +96,10 @@ jobs:
         id: slug
         run: echo "slug=$(echo '${{ matrix.platform }}' | tr '/' '-')" >> $GITHUB_OUTPUT
 
+      - name: Set image name
+        id: image
+        run: echo "name=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       # ── Dashboard-only image ──
       - name: Build dashboard-only (by digest)
         id: build-dash
@@ -103,7 +107,7 @@ jobs:
         with:
           context: .
           platforms: ${{ matrix.platform }}
-          outputs: type=image,name=ghcr.io/ofsazib/floci-dash,push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=${{ steps.image.outputs.name }},push-by-digest=true,name-canonical=true,push=true
           cache-from: type=gha,scope=dash-${{ steps.slug.outputs.slug }}
           cache-to: type=gha,scope=dash-${{ steps.slug.outputs.slug }},mode=max
           provenance: false
@@ -118,7 +122,7 @@ jobs:
           context: .
           file: docker/Dockerfile.combined
           platforms: ${{ matrix.platform }}
-          outputs: type=image,name=ghcr.io/ofsazib/floci-dash,push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=${{ steps.image.outputs.name }},push-by-digest=true,name-canonical=true,push=true
           cache-from: type=gha,scope=combined-${{ steps.slug.outputs.slug }}
           cache-to: type=gha,scope=combined-${{ steps.slug.outputs.slug }},mode=max
           provenance: false
@@ -171,12 +175,16 @@ jobs:
           echo "combined-amd64=$(cat /tmp/digests/combined-linux-amd64.txt)" >> $GITHUB_OUTPUT
           echo "combined-arm64=$(cat /tmp/digests/combined-linux-arm64.txt)" >> $GITHUB_OUTPUT
 
+      - name: Set image name
+        id: image
+        run: echo "name=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       # ── Dashboard-only manifest ──
       - name: Extract semver tags — dashboard-only
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/ofsazib/floci-dash
+          images: ${{ steps.image.outputs.name }}
           flavor: |
             latest=auto
           tags: |
@@ -191,8 +199,8 @@ jobs:
           for tag in $TAGS; do
             docker buildx imagetools create \
               -t "$tag" \
-              "ghcr.io/ofsazib/floci-dash@${{ steps.digests.outputs.dash-amd64 }}" \
-              "ghcr.io/ofsazib/floci-dash@${{ steps.digests.outputs.dash-arm64 }}"
+              "${{ steps.image.outputs.name }}@${{ steps.digests.outputs.dash-amd64 }}" \
+              "${{ steps.image.outputs.name }}@${{ steps.digests.outputs.dash-arm64 }}"
           done
 
       # ── Combined manifest ──
@@ -200,7 +208,7 @@ jobs:
         id: meta-combined
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/ofsazib/floci-dash
+          images: ${{ steps.image.outputs.name }}
           flavor: |
             latest=true
             suffix=-combined,onlatest=true
@@ -216,6 +224,6 @@ jobs:
           for tag in $TAGS; do
             docker buildx imagetools create \
               -t "$tag" \
-              "ghcr.io/ofsazib/floci-dash@${{ steps.digests.outputs.combined-amd64 }}" \
-              "ghcr.io/ofsazib/floci-dash@${{ steps.digests.outputs.combined-arm64 }}"
+              "${{ steps.image.outputs.name }}@${{ steps.digests.outputs.combined-amd64 }}" \
+              "${{ steps.image.outputs.name }}@${{ steps.digests.outputs.combined-arm64 }}"
           done

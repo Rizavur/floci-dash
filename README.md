@@ -14,12 +14,12 @@
   <img src="https://img.shields.io/badge/Tailwind_CSS-4.x-06b6d4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
   <img src="https://img.shields.io/badge/Hono-4.x-e36002?logo=hono&logoColor=white" alt="Hono" />
   <img src="https://img.shields.io/badge/Docker-ready-2496ed?logo=docker&logoColor=white" alt="Docker" />
-  <img src="https://github.com/ofsazib/floci-dash/actions/workflows/ci.yml/badge.svg" alt="CI" />
-  <a href="https://codecov.io/gh/ofsazib/floci-dash"><img src="https://codecov.io/gh/ofsazib/floci-dash/branch/main/graph/badge.svg" alt="Codecov" /></a>
+  <img src="https://github.com/Rizavur/floci-dash/actions/workflows/ci.yml/badge.svg" alt="CI" />
+  <a href="https://codecov.io/gh/Rizavur/floci-dash"><img src="https://codecov.io/gh/Rizavur/floci-dash/branch/main/graph/badge.svg" alt="Codecov" /></a>
   <br/>
-  <a href="https://github.com/ofsazib/floci-dash/pkgs/container/floci-dash"><img src="https://ghcr-badge.egpl.dev/ofsazib/floci-dash/latest_tag?trim=major&amp;label=version" alt="version" /></a>
-  <a href="https://github.com/ofsazib/floci-dash/pkgs/container/floci-dash"><img src="https://ghcr-badge.egpl.dev/ofsazib/floci-dash/size?trim=major" alt="image size" /></a>
-  <a href="https://github.com/ofsazib/floci-dash/pkgs/container/floci-dash"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fghcr-badge.elias.eu.org%2Fapi%2Fofsazib%2Ffloci-dash&query=downloadCount&label=pulls&color=blue&logo=docker" alt="pulls" /></a>
+  <a href="https://github.com/Rizavur/floci-dash/pkgs/container/floci-dash"><img src="https://ghcr-badge.egpl.dev/rizavur/floci-dash/latest_tag?trim=major&amp;label=version" alt="version" /></a>
+  <a href="https://github.com/Rizavur/floci-dash/pkgs/container/floci-dash"><img src="https://ghcr-badge.egpl.dev/rizavur/floci-dash/size?trim=major" alt="image size" /></a>
+  <a href="https://github.com/Rizavur/floci-dash/pkgs/container/floci-dash"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fghcr-badge.elias.eu.org%2Fapi%2Frizavur%2Ffloci-dash&query=downloadCount&label=pulls&color=blue&logo=docker" alt="pulls" /></a>
 </p>
 
 <p align="center">
@@ -71,7 +71,7 @@
 > **Prerequisites:** [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) (or Docker Desktop)
 
 ```bash
-git clone https://github.com/ofsazib/floci-dash.git
+git clone https://github.com/Rizavur/floci-dash.git
 cd floci-dash
 make up-bg
 ```
@@ -80,20 +80,20 @@ Or pull the public Docker image. Two variants are published:
 
 | Image | Tag example | Contains |
 |-------|-------------|----------|
-| Dashboard only | `ghcr.io/ofsazib/floci-dash:latest` | Dashboard only — pair with external Floci |
-| Combined | `ghcr.io/ofsazib/floci-dash:latest-combined` | Floci + Dashboard in one container |
+| Dashboard only | `ghcr.io/rizavur/floci-dash:latest` | Dashboard only — pair with external Floci |
+| Combined | `ghcr.io/rizavur/floci-dash:latest-combined` | Floci + Dashboard in one container |
 
 **Tag scheme:** `latest` / `latest-combined` always point at the most recent **stable release** (a `v*` git tag). Every push to `main` also publishes `edge` / `edge-combined` (bleeding-edge) plus an immutable `0.0.<build>` tag. To pin a specific version, use a release tag such as `:1.2.3` (or `:1.2.3-combined`).
 
 ```bash
 # Dashboard only (needs Floci running separately on :4566)
-docker pull ghcr.io/ofsazib/floci-dash:latest
-docker run -p 9877:3000 --rm ghcr.io/ofsazib/floci-dash
+docker pull ghcr.io/rizavur/floci-dash:latest
+docker run -p 9877:3000 --rm ghcr.io/rizavur/floci-dash
 
 # Combined (Floci + Dashboard, single container)
-docker pull ghcr.io/ofsazib/floci-dash:latest-combined
+docker pull ghcr.io/rizavur/floci-dash:latest-combined
 docker run -p 3000:3000 -p 4566:4566 -v /var/run/docker.sock:/var/run/docker.sock \
-  --rm ghcr.io/ofsazib/floci-dash:latest-combined
+  --rm ghcr.io/rizavur/floci-dash:latest-combined
 ```
 
 Open [http://localhost:9877](http://localhost:9877) — the dashboard connects to Floci automatically. For the combined image, use [http://localhost:3000](http://localhost:3000).
@@ -168,7 +168,7 @@ For the **combined image**, set the mode and mount a volume yourself:
 docker run -p 3000:3000 -p 4566:4566 \
   -e FLOCI_STORAGE_MODE=hybrid -v floci-data:/app/data \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  --rm ghcr.io/ofsazib/floci-dash:latest-combined
+  --rm ghcr.io/rizavur/floci-dash:latest-combined
 ```
 
 (For LocalStack compatibility, Floci also accepts `PERSISTENCE=1`, which it auto-translates to `FLOCI_STORAGE_MODE=persistent`.)
