@@ -46,7 +46,7 @@ export function Modal({ visible, onDismiss, header, footer, size = "medium", chi
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderBottom: "1px solid var(--sh-line)" }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: "var(--sh-ink)" }}>{header}</div>
+          <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--sh-ink)" }}>{header}</div>
           <button
             onClick={onDismiss}
             aria-label="Close"

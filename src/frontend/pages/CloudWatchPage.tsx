@@ -148,7 +148,7 @@ function MetricsTab() {
             <SpaceBetween size="m">
               <Box>
                 <Sparkline values={sparkValues} />
-                <span style={{ marginLeft: 8, fontSize: 13 }} className="fd-text-muted-subtle">{datapoints.length} datapoints</span>
+                <span style={{ marginLeft: 8, fontSize: "0.8125rem" }} className="fd-text-muted-subtle">{datapoints.length} datapoints</span>
               </Box>
               <Table
                 columnDefinitions={[

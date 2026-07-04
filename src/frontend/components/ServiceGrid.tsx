@@ -92,7 +92,7 @@ const ServiceGrid = forwardRef<ServiceGridHandle, Props>(function ServiceGrid(
                 <Icon className="tw:w-2.5 tw:h-2.5" />
               </span>
               <span style={{
-                fontSize: 10,
+                fontSize: "0.625rem",
                 fontWeight: 600,
                 letterSpacing: "0.07em",
                 textTransform: "uppercase",
@@ -103,7 +103,7 @@ const ServiceGrid = forwardRef<ServiceGridHandle, Props>(function ServiceGrid(
               </span>
               {activeCount > 0 && (
                 <span style={{
-                  fontSize: 9,
+                  fontSize: "0.5625rem",
                   fontWeight: 700,
                   fontFamily: "var(--font-mono)",
                   color: "var(--sh-accent)",
@@ -115,7 +115,7 @@ const ServiceGrid = forwardRef<ServiceGridHandle, Props>(function ServiceGrid(
                 </span>
               )}
               <span className="tw:ml-auto" style={{
-                fontSize: 10,
+                fontSize: "0.625rem",
                 fontFamily: "var(--font-mono)",
                 color: running > 0 ? "var(--sh-ok)" : "var(--sh-faint)",
               }}>

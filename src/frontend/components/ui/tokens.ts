@@ -20,14 +20,14 @@ export const SPACE: Record<string, string> = {
 };
 
 export const FONT_SIZE: Record<string, string> = {
-  "body-s": "12px",
-  "body-m": "13px",
-  "heading-xs": "13px",
-  "heading-s": "14px",
-  "heading-m": "16px",
-  "heading-l": "20px",
-  "heading-xl": "24px",
-  "display-l": "32px",
+  "body-s": "0.75rem",
+  "body-m": "0.8125rem",
+  "heading-xs": "0.8125rem",
+  "heading-s": "0.875rem",
+  "heading-m": "1rem",
+  "heading-l": "1.25rem",
+  "heading-xl": "1.5rem",
+  "display-l": "2rem",
 };
 
 const COLOR_TOKENS: Record<string, string> = {

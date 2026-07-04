@@ -84,7 +84,7 @@ function KeysTab() {
           </Header>
         }
         columnDefinitions={[
-          { id: "id", header: "Key ID", cell: (k: any) => <span style={{ fontSize: 12, fontFamily: "monospace" }}>{k.keyId}</span> },
+          { id: "id", header: "Key ID", cell: (k: any) => <span style={{ fontSize: "0.75rem", fontFamily: "monospace" }}>{k.keyId}</span> },
           {
             id: "state",
             header: "State",
@@ -95,7 +95,7 @@ function KeysTab() {
           },
           { id: "desc", header: "Description", cell: (k: any) => k.description || "-" },
           { id: "usage", header: "Usage", cell: (k: any) => <Badge>{k.keyUsage || "-"}</Badge> },
-          { id: "spec", header: "Spec", cell: (k: any) => <span style={{ fontSize: 12 }}>{k.keySpec || "-"}</span> },
+          { id: "spec", header: "Spec", cell: (k: any) => <span style={{ fontSize: "0.75rem" }}>{k.keySpec || "-"}</span> },
           { id: "mgr", header: "Manager", cell: (k: any) => <Badge color={k.keyManager === "AWS" ? "blue" : "green"}>{k.keyManager || "CUSTOMER"}</Badge> },
           {
             id: "deletion",
@@ -198,8 +198,8 @@ function KeyDetailModal({ keyId, onClose }: { keyId: string; onClose: () => void
       content: k ? (
         <SpaceBetween size="l">
           <ColumnLayout columns={2} variant="text-grid">
-            <div><b>Key ID:</b> <span style={{ fontFamily: "monospace", fontSize: 12 }}>{k.keyId}</span></div>
-            <div><b>ARN:</b> <span style={{ fontSize: 12 }}>{k.arn}</span></div>
+            <div><b>Key ID:</b> <span style={{ fontFamily: "monospace", fontSize: "0.75rem" }}>{k.keyId}</span></div>
+            <div><b>ARN:</b> <span style={{ fontSize: "0.75rem" }}>{k.arn}</span></div>
             <div><b>State:</b> <Badge color={k.keyState === "Enabled" ? "green" : "grey"}>{k.keyState}</Badge></div>
             <div><b>Usage:</b> {k.keyUsage}</div>
             <div><b>Spec:</b> {k.keySpec}</div>
@@ -300,7 +300,7 @@ function KeyDetailModal({ keyId, onClose }: { keyId: string; onClose: () => void
         <Table
           columnDefinitions={[
             { id: "name", header: "Alias", cell: (a: any) => a.name },
-            { id: "arn", header: "ARN", cell: (a: any) => <span style={{ fontSize: 12 }}>{a.arn}</span> },
+            { id: "arn", header: "ARN", cell: (a: any) => <span style={{ fontSize: "0.75rem" }}>{a.arn}</span> },
             { id: "created", header: "Created", cell: (a: any) => a.creationDate ? new Date(a.creationDate).toLocaleDateString() : "-", mono: true },
           ]}
           items={aliases}
@@ -315,9 +315,9 @@ function KeyDetailModal({ keyId, onClose }: { keyId: string; onClose: () => void
       content: (
         <Table
           columnDefinitions={[
-            { id: "id", header: "Grant ID", cell: (g: any) => <span style={{ fontSize: 12, fontFamily: "monospace" }}>{g.grantId}</span> },
+            { id: "id", header: "Grant ID", cell: (g: any) => <span style={{ fontSize: "0.75rem", fontFamily: "monospace" }}>{g.grantId}</span> },
             { id: "name", header: "Name", cell: (g: any) => g.name || "-" },
-            { id: "principal", header: "Grantee principal", cell: (g: any) => <span style={{ fontSize: 12 }}>{g.granteePrincipal}</span> },
+            { id: "principal", header: "Grantee principal", cell: (g: any) => <span style={{ fontSize: "0.75rem" }}>{g.granteePrincipal}</span> },
             { id: "ops", header: "Operations", cell: (g: any) => (g.operations || []).map((op: string) => <Badge key={op}>{op}</Badge>) },
             { id: "created", header: "Created", cell: (g: any) => g.creationDate ? new Date(g.creationDate).toLocaleDateString() : "-", mono: true },
           ]}
@@ -355,7 +355,7 @@ function KeyDetailModal({ keyId, onClose }: { keyId: string; onClose: () => void
               {cryptoResult && (
                 <Alert type="success">
                   <b>Ciphertext (base64):</b>
-                  <pre style={{ fontSize: 11, overflow: "auto", marginTop: 4 }}>{cryptoResult.ciphertextBlob}</pre>
+                  <pre style={{ fontSize: "0.6875rem", overflow: "auto", marginTop: 4 }}>{cryptoResult.ciphertextBlob}</pre>
                 </Alert>
               )}
             </SpaceBetween>
@@ -383,7 +383,7 @@ function KeyDetailModal({ keyId, onClose }: { keyId: string; onClose: () => void
               {decryptResult && (
                 <Alert type="success">
                   <b>Plaintext (base64):</b>
-                  <pre style={{ fontSize: 11, overflow: "auto", marginTop: 4 }}>{decryptResult}</pre>
+                  <pre style={{ fontSize: "0.6875rem", overflow: "auto", marginTop: 4 }}>{decryptResult}</pre>
                 </Alert>
               )}
             </SpaceBetween>
@@ -426,7 +426,7 @@ function AliasesTab() {
         }
         columnDefinitions={[
           { id: "name", header: "Alias name", cell: (a: any) => a.name },
-          { id: "target", header: "Target key ID", cell: (a: any) => <span style={{ fontSize: 12, fontFamily: "monospace" }}>{a.targetKeyId}</span> },
+          { id: "target", header: "Target key ID", cell: (a: any) => <span style={{ fontSize: "0.75rem", fontFamily: "monospace" }}>{a.targetKeyId}</span> },
           { id: "created", header: "Created", cell: (a: any) => a.creationDate ? new Date(a.creationDate).toLocaleDateString() : "-", mono: true },
           {
             id: "actions",

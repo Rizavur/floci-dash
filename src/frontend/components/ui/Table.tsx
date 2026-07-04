@@ -21,12 +21,12 @@ export function TextFilter({ filteringText, filteringPlaceholder, onChange, coun
           placeholder={filteringPlaceholder}
           onChange={(e) => onChange({ detail: { filteringText: e.target.value } })}
           style={{
-            width: "100%", fontSize: 12.5, padding: "6px 10px 6px 30px", borderRadius: 5,
+            width: "100%", fontSize: "0.78125rem", padding: "6px 10px 6px 30px", borderRadius: 5,
             border: "1px solid var(--sh-line)", background: "var(--sh-elevated)", color: "var(--sh-ink)", outline: "none",
           }}
         />
       </div>
-      {countText && <span style={{ fontSize: 11.5, color: "var(--sh-faint)", whiteSpace: "nowrap" }}>{countText}</span>}
+      {countText && <span style={{ fontSize: "0.71875rem", color: "var(--sh-faint)", whiteSpace: "nowrap" }}>{countText}</span>}
     </div>
   );
 }
@@ -99,7 +99,7 @@ export function Table({
       {loading ? (
         <div style={{ overflowX: "auto", overflowY: "hidden" }}>
           <span className="tw:sr-only">{loadingText || "Loading…"}</span>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5, fontFamily: "var(--font-ui)" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.78125rem", fontFamily: "var(--font-ui)" }}>
             <thead>
               <tr>
                 {isSelectable && (
@@ -109,7 +109,7 @@ export function Table({
                   <th
                     key={col.id}
                     style={{
-                      textAlign: "left", padding: "8px 16px", fontSize: 11, fontWeight: 600,
+                      textAlign: "left", padding: "8px 16px", fontSize: "0.6875rem", fontWeight: 600,
                       textTransform: "uppercase", letterSpacing: "0.03em", color: "var(--sh-faint)",
                       borderBottom: "1px solid var(--sh-line)", width: col.width, whiteSpace: "nowrap",
                       background: "var(--sh-elevated)",
@@ -138,7 +138,7 @@ export function Table({
         <div style={{ padding: "32px 16px" }}>{empty}</div>
       ) : (
         <div style={{ overflowX: "auto", overflowY: "hidden" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5, fontFamily: "var(--font-ui)" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.78125rem", fontFamily: "var(--font-ui)" }}>
             <thead>
               <tr>
                 {isSelectable && (
@@ -152,7 +152,7 @@ export function Table({
                   <th
                     key={col.id}
                     style={{
-                      textAlign: "left", padding: "8px 16px", fontSize: 11, fontWeight: 600,
+                      textAlign: "left", padding: "8px 16px", fontSize: "0.6875rem", fontWeight: 600,
                       textTransform: "uppercase", letterSpacing: "0.03em", color: "var(--sh-faint)",
                       borderBottom: "1px solid var(--sh-line)", width: col.width, whiteSpace: "nowrap",
                       background: "var(--sh-elevated)",

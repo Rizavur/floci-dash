@@ -68,7 +68,7 @@ export default class ErrorBoundary extends Component<Props, State> {
                     whiteSpace: "pre-wrap",
                     wordBreak: "break-word",
                     fontFamily: "monospace",
-                    fontSize: 12,
+                    fontSize: "0.75rem",
                     margin: 0,
                     padding: "8px",
                     background: "var(--sh-elevated)",

@@ -24,7 +24,7 @@ interface BoxProps {
 }
 
 const HEADING_TAGS = new Set(["h1", "h2", "h3", "h4", "h5"]);
-const HEADING_SIZE: Record<string, number> = { h1: 24, h2: 18, h3: 15, h4: 14, h5: 13 };
+const HEADING_SIZE: Record<string, string> = { h1: "1.5rem", h2: "1.125rem", h3: "0.9375rem", h4: "0.875rem", h5: "0.8125rem" };
 
 export function Box({
   variant = "div", color, fontSize, fontWeight, padding, margin,
@@ -46,7 +46,7 @@ export function Box({
     // silently inherited the browser's ~16px, taller than the rest of this app's
     // ~12-13px scale (e.g. "strong" row labels rendering bigger than their own
     // section heading). 13px matches that scale; explicit fontSize still wins.
-    fontSize: fontSize ? resolveFontSize(fontSize) : isLabel ? "11px" : HEADING_TAGS.has(variant) ? HEADING_SIZE[variant] : "13px",
+    fontSize: fontSize ? resolveFontSize(fontSize) : isLabel ? "0.6875rem" : HEADING_TAGS.has(variant) ? HEADING_SIZE[variant] : "0.8125rem",
     fontWeight: fontWeight ?? (HEADING_TAGS.has(variant) ? 600 : isLabel ? 600 : undefined),
     textTransform: isLabel ? "uppercase" : undefined,
     letterSpacing: isLabel ? "0.04em" : undefined,
@@ -107,7 +107,7 @@ interface HeaderProps {
   className?: string;
 }
 
-const HEADER_SIZE: Record<string, number> = { h1: 20, h2: 15, h3: 13 };
+const HEADER_SIZE: Record<string, string> = { h1: "1.25rem", h2: "0.9375rem", h3: "0.8125rem" };
 
 export function Header({ variant = "h2", counter, description, info, actions, children, className }: HeaderProps) {
   const Tag: any = variant;
@@ -120,7 +120,7 @@ export function Header({ variant = "h2", counter, description, info, actions, ch
           {info && <span style={{ fontWeight: 400 }}>{info}</span>}
         </Tag>
         {description && (
-          <div style={{ marginTop: 4, fontSize: 12, color: "var(--sh-dim)" }}>{description}</div>
+          <div style={{ marginTop: 4, fontSize: "0.75rem", color: "var(--sh-dim)" }}>{description}</div>
         )}
       </div>
       {actions && <div style={{ flexShrink: 0 }}>{actions}</div>}
@@ -164,7 +164,7 @@ interface ContentLayoutProps {
 
 export function ContentLayout({ header, breadcrumbs, children }: ContentLayoutProps) {
   return (
-    <div className="tw:p-6 tw:max-w-[1280px] tw:mx-auto" style={{ display: "flex", flexDirection: "column", gap: 20, fontFamily: "var(--font-ui)" }}>
+    <div className="tw:p-6 tw:max-w-[1280px] tw:min-[1600px]:max-w-[1600px] tw:min-[1920px]:max-w-[1800px] tw:min-[2560px]:max-w-[2200px] tw:mx-auto" style={{ display: "flex", flexDirection: "column", gap: 20, fontFamily: "var(--font-ui)" }}>
       {breadcrumbs}
       {header}
       {children}
@@ -210,7 +210,7 @@ interface BreadcrumbGroupProps {
 
 export function BreadcrumbGroup({ items, onFollow }: BreadcrumbGroupProps) {
   return (
-    <nav style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontFamily: "var(--font-ui)" }}>
+    <nav style={{ display: "flex", alignItems: "center", gap: 4, fontSize: "0.75rem", fontFamily: "var(--font-ui)" }}>
       {items.map((item, i) => {
         const isLast = i === items.length - 1;
         return (

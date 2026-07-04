@@ -211,7 +211,7 @@ function StackDetailModal({ stackName, onClose }: { stackName: string; onClose: 
       content: s ? (
         <SpaceBetween size="l">
           <ColumnLayout columns={2} variant="text-grid">
-            <div><b>Stack ID:</b> <span style={{ fontSize: 12 }}>{s.stackId}</span></div>
+            <div><b>Stack ID:</b> <span style={{ fontSize: "0.75rem" }}>{s.stackId}</span></div>
             <div><b>Status:</b> <Badge color={STATUS_COLORS[s.status] || "grey"}>{s.status}</Badge></div>
             <div><b>Created:</b> {s.creationTime ? new Date(s.creationTime).toLocaleString() : "-"}</div>
             <div><b>Updated:</b> {s.lastUpdatedTime ? new Date(s.lastUpdatedTime).toLocaleString() : "-"}</div>
@@ -254,8 +254,8 @@ function StackDetailModal({ stackName, onClose }: { stackName: string; onClose: 
         <Table
           columnDefinitions={[
             { id: "logical", header: "Logical ID", cell: (r: any) => r.logicalId },
-            { id: "type", header: "Type", cell: (r: any) => <span style={{ fontSize: 12 }}>{r.type}</span> },
-            { id: "physical", header: "Physical ID", cell: (r: any) => <span style={{ fontSize: 12 }}>{r.physicalId || "-"}</span> },
+            { id: "type", header: "Type", cell: (r: any) => <span style={{ fontSize: "0.75rem" }}>{r.type}</span> },
+            { id: "physical", header: "Physical ID", cell: (r: any) => <span style={{ fontSize: "0.75rem" }}>{r.physicalId || "-"}</span> },
             { id: "status", header: "Status", cell: (r: any) => <Badge color={STATUS_COLORS[r.status] || "grey"}>{r.status}</Badge> },
             { id: "updated", header: "Updated", cell: (r: any) => r.lastUpdated ? new Date(r.lastUpdated).toLocaleString() : "-", mono: true },
           ]}
@@ -273,9 +273,9 @@ function StackDetailModal({ stackName, onClose }: { stackName: string; onClose: 
           columnDefinitions={[
             { id: "time", header: "Time", cell: (e: any) => e.timestamp ? new Date(e.timestamp).toLocaleString() : "-", mono: true },
             { id: "logical", header: "Logical ID", cell: (e: any) => e.logicalId || "-" },
-            { id: "type", header: "Type", cell: (e: any) => <span style={{ fontSize: 12 }}>{e.type || "-"}</span> },
+            { id: "type", header: "Type", cell: (e: any) => <span style={{ fontSize: "0.75rem" }}>{e.type || "-"}</span> },
             { id: "status", header: "Status", cell: (e: any) => <Badge color={STATUS_COLORS[e.status] || "grey"}>{e.status}</Badge> },
-            { id: "reason", header: "Status reason", cell: (e: any) => <span style={{ fontSize: 12 }}>{e.statusReason || "-"}</span> },
+            { id: "reason", header: "Status reason", cell: (e: any) => <span style={{ fontSize: "0.75rem" }}>{e.statusReason || "-"}</span> },
           ]}
           items={events}
           trackBy={(e: any) => e.eventId}
@@ -287,7 +287,7 @@ function StackDetailModal({ stackName, onClose }: { stackName: string; onClose: 
       id: "template",
       label: "Template",
       content: templateQuery.isLoading ? <Box>Loading...</Box> : (
-        <pre className="fd-code-bg" style={{ fontSize: 12, overflow: "auto", maxHeight: 400, padding: 12, borderRadius: 4 }}>
+        <pre className="fd-code-bg" style={{ fontSize: "0.75rem", overflow: "auto", maxHeight: 400, padding: 12, borderRadius: 4 }}>
           {templateQuery.data?.template || "No template"}
         </pre>
       ),
@@ -314,8 +314,8 @@ function ExportsTab() {
       header={<Header variant="h2" counter={`(${exportsList.length})`}>Exports</Header>}
       columnDefinitions={[
         { id: "name", header: "Export name", cell: (e: any) => e.name },
-        { id: "value", header: "Value", cell: (e: any) => <span style={{ fontSize: 12 }}>{e.value}</span> },
-        { id: "stack", header: "Exporting stack", cell: (e: any) => <span style={{ fontSize: 12 }}>{e.exportingStackId?.split("/")[1] || e.exportingStackId}</span> },
+        { id: "value", header: "Value", cell: (e: any) => <span style={{ fontSize: "0.75rem" }}>{e.value}</span> },
+        { id: "stack", header: "Exporting stack", cell: (e: any) => <span style={{ fontSize: "0.75rem" }}>{e.exportingStackId?.split("/")[1] || e.exportingStackId}</span> },
       ]}
       items={exportsList}
       loading={exportsQuery.isLoading}

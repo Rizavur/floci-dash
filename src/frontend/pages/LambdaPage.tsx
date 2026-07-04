@@ -356,7 +356,7 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
                   background: "var(--sh-elevated)",
                   padding: "12px",
                   borderRadius: "8px",
-                  fontSize: 13,
+                  fontSize: "0.8125rem",
                   overflow: "auto",
                 }}>
                   {typeof invokeFunction.data.payload === "string"

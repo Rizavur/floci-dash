@@ -221,7 +221,7 @@ function VpcCard({
                       alignItems: "center",
                       gap: "8px",
                       padding: "8px 12px",
-                      fontSize: 12,
+                      fontSize: "0.75rem",
                     }}
                   >
                     <span className="fd-dot-success" style={{ width: 6, height: 6 }} />
@@ -252,7 +252,7 @@ function VpcCard({
                   </span>
                 ))}
                 {routeTables.length > 3 && (
-                  <span style={{ fontSize: 11, color: "var(--sh-dim)" }}>
+                  <span style={{ fontSize: "0.6875rem", color: "var(--sh-dim)" }}>
                     +{routeTables.length - 3} more
                   </span>
                 )}
@@ -346,7 +346,7 @@ function InstanceRow({
         alignItems: "center",
         gap: "8px",
         padding: "6px 10px",
-        fontSize: 12,
+        fontSize: "0.75rem",
         marginLeft: "8px",
       }}
     >

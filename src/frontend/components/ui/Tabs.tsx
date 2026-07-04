@@ -39,7 +39,7 @@ export function Tabs({ tabs, activeTabId, onChange }: TabsComponentProps) {
               onClick={() => select(tab.id)}
               style={{
                 padding: "8px 14px",
-                fontSize: 12.5,
+                fontSize: "0.78125rem",
                 fontWeight: 500,
                 fontFamily: "var(--font-ui)",
                 background: "transparent",

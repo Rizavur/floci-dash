@@ -24,7 +24,7 @@ interface ButtonProps {
   className?: string;
 }
 
-const BASE = "tw:inline-flex tw:items-center tw:justify-center tw:gap-1.5 tw:cursor-pointer tw:select-none tw:whitespace-nowrap tw:transition-colors tw:duration-100 tw:text-[12px] tw:font-medium tw:rounded-[5px] tw:border tw:disabled:tw:cursor-not-allowed tw:disabled:tw:opacity-50";
+const BASE = "tw:inline-flex tw:items-center tw:justify-center tw:gap-1.5 tw:cursor-pointer tw:select-none tw:whitespace-nowrap tw:transition-colors tw:duration-100 tw:text-[0.75rem] tw:font-medium tw:rounded-[5px] tw:border tw:disabled:tw:cursor-not-allowed tw:disabled:tw:opacity-50";
 
 // Normalize variant aliases to their base visual style.
 function normalize(variant: ButtonVariant): "primary" | "normal" | "link" | "icon" {
