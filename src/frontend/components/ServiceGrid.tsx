@@ -1,5 +1,5 @@
 import { SERVICE_LABELS, CATEGORY_ORDER, SERVICE_CATEGORY_MAP } from "../types/services";
-import { getCategoryIcon } from "./categoryIcons";
+import { getCategoryIcon, getCategoryColor, getCategoryColorBg } from "./categoryIcons";
 import ServiceCard from "./ServiceCard";
 
 interface Props {
@@ -31,6 +31,8 @@ export default function ServiceGrid({ services, activeServices, resourceCounts }
         const running = keys.filter((k) => services[k] === "running").length;
         const activeCount = keys.filter((k) => activeSet.has(k)).length;
         const Icon = getCategoryIcon(category);
+        const categoryColor = getCategoryColor(category);
+        const categoryColorBg = getCategoryColorBg(category);
 
         return (
           <div key={category}>
@@ -40,8 +42,8 @@ export default function ServiceGrid({ services, activeServices, resourceCounts }
                 className="tw:flex tw:items-center tw:justify-center tw:flex-shrink-0"
                 style={{
                   width: 18, height: 18, borderRadius: 5,
-                  background: activeCount > 0 ? "var(--sh-accent-bg)" : "var(--sh-elevated)",
-                  color: activeCount > 0 ? "var(--sh-accent)" : "var(--sh-faint)",
+                  background: categoryColorBg,
+                  color: categoryColor,
                 }}
               >
                 <Icon className="tw:w-2.5 tw:h-2.5" />

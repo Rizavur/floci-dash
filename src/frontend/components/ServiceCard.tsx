@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { StarIcon } from "@heroicons/react/16/solid";
 import { StarIcon as StarIconOutline } from "@heroicons/react/24/outline";
 import { getServiceLabel, SERVICE_CATEGORY_MAP } from "../types/services";
-import { getCategoryIcon } from "./categoryIcons";
+import { getCategoryIcon, getCategoryColor, getCategoryColorBg } from "./categoryIcons";
 import { useFavorites } from "../stores/favorites";
 
 interface Props {
@@ -20,11 +20,15 @@ export default function ServiceCard({ serviceKey, status, isActive, resourceCoun
   const isRunning = status === "running";
   const { isFavorite, toggleFavorite } = useFavorites();
   const fav = isFavorite(serviceKey);
-  const Icon = getCategoryIcon(SERVICE_CATEGORY_MAP[serviceKey] || "Other");
+  const category = SERVICE_CATEGORY_MAP[serviceKey] || "Other";
+  const Icon = getCategoryIcon(category);
+  // Icon badge uses a fixed per-category color so services are identifiable
+  // by category at a glance; it dims when unavailable to keep status legible.
+  const categoryColor = getCategoryColor(category);
+  const categoryColorBg = getCategoryColorBg(category);
 
   // Three visual states: active (has resources) > running (idle) > unavailable.
   const accent = isActive ? "var(--sh-accent)" : isRunning ? "var(--sh-ok)" : "var(--sh-faint)";
-  const accentBg = isActive ? "var(--sh-accent-bg)" : "var(--sh-elevated)";
   const textColor = isRunning ? "var(--sh-ink)" : "var(--sh-faint)";
 
   const handleClick = () => navigate(`/services/${serviceKey}`);
@@ -70,7 +74,12 @@ export default function ServiceCard({ serviceKey, status, isActive, resourceCoun
       <div className="tw:flex tw:items-center tw:gap-2">
         <span
           className="tw:flex tw:items-center tw:justify-center tw:flex-shrink-0"
-          style={{ width: 22, height: 22, borderRadius: 6, background: accentBg, color: accent }}
+          style={{
+            width: 22, height: 22, borderRadius: 6,
+            background: categoryColorBg,
+            color: categoryColor,
+            opacity: isRunning ? 1 : 0.55,
+          }}
         >
           <Icon className="tw:w-3 tw:h-3" />
         </span>
