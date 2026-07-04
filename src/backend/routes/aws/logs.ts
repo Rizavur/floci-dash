@@ -118,6 +118,9 @@ router.get("/log-groups/:name/streams", async (c: Context) => {
     uploadSequenceToken: s.uploadSequenceToken,
     storedBytes: s.storedBytes,
   }));
+  // floci ignores the orderBy/descending params above entirely, so sort here
+  // ourselves — most recently active stream first, streams with no events last.
+  streams.sort((a, b) => (b.lastEventTimestamp ?? -1) - (a.lastEventTimestamp ?? -1));
   return c.json({ logStreams: streams, total: streams.length });
 });
 

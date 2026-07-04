@@ -151,6 +151,19 @@ describe("CloudWatch Logs Routes", () => {
       expect(body.logStreams[0].logStreamName).toBe("2025/01/01/stream-1");
     });
 
+    it("GET /log-groups/:name/streams — sorts by last event time descending (floci ignores orderBy)", async () => {
+      mockSend.mockResolvedValueOnce({
+        logStreams: [
+          { logStreamName: "stale", lastEventTimestamp: 1000 },
+          { logStreamName: "no-events" },
+          { logStreamName: "fresh", lastEventTimestamp: 3000 },
+        ],
+      });
+      const res = await get("/log-groups/%2Faws%2Flambda%2Fmy-func/streams");
+      const body = await res.json();
+      expect(body.logStreams.map((s: any) => s.logStreamName)).toEqual(["fresh", "stale", "no-events"]);
+    });
+
     it("POST /log-groups/:name/streams — creates a stream", async () => {
       mockSend.mockResolvedValueOnce({});
       const res = await post("/log-groups/%2Faws%2Flambda%2Fmy-func/streams", { logStreamName: "stream-1" });
