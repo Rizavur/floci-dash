@@ -39,6 +39,11 @@
   --sh-fail-bg:  rgba(248, 81, 73, 0.1);
   --sh-info:     #2dd4bf;
   --sh-info-bg:  rgba(45, 212, 191, 0.08);
+  /* Favorite star fill. Deliberately the same warm gold in both themes and NOT
+     tied to --sh-warn: --sh-warn is darkened in light mode for text contrast,
+     which makes a muddy/brown star icon. A star is a small icon, not body
+     text, so it can stay one consistent, recognizable color across themes. */
+  --sh-star:     #e3b341;
 }
 
 #app-shell.light {
