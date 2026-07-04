@@ -3,15 +3,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-const mockNavigate = vi.fn();
+// Card is a real <Link> now (not a div+onClick) so ctrl/cmd/middle-click and
+// "Open in new tab" work — mock it as a plain <a href> like the real thing.
 vi.mock("react-router-dom", () => ({
-  useNavigate: () => mockNavigate,
+  Link: ({ to, children, ...props }: any) => <a href={to} {...props}>{children}</a>,
 }));
 
 import ServiceCard from "./ServiceCard";
 
 beforeEach(() => {
-  vi.clearAllMocks();
   localStorage.clear();
 });
 
@@ -21,25 +21,15 @@ describe("ServiceCard", () => {
     expect(screen.getByText("S3")).toBeTruthy();
   });
 
-  it("navigates to the service page when clicked", async () => {
-    const user = userEvent.setup();
+  it("renders a real link to the service page (so it can be opened in a new tab)", () => {
     render(<ServiceCard serviceKey="s3" status="running" />);
-    await user.click(screen.getByRole("button", { name: /Open S3/i }));
-    expect(mockNavigate).toHaveBeenCalledWith("/services/s3");
-  });
-
-  it("navigates on Enter key press", async () => {
-    const user = userEvent.setup();
-    render(<ServiceCard serviceKey="ec2" status="running" />);
-    const card = screen.getByRole("button", { name: /Open EC2/i });
-    card.focus();
-    await user.keyboard("{Enter}");
-    expect(mockNavigate).toHaveBeenCalledWith("/services/ec2");
+    const card = screen.getByRole("link", { name: /Open S3/i });
+    expect(card.getAttribute("href")).toBe("/services/s3");
   });
 
   it("marks the accessible label as active when isActive is true", () => {
     render(<ServiceCard serviceKey="s3" status="running" isActive />);
-    expect(screen.getByRole("button", { name: /Open S3 \(active\)/i })).toBeTruthy();
+    expect(screen.getByRole("link", { name: /Open S3 \(active\)/i })).toBeTruthy();
   });
 
   it("shows a resource count badge when active with resources", () => {
@@ -63,12 +53,10 @@ describe("ServiceCard", () => {
     const starBtn = screen.getByRole("button", { name: "Star S3" });
     await user.click(starBtn);
     expect(screen.getByRole("button", { name: "Unstar S3" })).toBeTruthy();
-    // Clicking the star must not trigger navigation.
-    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it("renders unavailable services with the same accessible structure", () => {
     render(<ServiceCard serviceKey="glue" status="available" />);
-    expect(screen.getByRole("button", { name: /Open Glue/i })).toBeTruthy();
+    expect(screen.getByRole("link", { name: /Open Glue/i })).toBeTruthy();
   });
 });

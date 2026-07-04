@@ -71,7 +71,7 @@ export default function StatCard({
           fontSize: "0.6875rem",
           fontWeight: 500,
           letterSpacing: "0.02em",
-          color: "var(--sh-faint)",
+          color: "var(--sh-dim)",
           textTransform: "uppercase",
         }}>
           {label}

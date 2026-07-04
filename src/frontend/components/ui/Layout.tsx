@@ -115,7 +115,16 @@ export function Header({ variant = "h2", counter, description, info, actions, ch
     <div className={className} style={{ display: "flex", alignItems: description ? "flex-start" : "center", justifyContent: "space-between", gap: 16, width: "100%" }}>
       <div style={{ minWidth: 0 }}>
         <Tag style={{ margin: 0, fontSize: HEADER_SIZE[variant], fontWeight: 600, color: "var(--sh-ink)", display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--font-ui)" }}>
-          <span>{children}</span>
+          {/* `children` is usually "Title <StatusBadge/>" (e.g. "Kinesis <✓>")
+              passed as adjacent JSX nodes. Tailwind's preflight sets
+              `svg { display: block }`, so the checkmark icon is a block-level
+              element sitting in plain inline text flow — it forces its own
+              line regardless of title length or `white-space`, since that
+              only affects wrapping of inline content, not block elements.
+              Making this span itself a flex container fixes it for any
+              child, icon or not: flex items lay out in a row no matter what
+              display value they'd normally have on their own. */}
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>{children}</span>
           {counter && <span style={{ fontWeight: 400, color: "var(--sh-faint)", fontSize: "0.8em" }}>{counter}</span>}
           {info && <span style={{ fontWeight: 400 }}>{info}</span>}
         </Tag>
@@ -164,7 +173,7 @@ interface ContentLayoutProps {
 
 export function ContentLayout({ header, breadcrumbs, children }: ContentLayoutProps) {
   return (
-    <div className="tw:p-6 tw:max-w-[1280px] tw:min-[1600px]:max-w-[1600px] tw:min-[1920px]:max-w-[1800px] tw:min-[2560px]:max-w-[2200px] tw:mx-auto" style={{ display: "flex", flexDirection: "column", gap: 20, fontFamily: "var(--font-ui)" }}>
+    <div className="tw:p-6" style={{ display: "flex", flexDirection: "column", gap: 20, fontFamily: "var(--font-ui)" }}>
       {breadcrumbs}
       {header}
       {children}

@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
 
 vi.mock("react-router-dom", () => ({
-  useNavigate: () => vi.fn(),
+  Link: ({ to, children, ...props }: any) => <a href={to} {...props}>{children}</a>,
 }));
 
 import ServiceGrid, { type ServiceGridHandle } from "./ServiceGrid";
