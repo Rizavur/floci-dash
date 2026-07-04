@@ -6,6 +6,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ToastProvider, useToast } from "./components/Toast";
 import { setGlobalErrorReporter, clearGlobalErrorReporter } from "./lib/globalErrorHandler";
 import { DashboardSkeleton } from "./components/LoadingSkeleton";
+import { ContentLayout } from "./components/ui";
 import DashboardHome from "./pages/DashboardHome";
 
 // Lazy-loaded dedicated service pages — code-split at the route level
@@ -80,7 +81,7 @@ export default function App() {
             <ErrorBoundary>
               <AppLayoutShell>
                 <ErrorBoundary>
-                  <Suspense fallback={<DashboardSkeleton />}>
+                  <Suspense fallback={<ContentLayout><DashboardSkeleton /></ContentLayout>}>
                     <Routes>
                       <Route path="/" element={<DashboardHome />} />
                       <Route path="/services/s3" element={<S3Page />} />
