@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ContentLayout,
   Header,
@@ -50,9 +50,10 @@ const RUNTIMES = [
 
 export default function LambdaPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: health } = useHealth();
   const [selectedTab, setSelectedTab] = useState("functions");
-  const [selectedFunction, setSelectedFunction] = useState<string | null>(null);
+  const selectedFunction = searchParams.get("function");
 
   const lambdaStatus = health?.services?.lambda;
   const statusText = lambdaStatus === "running" ? "running" : lambdaStatus === "available" ? "available" : "connected";
@@ -61,7 +62,10 @@ export default function LambdaPage() {
     return (
       <LambdaFunctionDetail
         name={selectedFunction}
-        onBack={() => setSelectedFunction(null)}
+        onBack={() => {
+          searchParams.delete("function");
+          setSearchParams(searchParams);
+        }}
       />
     );
   }
@@ -70,7 +74,7 @@ export default function LambdaPage() {
     {
       id: "functions",
       label: "Functions",
-      content: <LambdaFunctionList onSelect={(name) => setSelectedFunction(name)} />,
+      content: <LambdaFunctionList onSelect={(name) => setSearchParams({ function: name })} />,
     },
     {
       id: "layers",

@@ -31,15 +31,6 @@ vi.mock("../components/Toast", () => ({
   ToastProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-vi.mock("react-router-dom", async () => {
-  const actual = await import("react-router-dom");
-  return {
-    ...actual,
-    useNavigate: () => vi.fn(),
-    useSearchParams: () => [new URLSearchParams(), vi.fn()],
-  };
-});
-
 import SecretsManagerPage from "./SecretsManagerPage";
 
 function pageWrapper() {

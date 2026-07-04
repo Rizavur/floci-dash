@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   BreadcrumbGroup,
   ContentLayout,
@@ -38,7 +38,12 @@ import {
 function SecretsPage() {
   const { showToast } = useToast();
   const [showCreate, setShowCreate] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedId = searchParams.get("secret");
+  const setSelectedId = (id: string | null) => {
+    if (id) setSearchParams({ secret: id });
+    else { searchParams.delete("secret"); setSearchParams(searchParams); }
+  };
 
   const secretsQuery = useSecrets();
   const createSecret = useCreateSecret();
