@@ -84,11 +84,11 @@ beforeEach(() => {
 });
 
 describe("S3BucketConfig — tab navigation", () => {
-  it("renders all 11 tab buttons", () => {
+  it("renders all 11 tabs", () => {
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
     const tabs = ["Overview", "Versioning", "Tags", "Policy", "Encryption", "Lifecycle", "CORS", "Website", "Notifications", "Public Access", "Logging"];
     for (const tab of tabs) {
-      expect(screen.getByRole("button", { name: tab })).toBeTruthy();
+      expect(screen.getByRole("tab", { name: tab })).toBeTruthy();
     }
   });
 
@@ -100,21 +100,21 @@ describe("S3BucketConfig — tab navigation", () => {
   it("switches to Versioning tab", async () => {
     const user = userEvent.setup();
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Versioning" }));
+    await user.click(screen.getByRole("tab", { name: "Versioning" }));
     expect(screen.getByText("Bucket Versioning")).toBeTruthy();
   });
 
   it("switches to Tags tab", async () => {
     const user = userEvent.setup();
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Tags" }));
+    await user.click(screen.getByRole("tab", { name: "Tags" }));
     expect(screen.getByText("Bucket Tags")).toBeTruthy();
   });
 
   it("switches to Policy tab", async () => {
     const user = userEvent.setup();
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Policy" }));
+    await user.click(screen.getByRole("tab", { name: "Policy" }));
     await waitFor(() => {
       expect(screen.getByText("Bucket Policy")).toBeTruthy();
     });
@@ -123,49 +123,55 @@ describe("S3BucketConfig — tab navigation", () => {
   it("switches to Encryption tab", async () => {
     const user = userEvent.setup();
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Encryption" }));
+    await user.click(screen.getByRole("tab", { name: "Encryption" }));
     expect(screen.getByText("Default Encryption")).toBeTruthy();
   });
 
   it("switches to Lifecycle tab", async () => {
     const user = userEvent.setup();
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Lifecycle" }));
+    await user.click(screen.getByRole("tab", { name: "Lifecycle" }));
     expect(screen.getByText("Lifecycle Rules")).toBeTruthy();
   });
 
   it("switches to CORS tab", async () => {
     const user = userEvent.setup();
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "CORS" }));
+    await user.click(screen.getByRole("tab", { name: "CORS" }));
     expect(screen.getByText("CORS Configuration")).toBeTruthy();
   });
 
-  it("switches to Website tab", async () => {
+  // Regression: this component used to read `process.env.AWS_REGION` in the
+  // website endpoint text, which doesn't exist in a real browser (Vite only
+  // special-cases NODE_ENV) and threw, caught by the app's top-level
+  // ErrorBoundary, replacing the whole page. Assert the real endpoint string
+  // renders (fixed to a plain static string, no `process` reference at all).
+  it("switches to Website tab and shows the website endpoint", async () => {
     const user = userEvent.setup();
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Website" }));
+    await user.click(screen.getByRole("tab", { name: "Website" }));
     expect(screen.getByText("Static Website Hosting")).toBeTruthy();
+    expect(screen.getByText("http://my-bucket.s3-website-us-east-1.amazonaws.com")).toBeTruthy();
   });
 
   it("switches to Notifications tab", async () => {
     const user = userEvent.setup();
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Notifications" }));
+    await user.click(screen.getByRole("tab", { name: "Notifications" }));
     expect(screen.getByText("Event Notifications")).toBeTruthy();
   });
 
   it("switches to Public Access tab", async () => {
     const user = userEvent.setup();
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Public Access" }));
+    await user.click(screen.getByRole("tab", { name: "Public Access" }));
     expect(screen.getByText("Public Access Block Configuration")).toBeTruthy();
   });
 
   it("switches to Logging tab", async () => {
     const user = userEvent.setup();
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Logging" }));
+    await user.click(screen.getByRole("tab", { name: "Logging" }));
     expect(screen.getByText("Server Access Logging")).toBeTruthy();
   });
 });
@@ -193,7 +199,7 @@ describe("S3BucketConfig — Versioning tab", () => {
     const mockMutate = vi.fn();
     (useS3UpdateVersioning as any).mockReturnValue({ mutate: mockMutate, isPending: false, isError: false, error: null });
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Versioning" }));
+    await user.click(screen.getByRole("tab", { name: "Versioning" }));
     await user.click(screen.getByRole("button", { name: /Save changes/i }));
     expect(mockMutate).toHaveBeenCalled();
   });
@@ -202,7 +208,7 @@ describe("S3BucketConfig — Versioning tab", () => {
     (useS3BucketVersioning as any).mockReturnValue({ data: undefined, isLoading: true, isError: false, error: null });
     const user = userEvent.setup();
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Versioning" }));
+    await user.click(screen.getByRole("tab", { name: "Versioning" }));
     // The spinner replaces the Container content when isLoading
     expect(screen.queryByText("Bucket Versioning")).toBeNull();
   });
@@ -212,7 +218,7 @@ describe("S3BucketConfig — Tags tab", () => {
   it("renders existing tag pairs from data", async () => {
     const user = userEvent.setup();
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Tags" }));
+    await user.click(screen.getByRole("tab", { name: "Tags" }));
     expect(screen.getByDisplayValue("env")).toBeTruthy();
     expect(screen.getByDisplayValue("prod")).toBeTruthy();
   });
@@ -220,7 +226,7 @@ describe("S3BucketConfig — Tags tab", () => {
   it("adds a new tag pair when Add tag clicked", async () => {
     const user = userEvent.setup();
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Tags" }));
+    await user.click(screen.getByRole("tab", { name: "Tags" }));
     const before = screen.getAllByPlaceholderText("Tag key").length;
     await user.click(screen.getByRole("button", { name: /Add tag/i }));
     const after = screen.getAllByPlaceholderText("Tag key").length;
@@ -230,7 +236,7 @@ describe("S3BucketConfig — Tags tab", () => {
   it("removes a tag pair when remove clicked", async () => {
     const user = userEvent.setup();
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Tags" }));
+    await user.click(screen.getByRole("tab", { name: "Tags" }));
     await waitFor(() => expect(screen.getByDisplayValue("env")).toBeTruthy());
     const before = screen.getAllByPlaceholderText("Tag key").length;
     await user.click(screen.getByRole("button", { name: /Remove tag/i }));
@@ -243,7 +249,7 @@ describe("S3BucketConfig — Tags tab", () => {
     const mockMutate = vi.fn();
     (useS3UpdateBucketTags as any).mockReturnValue({ mutate: mockMutate, isPending: false, isError: false, error: null });
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Tags" }));
+    await user.click(screen.getByRole("tab", { name: "Tags" }));
     await user.click(screen.getByRole("button", { name: /Save tags/i }));
     expect(mockMutate).toHaveBeenCalledWith([{ Key: "env", Value: "prod" }]);
   });
@@ -253,7 +259,7 @@ describe("S3BucketConfig — Policy tab", () => {
   it("renders existing policy text", async () => {
     const user = userEvent.setup();
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Policy" }));
+    await user.click(screen.getByRole("tab", { name: "Policy" }));
     await waitFor(() => {
       expect(screen.getByDisplayValue(/Version/)).toBeTruthy();
     });
@@ -264,7 +270,7 @@ describe("S3BucketConfig — Policy tab", () => {
     const mockMutate = vi.fn();
     (useS3UpdateBucketPolicy as any).mockReturnValue({ mutate: mockMutate, isPending: false, isError: false, error: null });
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Policy" }));
+    await user.click(screen.getByRole("tab", { name: "Policy" }));
     await waitFor(() => expect(screen.getByDisplayValue(/Version/)).toBeTruthy());
     await user.click(screen.getByRole("button", { name: /Save policy/i }));
     expect(mockMutate).toHaveBeenCalled();
@@ -275,7 +281,7 @@ describe("S3BucketConfig — Policy tab", () => {
     const mockDelete = vi.fn();
     (useS3DeleteBucketPolicy as any).mockReturnValue({ mutate: mockDelete, isPending: false, isError: false, error: null });
     render(<S3BucketConfig bucket="my-bucket" />, { wrapper: createWrapper() });
-    await user.click(screen.getByRole("button", { name: "Policy" }));
+    await user.click(screen.getByRole("tab", { name: "Policy" }));
     await waitFor(() => expect(screen.getByDisplayValue(/Version/)).toBeTruthy());
     const delBtn = screen.queryByRole("button", { name: /Delete policy/i });
     if (delBtn) {
