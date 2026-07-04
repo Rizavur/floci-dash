@@ -67,6 +67,7 @@ export function Button({
 }: ButtonProps) {
   const base = normalize(variant);
   const isIconOnly = base === "icon";
+  const isDestructive = base === "icon" && iconName === "remove";
   const Icon = resolveIcon(iconName);
   const { className: variantClassName, style } = variantStyle(variant, disabled);
   const isDisabled = disabled || loading;
@@ -94,7 +95,7 @@ export function Button({
         className={mergedClassName}
         style={style}
         onClick={isDisabled ? (e) => e.preventDefault() : handleClick}
-        onMouseEnter={(e) => { if (base === "normal" && !isDisabled) e.currentTarget.style.background = "var(--sh-hover)"; if (base === "icon" && !isDisabled) { e.currentTarget.style.background = "var(--sh-hover)"; e.currentTarget.style.color = "var(--sh-ink)"; } }}
+        onMouseEnter={(e) => { if (base === "normal" && !isDisabled) e.currentTarget.style.background = "var(--sh-hover)"; if (base === "icon" && !isDisabled) { e.currentTarget.style.background = isDestructive ? "var(--sh-fail-bg)" : "var(--sh-hover)"; e.currentTarget.style.color = isDestructive ? "var(--sh-fail)" : "var(--sh-ink)"; } }}
         onMouseLeave={(e) => { if (base === "normal") e.currentTarget.style.background = "var(--sh-elevated)"; if (base === "icon") { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sh-dim)"; } }}
       >
         {content}
@@ -110,7 +111,7 @@ export function Button({
       onClick={handleClick}
       className={mergedClassName}
       style={style}
-      onMouseEnter={(e) => { if (isDisabled) return; if (base === "normal") e.currentTarget.style.background = "var(--sh-hover)"; if (base === "icon") { e.currentTarget.style.background = "var(--sh-hover)"; e.currentTarget.style.color = "var(--sh-ink)"; } if (base === "primary") e.currentTarget.style.opacity = "0.9"; }}
+      onMouseEnter={(e) => { if (isDisabled) return; if (base === "normal") e.currentTarget.style.background = "var(--sh-hover)"; if (base === "icon") { e.currentTarget.style.background = isDestructive ? "var(--sh-fail-bg)" : "var(--sh-hover)"; e.currentTarget.style.color = isDestructive ? "var(--sh-fail)" : "var(--sh-ink)"; } if (base === "primary") e.currentTarget.style.opacity = "0.9"; }}
       onMouseLeave={(e) => { if (base === "normal") e.currentTarget.style.background = "var(--sh-elevated)"; if (base === "icon") { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sh-dim)"; } if (base === "primary") e.currentTarget.style.opacity = "1"; }}
     >
       {content}
