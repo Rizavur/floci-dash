@@ -57,7 +57,12 @@ export function Modal({ visible, onDismiss, header, footer, size = "medium", chi
         </div>
         <div style={{ padding: 18, overflowY: "auto", flex: 1 }}>{children}</div>
         {footer && (
-          <div style={{ padding: "12px 18px", borderTop: "1px solid var(--sh-line)" }}>{footer}</div>
+          // flow-root gives this div its own block-formatting context, so it
+          // correctly wraps the floated (`Box float="right"`) button row
+          // instead of collapsing to zero height around it — without this the
+          // footer's padding/border doesn't actually contain the buttons,
+          // throwing off their vertical position relative to the modal edge.
+          <div style={{ padding: "12px 18px", borderTop: "1px solid var(--sh-line)", display: "flow-root" }}>{footer}</div>
         )}
       </div>
     </div>
