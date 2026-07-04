@@ -346,16 +346,14 @@ export default function AppLayoutShell({ children }: Props) {
               </div>
             )}
 
-            {/* Divider before categories */}
-            <div className="tw:my-2 tw:mx-2" style={{ height: "1px", background: "var(--sh-line-sub)" }} />
-
-            {/* Expand/collapse all categories */}
-            <div className="tw:flex tw:items-center tw:justify-end tw:gap-0.5 tw:px-1 tw:pb-1">
+            {/* Divider before categories, with expand/collapse-all inline on the same line */}
+            <div className="tw:flex tw:items-center tw:gap-1 tw:my-1 tw:mx-2">
+              <div className="tw:flex-1" style={{ height: "1px", background: "var(--sh-line-sub)" }} />
               <button
                 onClick={expandAll}
                 title="Expand all"
                 aria-label="Expand all categories"
-                className="tw:flex tw:items-center tw:justify-center tw:w-6 tw:h-6 tw:rounded tw:cursor-pointer tw:bg-transparent tw:border-0"
+                className="tw:flex tw:items-center tw:justify-center tw:w-5 tw:h-5 tw:rounded tw:cursor-pointer tw:bg-transparent tw:border-0 tw:flex-shrink-0"
                 style={{ color: "var(--sh-faint)" }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = "var(--sh-hover)"; e.currentTarget.style.color = "var(--sh-dim)"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sh-faint)"; }}
@@ -366,7 +364,7 @@ export default function AppLayoutShell({ children }: Props) {
                 onClick={collapseAll}
                 title="Collapse all"
                 aria-label="Collapse all categories"
-                className="tw:flex tw:items-center tw:justify-center tw:w-6 tw:h-6 tw:rounded tw:cursor-pointer tw:bg-transparent tw:border-0"
+                className="tw:flex tw:items-center tw:justify-center tw:w-5 tw:h-5 tw:rounded tw:cursor-pointer tw:bg-transparent tw:border-0 tw:flex-shrink-0"
                 style={{ color: "var(--sh-faint)" }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = "var(--sh-hover)"; e.currentTarget.style.color = "var(--sh-dim)"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sh-faint)"; }}
