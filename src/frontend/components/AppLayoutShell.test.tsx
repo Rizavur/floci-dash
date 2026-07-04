@@ -7,7 +7,7 @@ import React from "react";
 
 vi.mock("react-router-dom", () => ({
   useNavigate: () => vi.fn(),
-  useLocation: () => ({ pathname: "/", hash: "" }),
+  useLocation: vi.fn(() => ({ pathname: "/", hash: "" })),
 }));
 
 vi.mock("../hooks/useSystem", () => ({
@@ -38,6 +38,7 @@ vi.mock("../stores/settings", () => ({
 import AppLayoutShell from "./AppLayoutShell";
 import { useHealth, useActiveServices } from "../hooks/useSystem";
 import { useSettings } from "../stores/settings";
+import { useLocation } from "react-router-dom";
 
 function createWrapper() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -66,6 +67,7 @@ beforeEach(() => {
     refreshInterval: 5000,
     setRefreshInterval: vi.fn(),
   });
+  (useLocation as any).mockReturnValue({ pathname: "/", hash: "" });
   document.body.classList.remove("awsui-dark-mode");
 });
 
@@ -146,14 +148,42 @@ describe("AppLayoutShell — health status", () => {
 // ── Navigation items ───────────────────────────────────────────────────────
 
 describe("AppLayoutShell — navigation items", () => {
-  it("renders services reported by Floci", () => {
+  it("renders services reported by Floci", async () => {
+    const user = userEvent.setup();
     render(
       <AppLayoutShell><div>Content</div></AppLayoutShell>,
       { wrapper: createWrapper() },
     );
+    // Categories start collapsed by default (see AppLayoutShell.tsx) since
+    // 67 real services would otherwise make the sidebar extremely long —
+    // expand the ones containing our mocked services first.
+    await user.click(screen.getByRole("button", { name: /Storage/i }));
+    await user.click(screen.getByRole("button", { name: /Compute/i }));
     expect(screen.getAllByText("S3").length).toBeGreaterThan(0);
     expect(screen.getAllByText("EC2").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Lambda").length).toBeGreaterThan(0);
+  });
+
+  it("keeps categories collapsed by default so the sidebar isn't a huge list", () => {
+    render(
+      <AppLayoutShell><div>Content</div></AppLayoutShell>,
+      { wrapper: createWrapper() },
+    );
+    // No service page is active (pathname "/"), so no category should have
+    // auto-expanded — service names shouldn't appear until a category is clicked.
+    expect(screen.queryByText("S3")).toBeNull();
+    expect(screen.queryByText("EC2")).toBeNull();
+  });
+
+  it("auto-expands the category containing the currently active service", () => {
+    (useLocation as any).mockReturnValue({ pathname: "/services/s3", hash: "" });
+    render(
+      <AppLayoutShell><div>Content</div></AppLayoutShell>,
+      { wrapper: createWrapper() },
+    );
+    // Storage (S3's category) should already be open; Compute should not.
+    expect(screen.getAllByText("S3").length).toBeGreaterThan(0);
+    expect(screen.queryByText("EC2")).toBeNull();
   });
 
   it("renders search input with correct placeholder", () => {
