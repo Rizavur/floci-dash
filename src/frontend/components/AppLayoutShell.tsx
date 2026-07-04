@@ -114,7 +114,8 @@ export default function AppLayoutShell({ children }: Props) {
   // lost — users mostly navigate via Favorites/Recent/Search anyway.
   const [collapsed, setCollapsed] = useState<Set<string>>(() => {
     const activeCategory = SERVICE_CATEGORY_MAP[activeKey];
-    return new Set(CATEGORY_ORDER.filter((c) => c !== activeCategory));
+    // ponytail: "Other" is a fallback bucket, not part of CATEGORY_ORDER — include it too, else it never collapses.
+    return new Set([...CATEGORY_ORDER, "Other"].filter((c) => c !== activeCategory));
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
