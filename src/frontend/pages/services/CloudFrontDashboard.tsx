@@ -514,12 +514,14 @@ export function CloudFrontDashboard() {
   const createInvalidation = useCreateCloudFrontInvalidation(selectedDist || "");
   const [showInvalidation, setShowInvalidation] = useState(false);
   const [invPaths, setInvPaths] = useState("/*");
+  const [activeTab, setActiveTab] = useState<"distributions" | "invalidations" | "cache-policies" | "functions">("distributions");
 
   if (isLoading) return <TableSkeleton />;
 
   return (
     <Tabs
-      activeTabId={selectedDist ? "invalidations" : "distributions"}
+      activeTabId={activeTab}
+      onChange={({ detail }) => setActiveTab(detail.activeTabId as typeof activeTab)}
       tabs={[
         {
           id: "distributions",
@@ -544,7 +546,7 @@ export function CloudFrontDashboard() {
                   id: "id",
                   header: "ID",
                   cell: (i: any) => (
-                    <Button variant="link" onClick={() => setSelectedDist(i.id)}>
+                    <Button variant="link" onClick={() => { setSelectedDist(i.id); setActiveTab("invalidations"); }}>
                       {i.id}
                     </Button>
                   ),
@@ -568,7 +570,7 @@ export function CloudFrontDashboard() {
             <>
               {selectedDist && (
                 <Box margin={{ bottom: "s" }}>
-                  <Button iconName="arrow-left" onClick={() => setSelectedDist(null)}>
+                  <Button iconName="arrow-left" onClick={() => { setSelectedDist(null); setActiveTab("distributions"); }}>
                     Back to distributions
                   </Button>
                 </Box>
