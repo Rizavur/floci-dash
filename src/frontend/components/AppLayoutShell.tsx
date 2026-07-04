@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   MagnifyingGlassIcon,
   ChevronRightIcon,
+  ChevronDoubleDownIcon,
+  ChevronDoubleUpIcon,
   StarIcon,
   MoonIcon,
   SunIcon,
@@ -192,6 +194,9 @@ export default function AppLayoutShell({ children }: Props) {
     return cats;
   }, [grouped]);
 
+  const expandAll = useCallback(() => setCollapsed(new Set()), []);
+  const collapseAll = useCallback(() => setCollapsed(new Set(orderedCategories)), [orderedCategories]);
+
   // Filtered view when searching
   const searchResults = useMemo(() => {
     if (!query) return null;
@@ -343,6 +348,32 @@ export default function AppLayoutShell({ children }: Props) {
 
             {/* Divider before categories */}
             <div className="tw:my-2 tw:mx-2" style={{ height: "1px", background: "var(--sh-line-sub)" }} />
+
+            {/* Expand/collapse all categories */}
+            <div className="tw:flex tw:items-center tw:justify-end tw:gap-0.5 tw:px-1 tw:pb-1">
+              <button
+                onClick={expandAll}
+                title="Expand all"
+                aria-label="Expand all categories"
+                className="tw:flex tw:items-center tw:justify-center tw:w-6 tw:h-6 tw:rounded tw:cursor-pointer tw:bg-transparent tw:border-0"
+                style={{ color: "var(--sh-faint)" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--sh-hover)"; e.currentTarget.style.color = "var(--sh-dim)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sh-faint)"; }}
+              >
+                <ChevronDoubleDownIcon className={IC} />
+              </button>
+              <button
+                onClick={collapseAll}
+                title="Collapse all"
+                aria-label="Collapse all categories"
+                className="tw:flex tw:items-center tw:justify-center tw:w-6 tw:h-6 tw:rounded tw:cursor-pointer tw:bg-transparent tw:border-0"
+                style={{ color: "var(--sh-faint)" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--sh-hover)"; e.currentTarget.style.color = "var(--sh-dim)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sh-faint)"; }}
+              >
+                <ChevronDoubleUpIcon className={IC} />
+              </button>
+            </div>
 
             {/* Categories */}
             {orderedCategories.map((cat) => {
