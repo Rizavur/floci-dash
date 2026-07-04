@@ -81,6 +81,24 @@ describe("S3Page", () => {
     expect(screen.getByText("my-bucket")).toBeTruthy();
   });
 
+  it("sorts buckets alphabetically regardless of API order", () => {
+    mockBuckets.mockReturnValue({
+      data: {
+        buckets: [
+          { name: "zebra-bucket", createdAt: "2024-01-01T00:00:00Z" },
+          { name: "alpha-bucket", createdAt: "2024-01-01T00:00:00Z" },
+          { name: "mango-bucket", createdAt: "2024-01-01T00:00:00Z" },
+        ],
+        total: 3,
+      },
+      isLoading: false, isError: false, error: null,
+    });
+    render(<S3Page />, { wrapper: createWrapper() });
+    const rowHeaderCells = screen.getAllByRole("row").slice(1).map((row) => row.textContent);
+    const bucketOrder = rowHeaderCells.map((text) => ["zebra-bucket", "alpha-bucket", "mango-bucket"].find((n) => text?.includes(n)));
+    expect(bucketOrder).toEqual(["alpha-bucket", "mango-bucket", "zebra-bucket"]);
+  });
+
   it("shows empty state when no buckets", () => {
     mockBuckets.mockReturnValue({
       data: { buckets: [], total: 0 },
