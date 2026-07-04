@@ -163,6 +163,48 @@ describe("S3Page", () => {
     expect(screen.getByText("Loading objects...")).toBeTruthy();
   });
 
+  // ─── Folder navigation (URL-tracked) ───────────────────
+  // Regression coverage: the folder prefix used to live only in component
+  // state, invisible to the URL/browser history, so the back button skipped
+  // straight past every folder level instead of stepping through them.
+
+  it("reads the folder prefix straight from the URL (deep link)", () => {
+    mockSearchParams.mockReturnValue([new URLSearchParams("bucket=my-bucket&prefix=a/b/c/"), vi.fn()]);
+    mockObjects.mockReturnValue({ data: { objects: [], folders: [], total: 0 }, isLoading: false });
+    render(<S3Page />, { wrapper: createWrapper() });
+    expect(mockObjects).toHaveBeenCalledWith("my-bucket", "a/b/c/");
+  });
+
+  it("pushes the folder prefix onto the URL when navigating into a folder", async () => {
+    const setParams = vi.fn();
+    mockSearchParams.mockReturnValue([new URLSearchParams("bucket=my-bucket"), setParams]);
+    mockObjects.mockReturnValue({
+      data: { objects: [], folders: [{ prefix: "logs/", name: "logs" }], total: 1 },
+      isLoading: false,
+    });
+    const user = userEvent.setup();
+    render(<S3Page />, { wrapper: createWrapper() });
+
+    await clickButton(user, "logs/");
+
+    expect(setParams).toHaveBeenCalledWith({ bucket: "my-bucket", prefix: "logs/" });
+  });
+
+  it("keeps the folder prefix in the URL when selecting an object inside it", async () => {
+    const setParams = vi.fn();
+    mockSearchParams.mockReturnValue([new URLSearchParams("bucket=my-bucket&prefix=a/b/c/"), setParams]);
+    mockObjects.mockReturnValue({
+      data: { objects: [{ key: "a/b/c/file.txt", size: 10, lastModified: null }], folders: [], total: 1 },
+      isLoading: false,
+    });
+    const user = userEvent.setup();
+    render(<S3Page />, { wrapper: createWrapper() });
+
+    await clickButton(user, "file.txt");
+
+    expect(setParams).toHaveBeenCalledWith({ bucket: "my-bucket", prefix: "a/b/c/", object: "a/b/c/file.txt" });
+  });
+
   // ─── Overview Tab Tests ─────────────────────────────────
 
   it("renders overview tab with stats", () => {

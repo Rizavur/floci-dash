@@ -57,13 +57,16 @@ export default function S3Page() {
 
   const selectedBucket = searchParams.get("bucket");
   const selectedObject = searchParams.get("object");
+  // Folder (prefix) lives in the URL too, not just component state — this is what
+  // makes the browser back button step through folder levels correctly instead of
+  // jumping straight past them to wherever the bucket/object params last changed.
+  const currentPrefix = searchParams.get("prefix") || "";
   const [activeTab, setActiveTab] = useState(selectedBucket ? "objects" : "buckets");
   const [showCreateBucket, setShowCreateBucket] = useState(false);
   const [showUploadObject, setShowUploadObject] = useState(false);
   const [newBucketName, setNewBucketName] = useState("");
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [uploadPrefix, setUploadPrefix] = useState("");
-  const [currentPrefix, setCurrentPrefix] = useState("");
   const [uploadResults, setUploadResults] = useState<S3UploadResult[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
@@ -79,11 +82,18 @@ export default function S3Page() {
   }
 
   function selectObject(key: string | null) {
-    if (key && selectedBucket) {
-      setSearchParams({ bucket: selectedBucket, object: key });
-    } else if (selectedBucket) {
-      setSearchParams({ bucket: selectedBucket });
-    }
+    if (!selectedBucket) return;
+    const params: Record<string, string> = { bucket: selectedBucket };
+    if (currentPrefix) params.prefix = currentPrefix;
+    if (key) params.object = key;
+    setSearchParams(params);
+  }
+
+  function selectPrefix(prefix: string) {
+    if (!selectedBucket) return;
+    const params: Record<string, string> = { bucket: selectedBucket };
+    if (prefix) params.prefix = prefix;
+    setSearchParams(params);
   }
 
   const createBucket = useS3CreateBucket();
@@ -137,11 +147,12 @@ export default function S3Page() {
           content: (
             <S3ObjectBrowser
               bucket={selectedBucket}
+              prefix={currentPrefix}
+              onPrefixChange={selectPrefix}
               selectedObject={selectedObject}
               onSelectObject={selectObject}
               onBack={() => selectBucket(null)}
               onUploadClick={() => { setUploadPrefix(currentPrefix); setShowUploadObject(true); }}
-              onPrefixChange={setCurrentPrefix}
             />
           ),
         },
@@ -459,10 +470,9 @@ function S3BucketList({ onSelectBucket, onCreateClick }: { onSelectBucket: (name
   );
 }
 
-function S3ObjectBrowser({ bucket, selectedObject, onSelectObject, onBack, onUploadClick, onPrefixChange }: {
-  bucket: string; selectedObject: string | null; onSelectObject: (key: string | null) => void; onBack: () => void; onUploadClick: () => void; onPrefixChange?: (prefix: string) => void;
+function S3ObjectBrowser({ bucket, prefix, onPrefixChange, selectedObject, onSelectObject, onBack, onUploadClick }: {
+  bucket: string; prefix: string; onPrefixChange: (prefix: string) => void; selectedObject: string | null; onSelectObject: (key: string | null) => void; onBack: () => void; onUploadClick: () => void;
 }) {
-  const [prefix, setPrefix] = useState("");
   const { data, isLoading } = useS3Objects(bucket, prefix);
   const deleteObject = useS3DeleteObject(bucket);
   const createFolder = useS3CreateFolder(bucket);
@@ -482,7 +492,7 @@ function S3ObjectBrowser({ bucket, selectedObject, onSelectObject, onBack, onUpl
     : allObjects;
 
   function navigateToFolder(folderPrefix: string) {
-    setPrefix(folderPrefix);
+    onPrefixChange(folderPrefix);
     setSearchTerm("");
   }
 
@@ -490,13 +500,8 @@ function S3ObjectBrowser({ bucket, selectedObject, onSelectObject, onBack, onUpl
     const parts = prefix.replace(/\/$/, "").split("/");
     parts.pop();
     const parent = parts.length > 0 ? parts.join("/") + "/" : "";
-    setPrefix(parent);
+    onPrefixChange(parent);
     setSearchTerm("");
-  }
-
-  function handlePrefixChange(newPrefix: string) {
-    setPrefix(newPrefix);
-    onPrefixChange?.(newPrefix);
   }
 
   const breadcrumbItems: Array<{ text: string; href: string; prefix?: string }> = [
@@ -800,10 +805,10 @@ function S3ObjectViewer({ bucket, objectKey, onBack }: { bucket: string; objectK
       </SpaceBetween>
 
       <ColumnLayout columns={4} variant="text-grid">
-        <StatCard label="Size" value={data?.size != null ? formatBytes(data.size) : "—"} variant="info" size="sm" />
-        <StatCard label="Type" value={data?.contentType || "—"} variant="info" size="sm" />
-        <StatCard label="Modified" value={data?.lastModified ? new Date(data.lastModified).toLocaleString() : "—"} variant="info" size="sm" />
-        <StatCard label="ETag" value={data?.etag || "—"} variant="info" size="sm" />
+        <StatCard label="Size" value={data?.size != null ? formatBytes(data.size) : "—"} variant="info" size="sm" isText />
+        <StatCard label="Type" value={data?.contentType || "—"} variant="info" size="sm" isText />
+        <StatCard label="Modified" value={data?.lastModified ? new Date(data.lastModified).toLocaleString() : "—"} variant="info" size="sm" isText />
+        <StatCard label="ETag" value={data?.etag || "—"} variant="info" size="sm" isText />
       </ColumnLayout>
 
       <Container header={<Header variant="h3">Actions</Header>}>
