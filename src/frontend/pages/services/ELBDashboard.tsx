@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -529,8 +528,6 @@ export function ELBDashboard() {
     { label: "TCP_UDP", value: "TCP_UDP" },
   ];
 
-  if (lbsLoading || tgsLoading) return <TableSkeleton />;
-
   return (
     <Tabs
       activeTabId={activeTab}
@@ -655,7 +652,7 @@ export function ELBDashboard() {
                     isRowHeader: true,
                   },
                   { id: "protocol", header: "Protocol", cell: (item: any) => item.protocol },
-                  { id: "port", header: "Port", cell: (item: any) => item.port },
+                  { id: "port", header: "Port", cell: (item: any) => item.port, mono: true },
                   { id: "targetType", header: "Target Type", cell: (item: any) => item.targetType },
                   {
                     id: "actions",

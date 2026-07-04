@@ -98,7 +98,7 @@ function TableIndexes({ tableName, tableDetail }: { tableName: string; tableDeta
                 const key = item.KeySchema?.find((k: any) => k.KeyType === "RANGE");
                 return key?.AttributeName || "—";
               }},
-              { id: "items", header: "Items", cell: (item: any) => item.ItemCount?.toLocaleString() ?? "—" },
+              { id: "items", header: "Items", cell: (item: any) => item.ItemCount?.toLocaleString() ?? "—", mono: true },
               { id: "size", header: "Size", cell: (item: any) => {
                 if (item.IndexSizeBytes != null) {
                   const bytes = item.IndexSizeBytes;
@@ -109,7 +109,7 @@ function TableIndexes({ tableName, tableDetail }: { tableName: string; tableDeta
                   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
                 }
                 return "—";
-              }},
+              }, mono: true},
             ]}
             items={gsis}
           />

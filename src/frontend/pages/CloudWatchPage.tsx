@@ -152,12 +152,12 @@ function MetricsTab() {
               </Box>
               <Table
                 columnDefinitions={[
-                  { id: "time", header: "Timestamp", cell: (d: any) => d.timestamp ? new Date(d.timestamp).toLocaleString() : "-" },
-                  { id: "avg", header: "Average", cell: (d: any) => d.average?.toFixed(2) ?? "-" },
-                  { id: "sum", header: "Sum", cell: (d: any) => d.sum?.toFixed(2) ?? "-" },
-                  { id: "min", header: "Min", cell: (d: any) => d.minimum?.toFixed(2) ?? "-" },
-                  { id: "max", header: "Max", cell: (d: any) => d.maximum?.toFixed(2) ?? "-" },
-                  { id: "sc", header: "SampleCount", cell: (d: any) => d.sampleCount ?? "-" },
+                  { id: "time", header: "Timestamp", cell: (d: any) => d.timestamp ? new Date(d.timestamp).toLocaleString() : "-", mono: true },
+                  { id: "avg", header: "Average", cell: (d: any) => d.average?.toFixed(2) ?? "-", mono: true },
+                  { id: "sum", header: "Sum", cell: (d: any) => d.sum?.toFixed(2) ?? "-", mono: true },
+                  { id: "min", header: "Min", cell: (d: any) => d.minimum?.toFixed(2) ?? "-", mono: true },
+                  { id: "max", header: "Max", cell: (d: any) => d.maximum?.toFixed(2) ?? "-", mono: true },
+                  { id: "sc", header: "SampleCount", cell: (d: any) => d.sampleCount ?? "-", mono: true },
                   { id: "unit", header: "Unit", cell: (d: any) => d.unit ?? "-" },
                 ]}
                 items={datapoints}
@@ -289,7 +289,7 @@ function AlarmsTab() {
           { id: "name", header: "Name", cell: (a: any) => a.name },
           { id: "metric", header: "Metric", cell: (a: any) => a.namespace ? `${a.namespace}/${a.metricName}` : "-" },
           { id: "threshold", header: "Threshold", cell: (a: any) => a.threshold != null ? `${a.comparisonOperator || ""} ${a.threshold}` : "-" },
-          { id: "period", header: "Period", cell: (a: any) => a.period ? `${a.period}s` : "-" },
+          { id: "period", header: "Period", cell: (a: any) => a.period ? `${a.period}s` : "-", mono: true },
           { id: "stat", header: "Statistic", cell: (a: any) => a.statistic || "-" },
           {
             id: "actions",

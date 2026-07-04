@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -520,8 +519,6 @@ export function KinesisDashboard() {
   const [recordKey, setRecordKey] = useState("");
   const [activeTab, setActiveTab] = useState<"streams" | "detail">("streams");
 
-  if (isLoading) return <TableSkeleton />;
-
   return (
     <Tabs
       activeTabId={activeTab}
@@ -561,10 +558,10 @@ export function KinesisDashboard() {
                     isRowHeader: true,
                   },
                   { id: "status", header: "Status", cell: (i: any) => i.status },
-                  { id: "shards", header: "Open Shards", cell: (i: any) => i.shards },
-                  { id: "retention", header: "Retention (hrs)", cell: (i: any) => i.retention },
+                  { id: "shards", header: "Open Shards", cell: (i: any) => i.shards, mono: true },
+                  { id: "retention", header: "Retention (hrs)", cell: (i: any) => i.retention, mono: true },
                   { id: "encryption", header: "Encryption", cell: (i: any) => i.encryption },
-                  { id: "created", header: "Created", cell: (i: any) => i.created },
+                  { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
                   {
                     id: "actions",
                     header: "",

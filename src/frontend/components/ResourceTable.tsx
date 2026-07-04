@@ -8,6 +8,8 @@ interface Column {
   cell: (item: any) => React.ReactNode;
   isRowHeader?: boolean;
   width?: number;
+  /** Render this column in the monospace font with tabular digits — use for dates, sizes, counts. */
+  mono?: boolean;
 }
 
 interface Props {
@@ -66,6 +68,7 @@ export default function ResourceTable({
     cell: c.cell,
     isRowHeader: c.isRowHeader,
     width: c.width ?? (onDelete && c.id === "actions" ? 80 : undefined),
+    mono: c.mono,
   }));
 
   return (

@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -523,6 +522,7 @@ export function Route53Dashboard() {
       id: "records",
       header: "Record Sets",
       cell: (item: any) => item.ResourceRecordSetCount ?? 0,
+      mono: true,
     },
     { id: "comment", header: "Comment", cell: (item: any) => item.Config?.Comment || "—" },
     { id: "private", header: "Private", cell: (item: any) => (item.Config?.PrivateZone ? "Yes" : "No") },
@@ -642,7 +642,7 @@ function Route53ZoneDetail({ zoneId, onBack }: { zoneId: string; onBack: () => v
   const columns = [
     { id: "name", header: "Name", cell: (item: any) => item.Name, isRowHeader: true },
     { id: "type", header: "Type", cell: (item: any) => item.Type || "—" },
-    { id: "ttl", header: "TTL", cell: (item: any) => item.TTL ?? "—" },
+    { id: "ttl", header: "TTL", cell: (item: any) => item.TTL ?? "—", mono: true },
     {
       id: "value",
       header: "Value",

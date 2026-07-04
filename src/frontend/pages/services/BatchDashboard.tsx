@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -529,8 +528,6 @@ export function BatchDashboard() {
   const [jobQueue, setJobQueue] = useState("");
   const [jobDefinition, setJobDefinition] = useState("");
 
-  if (ceLoading || jqLoading || jdLoading) return <TableSkeleton />;
-
   return (
     <SpaceBetween size="l">
       <ResourceTable
@@ -543,6 +540,7 @@ export function BatchDashboard() {
           state: ce.state || "-",
           status: ce.status || "-",
         }))}
+        loading={ceLoading}
         columns={[
           { id: "name", header: "Name", cell: (i: any) => i.name, isRowHeader: true },
           { id: "type", header: "Type", cell: (i: any) => i.type },
@@ -568,9 +566,10 @@ export function BatchDashboard() {
           state: jq.state || "-",
           status: jq.status || "-",
         }))}
+        loading={jqLoading}
         columns={[
           { id: "name", header: "Name", cell: (i: any) => i.name, isRowHeader: true },
-          { id: "priority", header: "Priority", cell: (i: any) => i.priority },
+          { id: "priority", header: "Priority", cell: (i: any) => i.priority, mono: true },
           { id: "state", header: "State", cell: (i: any) => i.state },
           { id: "status", header: "Status", cell: (i: any) => i.status },
           { id: "actions", header: "", cell: (i: any) => (
@@ -593,6 +592,7 @@ export function BatchDashboard() {
           type: jd.type || "-",
           status: jd.status || "-",
         }))}
+        loading={jdLoading}
         columns={[
           { id: "name", header: "Name", cell: (i: any) => i.name, isRowHeader: true },
           { id: "revision", header: "Revision", cell: (i: any) => i.revision },

@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -512,8 +511,6 @@ export function GlueDashboard() {
   const { data: tblData } = useGlueTables(selectedDb);
   const deleteTbl = useDeleteGlueTable(selectedDb || "");
 
-  if (isLoading) return <TableSkeleton />;
-
   if (selectedDb) {
     return (
       <>
@@ -539,8 +536,8 @@ export function GlueDashboard() {
             { id: "name", header: "Name", cell: (i: any) => i.name, isRowHeader: true },
             { id: "type", header: "Type", cell: (i: any) => i.type },
             { id: "location", header: "Location", cell: (i: any) => i.location },
-            { id: "columns", header: "Columns", cell: (i: any) => i.columns },
-            { id: "created", header: "Created", cell: (i: any) => i.created },
+            { id: "columns", header: "Columns", cell: (i: any) => i.columns, mono: true },
+            { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
             {
               id: "actions",
               header: "",
@@ -589,7 +586,7 @@ export function GlueDashboard() {
         },
         { id: "description", header: "Description", cell: (i: any) => i.description },
         { id: "location", header: "Location", cell: (i: any) => i.location },
-        { id: "created", header: "Created", cell: (i: any) => i.created },
+        { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
         {
           id: "actions",
           header: "",

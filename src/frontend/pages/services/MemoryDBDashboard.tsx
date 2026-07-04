@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -537,7 +536,7 @@ export function MemoryDBDashboard() {
           { id: "status", header: "Status", cell: (i: any) => i.status },
           { id: "nodeType", header: "Node Type", cell: (i: any) => i.nodeType },
           { id: "engine", header: "Engine", cell: (i: any) => i.engine },
-          { id: "shards", header: "Shards", cell: (i: any) => i.shards },
+          { id: "shards", header: "Shards", cell: (i: any) => i.shards, mono: true },
           { id: "endpoint", header: "Endpoint", cell: (i: any) => i.endpoint },
           { id: "actions", header: "", cell: (i: any) => (
             <DeleteButton

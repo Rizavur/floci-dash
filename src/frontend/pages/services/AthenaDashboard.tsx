@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -510,8 +509,6 @@ export function AthenaDashboard() {
   const deleteWg = useDeleteAthenaWorkGroup();
   const { data: qeData } = useAthenaQueryExecutions();
 
-  if (isLoading) return <TableSkeleton />;
-
   return (
     <Tabs
       tabs={[
@@ -529,13 +526,13 @@ export function AthenaDashboard() {
                 description: w.Description || "-",
                 created: w.CreationTime ? new Date(w.CreationTime).toLocaleDateString() : "-",
               }))}
-              loading={false}
+              loading={isLoading}
               emptyMessage="No work groups"
               columns={[
                 { id: "name", header: "Name", cell: (i: any) => i.name, isRowHeader: true },
                 { id: "state", header: "State", cell: (i: any) => i.state },
                 { id: "description", header: "Description", cell: (i: any) => i.description },
-                { id: "created", header: "Created", cell: (i: any) => i.created },
+                { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
                 {
                   id: "actions",
                   header: "",

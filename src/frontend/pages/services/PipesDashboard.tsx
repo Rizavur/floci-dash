@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -511,8 +510,6 @@ export function PipesDashboard() {
   const startPipe = useStartPipe();
   const stopPipe = useStopPipe();
 
-  if (isLoading) return <TableSkeleton />;
-
   return (
     <ResourceTable
       resourceName="Pipe"
@@ -534,7 +531,7 @@ export function PipesDashboard() {
         { id: "target", header: "Target", cell: (i: any) => i.target },
         { id: "desired", header: "Desired", cell: (i: any) => i.desired },
         { id: "current", header: "Current", cell: (i: any) => i.current },
-        { id: "created", header: "Created", cell: (i: any) => i.created },
+        { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
         {
           id: "actions",
           header: "",

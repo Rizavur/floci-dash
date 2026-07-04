@@ -80,8 +80,8 @@ function StacksTab() {
             cell: (s: any) => <Badge color={STATUS_COLORS[s.status] || "grey"}>{s.status}</Badge>,
           },
           { id: "desc", header: "Description", cell: (s: any) => s.description || "-" },
-          { id: "created", header: "Created", cell: (s: any) => s.creationTime ? new Date(s.creationTime).toLocaleString() : "-" },
-          { id: "updated", header: "Updated", cell: (s: any) => s.lastUpdatedTime ? new Date(s.lastUpdatedTime).toLocaleString() : "-" },
+          { id: "created", header: "Created", cell: (s: any) => s.creationTime ? new Date(s.creationTime).toLocaleString() : "-", mono: true },
+          { id: "updated", header: "Updated", cell: (s: any) => s.lastUpdatedTime ? new Date(s.lastUpdatedTime).toLocaleString() : "-", mono: true },
           {
             id: "actions",
             header: "",
@@ -252,7 +252,7 @@ function StackDetailModal({ stackName, onClose }: { stackName: string; onClose: 
             { id: "type", header: "Type", cell: (r: any) => <span style={{ fontSize: 12 }}>{r.type}</span> },
             { id: "physical", header: "Physical ID", cell: (r: any) => <span style={{ fontSize: 12 }}>{r.physicalId || "-"}</span> },
             { id: "status", header: "Status", cell: (r: any) => <Badge color={STATUS_COLORS[r.status] || "grey"}>{r.status}</Badge> },
-            { id: "updated", header: "Updated", cell: (r: any) => r.lastUpdated ? new Date(r.lastUpdated).toLocaleString() : "-" },
+            { id: "updated", header: "Updated", cell: (r: any) => r.lastUpdated ? new Date(r.lastUpdated).toLocaleString() : "-", mono: true },
           ]}
           items={resources}
           trackBy={(r: any) => r.logicalId}
@@ -266,7 +266,7 @@ function StackDetailModal({ stackName, onClose }: { stackName: string; onClose: 
       content: (
         <Table
           columnDefinitions={[
-            { id: "time", header: "Time", cell: (e: any) => e.timestamp ? new Date(e.timestamp).toLocaleString() : "-" },
+            { id: "time", header: "Time", cell: (e: any) => e.timestamp ? new Date(e.timestamp).toLocaleString() : "-", mono: true },
             { id: "logical", header: "Logical ID", cell: (e: any) => e.logicalId || "-" },
             { id: "type", header: "Type", cell: (e: any) => <span style={{ fontSize: 12 }}>{e.type || "-"}</span> },
             { id: "status", header: "Status", cell: (e: any) => <Badge color={STATUS_COLORS[e.status] || "grey"}>{e.status}</Badge> },

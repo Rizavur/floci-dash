@@ -1,28 +1,8 @@
 import { Box, Skeleton, SpaceBetween } from "./ui";
 
-interface TableSkeletonProps {
-  rows?: number;
-  columns?: number;
-}
-
-export function TableSkeleton({ rows = 5, columns = 3 }: TableSkeletonProps) {
-  return (
-    <SpaceBetween size="l">
-      <Skeleton height="20px" width="120px" />
-      <Box padding="s">
-        <SpaceBetween size="m">
-          {Array.from({ length: rows }).map((_, i) => (
-            <div key={i} style={{ display: "flex", gap: "16px" }}>
-              {Array.from({ length: columns }).map((_, j) => (
-                <Skeleton key={j} height="16px" width={j === 0 ? "40%" : "25%"} />
-              ))}
-            </div>
-          ))}
-        </SpaceBetween>
-      </Box>
-    </SpaceBetween>
-  );
-}
+// Note: table loading now uses Table.tsx's built-in column-aligned skeleton
+// (pass `loading` to <Table>/<ResourceTable>) instead of a standalone component,
+// since a generic skeleton here can't match the real table's column count/widths.
 
 interface CardsSkeletonProps {
   count?: number;

@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -544,14 +543,13 @@ export function BackupDashboard() {
     completed: j.CompletionDate ? new Date(j.CompletionDate).toLocaleDateString() : "-",
   }));
 
-  if (plansLoading || vaultsLoading || jobsLoading) return <TableSkeleton />;
-
   return (
     <SpaceBetween size="l">
       <Container header={<Header variant="h3" counter={plansData?.total} actions={<Button onClick={() => setShowCreatePlan(true)}>Create plan</Button>}>Backup Plans</Header>}>
         <ResourceTable
           resourceName="Plan"
           items={plans}
+          loading={plansLoading}
           columns={[
             {
               id: "name",
@@ -564,7 +562,7 @@ export function BackupDashboard() {
               isRowHeader: true,
             },
             { id: "version", header: "Version", cell: (i: any) => i.version },
-            { id: "created", header: "Created", cell: (i: any) => i.created },
+            { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
             {
               id: "actions",
               header: "",
@@ -609,11 +607,12 @@ export function BackupDashboard() {
         <ResourceTable
           resourceName="Vault"
           items={vaults}
+          loading={vaultsLoading}
           columns={[
             { id: "name", header: "Vault Name", cell: (i: any) => i.name, isRowHeader: true },
             { id: "arn", header: "ARN", cell: (i: any) => i.arn },
             { id: "encrypted", header: "Encrypted", cell: (i: any) => i.encrypted },
-            { id: "created", header: "Created", cell: (i: any) => i.created },
+            { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
             {
               id: "actions",
               header: "",
@@ -638,13 +637,14 @@ export function BackupDashboard() {
         <ResourceTable
           resourceName="Job"
           items={jobs}
+          loading={jobsLoading}
           columns={[
             { id: "id", header: "Job ID", cell: (i: any) => (i.id || "").slice(0, 20) + "...", isRowHeader: true },
             { id: "resource", header: "Resource", cell: (i: any) => i.resource },
             { id: "vault", header: "Vault", cell: (i: any) => i.vault },
             { id: "state", header: "State", cell: (i: any) => i.state },
-            { id: "created", header: "Created", cell: (i: any) => i.created },
-            { id: "completed", header: "Completed", cell: (i: any) => i.completed },
+            { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
+            { id: "completed", header: "Completed", cell: (i: any) => i.completed, mono: true },
             {
               id: "actions",
               header: "",

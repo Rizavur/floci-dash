@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -519,8 +518,6 @@ export function EMRDashboard() {
   const [secName, setSecName] = useState("");
   const [secConfigJson, setSecConfigJson] = useState("");
 
-  if (clustersLoading) return <TableSkeleton />;
-
   return (
     <SpaceBetween size="l">
       <ResourceTable
@@ -533,11 +530,12 @@ export function EMRDashboard() {
           status: c.Status?.State || "-",
           created: c.Status?.Timeline?.CreationDateTime ? new Date(c.Status.Timeline.CreationDateTime * 1000).toLocaleDateString() : "-",
         }))}
+        loading={clustersLoading}
         columns={[
           { id: "id", header: "ID", cell: (i: any) => i.id, isRowHeader: true },
           { id: "name", header: "Name", cell: (i: any) => i.name },
           { id: "status", header: "Status", cell: (i: any) => i.status },
-          { id: "created", header: "Created", cell: (i: any) => i.created },
+          { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
           { id: "actions", header: "", cell: (i: any) => (
             <DeleteButton itemName={i.name} resourceType="cluster" loading={terminate.isPending && terminate.variables === i.id} onDelete={() => terminate.mutateAsync(i.id)} />
           )},
@@ -558,7 +556,7 @@ export function EMRDashboard() {
         }))}
         columns={[
           { id: "name", header: "Name", cell: (i: any) => i.name, isRowHeader: true },
-          { id: "created", header: "Created", cell: (i: any) => i.created },
+          { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
           { id: "actions", header: "", cell: (i: any) => (
             <DeleteButton itemName={i.name} resourceType="security configuration" loading={deleteSecConfig.isPending && deleteSecConfig.variables === i.name} onDelete={() => deleteSecConfig.mutateAsync(i.name)} />
           )},

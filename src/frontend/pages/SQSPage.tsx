@@ -25,7 +25,6 @@ import {
 } from "../components/ui";
 import { useHealth } from "../hooks/useSystem";
 import StatusBadge from "../components/StatusBadge";
-import { TableSkeleton } from "../components/LoadingSkeleton";
 import StatCard from "../components/StatCard";
 import { useToast } from "../components/Toast";
 import { useConfirmDialog } from "../components/ConfirmDialog";
@@ -497,10 +496,6 @@ function AttributesTab({
   const [delaySeconds, setDelaySeconds] = useState(attrs.DelaySeconds || "0");
   const [messageRetention, setMessageRetention] = useState(attrs.MessageRetentionPeriod || "345600");
 
-  if (isLoading) {
-    return <TableSkeleton />;
-  }
-
   const hasRedrive = !!attrs.RedrivePolicy;
 
   const handleSave = () => {
@@ -678,6 +673,7 @@ function MessagesTab({
             header: "Receive count",
             cell: (item: SQSMessage) =>
               item.Attributes?.ApproximateReceiveCount || "0",
+            mono: true,
           },
           {
             id: "sent",
@@ -686,6 +682,7 @@ function MessagesTab({
               item.Attributes?.SentTimestamp
                 ? new Date(parseInt(item.Attributes.SentTimestamp)).toLocaleTimeString()
                 : "—",
+            mono: true,
           },
           ...(isFifo
             ? [

@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -511,8 +510,6 @@ export function CloudTrailDashboard() {
   const startLogging = useStartCloudTrailLogging();
   const stopLogging = useStopCloudTrailLogging();
 
-  if (isLoading) return <TableSkeleton />;
-
   return (
     <ResourceTable
       resourceName="Trail"
@@ -536,7 +533,7 @@ export function CloudTrailDashboard() {
         { id: "multiRegion", header: "Multi-Region", cell: (i: any) => i.multiRegion },
         { id: "globalEvents", header: "Global Events", cell: (i: any) => i.globalEvents },
         { id: "homeRegion", header: "Home Region", cell: (i: any) => i.homeRegion },
-        { id: "created", header: "Created", cell: (i: any) => i.created },
+        { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
         {
           id: "actions",
           header: "",

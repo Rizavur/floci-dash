@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -525,7 +524,7 @@ export function SSMDashboard() {
   const columns = [
     { id: "name", header: "Name", cell: (item: any) => item.Name, isRowHeader: true },
     { id: "type", header: "Type", cell: (item: any) => item.Type || "—" },
-    { id: "version", header: "Version", cell: (item: any) => item.Version ?? "—" },
+    { id: "version", header: "Version", cell: (item: any) => item.Version ?? "—", mono: true },
     {
       id: "lastModified",
       header: "Last Modified",
@@ -533,6 +532,7 @@ export function SSMDashboard() {
         item.LastModifiedDate
           ? new Date(item.LastModifiedDate * 1000).toLocaleString()
           : "—",
+      mono: true,
     },
     { id: "description", header: "Description", cell: (item: any) => item.Description || "—" },
     {
@@ -722,7 +722,7 @@ function SSMParameterDetail({ name, onBack }: { name: string; onBack: () => void
                 resourceName="Version"
                 items={historyData.history}
                 columns={[
-                  { id: "version", header: "Version", cell: (item: any) => item.Version ?? "—" },
+                  { id: "version", header: "Version", cell: (item: any) => item.Version ?? "—", mono: true },
                   {
                     id: "value",
                     header: "Value",
@@ -741,6 +741,7 @@ function SSMParameterDetail({ name, onBack }: { name: string; onBack: () => void
                       item.LastModifiedDate
                         ? new Date(item.LastModifiedDate * 1000).toLocaleString()
                         : "—",
+                    mono: true,
                   },
                 ]}
                 filterEnabled={false}

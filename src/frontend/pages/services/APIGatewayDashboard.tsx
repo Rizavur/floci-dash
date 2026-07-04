@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -520,7 +519,7 @@ export function APIGatewayDashboard() {
     { id: "name", header: "Name", cell: (item: any) => item.name, isRowHeader: true },
     { id: "id", header: "API ID", cell: (item: any) => item.id },
     { id: "description", header: "Description", cell: (item: any) => item.description || "—" },
-    { id: "created", header: "Created", cell: (item: any) => item.createdDate ? new Date(item.createdDate).toLocaleDateString() : "—" },
+    { id: "created", header: "Created", cell: (item: any) => item.createdDate ? new Date(item.createdDate).toLocaleDateString() : "—", mono: true },
     {
       id: "actions",
       header: "",
@@ -679,6 +678,7 @@ function APIGatewayApiDetail({ apiId, onBack }: { apiId: string; onBack: () => v
                 header: "Created",
                 cell: (item: any) =>
                   item.createdDate ? new Date(item.createdDate).toLocaleString() : "—",
+                mono: true,
               },
               {
                 id: "status",

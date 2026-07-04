@@ -230,11 +230,11 @@ describe("SQSPage", () => {
 
   // ─── AttributesTab Tests ───────────────────────────────
 
-  it("shows loading skeleton when attributes are loading", () => {
+  it("renders attributes section immediately while attributes are loading", () => {
     mockSearchParams.mockReturnValue([new URLSearchParams("?queueUrl=http://localhost:4566/000000000000/my-queue"), vi.fn()]);
     mockSQSAttributes.mockReturnValue({ data: undefined, isLoading: true });
     render(<SQSPage />, { wrapper: createWrapper() });
-    expect(screen.queryByText("Queue attributes")).toBeNull();
+    expect(screen.queryByText("Queue attributes")).not.toBeNull();
   });
 
   it("shows redrive policy warning when RedrivePolicy is present", () => {

@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -513,8 +512,6 @@ export function CognitoDashboard() {
   const { data: groupsData } = useCognitoGroups(selectedPool);
   const { data: clientsData } = useCognitoUserPoolClients(selectedPool);
 
-  if (isLoading) return <TableSkeleton />;
-
   if (selectedPool) {
     return (
       <>
@@ -547,7 +544,7 @@ export function CognitoDashboard() {
                     { id: "username", header: "Username", cell: (i: any) => i.username, isRowHeader: true },
                     { id: "status", header: "Status", cell: (i: any) => i.status },
                     { id: "enabled", header: "Enabled", cell: (i: any) => (i.enabled ? "Yes" : "No") },
-                    { id: "created", header: "Created", cell: (i: any) => i.created },
+                    { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
                   ]}
                   filterEnabled
                   filterPlaceholder="Find users"
@@ -574,7 +571,7 @@ export function CognitoDashboard() {
                   columns={[
                     { id: "name", header: "Name", cell: (i: any) => i.name, isRowHeader: true },
                     { id: "description", header: "Description", cell: (i: any) => i.description },
-                    { id: "precedence", header: "Precedence", cell: (i: any) => i.precedence },
+                    { id: "precedence", header: "Precedence", cell: (i: any) => i.precedence, mono: true },
                     { id: "role", header: "Role ARN", cell: (i: any) => i.role },
                   ]}
                   filterEnabled
@@ -603,7 +600,7 @@ export function CognitoDashboard() {
                   columns={[
                     { id: "id", header: "Client ID", cell: (i: any) => i.id, isRowHeader: true },
                     { id: "name", header: "Name", cell: (i: any) => i.name },
-                    { id: "created", header: "Created", cell: (i: any) => i.created },
+                    { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
                   ]}
                   filterEnabled
                   filterPlaceholder="Find clients"
@@ -645,7 +642,7 @@ export function CognitoDashboard() {
         },
         { id: "id", header: "Pool ID", cell: (i: any) => i.id },
         { id: "status", header: "Status", cell: (i: any) => i.status },
-        { id: "created", header: "Created", cell: (i: any) => i.created },
+        { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
         {
           id: "actions",
           header: "",

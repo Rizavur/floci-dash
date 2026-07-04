@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -549,7 +548,7 @@ export function Ec2MessagesDashboard() {
           { id: "id", header: "Message ID", cell: (i: any) => i.id, isRowHeader: true },
           { id: "destination", header: "Destination", cell: (i: any) => i.destination },
           { id: "status", header: "Status", cell: (i: any) => i.status },
-          { id: "created", header: "Created", cell: (i: any) => i.created },
+          { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
           { id: "actions", header: "", cell: (i: any) => (
             <Button
               variant="inline-link"

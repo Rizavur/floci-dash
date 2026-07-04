@@ -433,7 +433,7 @@ function S3BucketList({ onSelectBucket, onCreateClick }: { onSelectBucket: (name
       }
       columnDefinitions={[
         { id: "name", header: "Name", cell: (item: any) => <Button variant="link" onClick={() => onSelectBucket(item.name)}>{item.name}</Button>, isRowHeader: true, width: 400 },
-        { id: "created", header: "Created", cell: (item: any) => item.createdAt ? new Date(item.createdAt).toLocaleString() : "—" },
+        { id: "created", header: "Created", cell: (item: any) => item.createdAt ? new Date(item.createdAt).toLocaleString() : "—", mono: true },
         { id: "actions", header: "", width: 80, cell: (item: any) => (
           <Button variant="icon" iconName="remove" ariaLabel={`Delete ${item.name}`} loading={deleteBucket.isPending && deleteBucket.variables === item.name}
             onClick={async () => {
@@ -628,8 +628,8 @@ function S3ObjectBrowser({ bucket, prefix, onPrefixChange, selectedObject, onSel
               );
             },
           },
-          { id: "size", header: "Size", cell: (item: any) => item._isFolder ? "—" : formatBytes(item.size) },
-          { id: "modified", header: "Last modified", cell: (item: any) => item._isFolder ? "—" : (item.lastModified ? new Date(item.lastModified).toLocaleString() : "—") },
+          { id: "size", header: "Size", cell: (item: any) => item._isFolder ? "—" : formatBytes(item.size), mono: true },
+          { id: "modified", header: "Last modified", cell: (item: any) => item._isFolder ? "—" : (item.lastModified ? new Date(item.lastModified).toLocaleString() : "—"), mono: true },
           { id: "actions", header: "", width: 80, cell: (item: any) => {
             if (item._isFolder) {
               return (

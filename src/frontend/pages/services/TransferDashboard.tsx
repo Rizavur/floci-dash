@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -538,8 +537,6 @@ export function TransferDashboard() {
     sshKeys: u.SshPublicKeyCount ?? u.SshPublicKeys?.length ?? "-",
   }));
 
-  if (serversLoading) return <TableSkeleton />;
-
   return (
     <SpaceBetween size="l">
       <ResourceTable
@@ -562,7 +559,7 @@ export function TransferDashboard() {
           { id: "state", header: "State", cell: (i: any) => i.state },
           { id: "protocol", header: "Protocol", cell: (i: any) => i.protocol },
           { id: "identityProvider", header: "Identity Provider", cell: (i: any) => i.identityProvider },
-          { id: "created", header: "Created", cell: (i: any) => i.created },
+          { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
           {
             id: "actions",
             header: "",

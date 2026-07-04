@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -509,8 +508,6 @@ export function MskDashboard() {
   const { data, isLoading } = useMskClusters();
   const deleteCluster = useDeleteMskCluster();
 
-  if (isLoading) return <TableSkeleton />;
-
   return (
     <ResourceTable
       resourceName="Cluster"
@@ -529,9 +526,9 @@ export function MskDashboard() {
       columns={[
         { id: "name", header: "Cluster Name", cell: (i: any) => i.name, isRowHeader: true },
         { id: "state", header: "State", cell: (i: any) => i.state },
-        { id: "brokers", header: "Brokers", cell: (i: any) => i.brokers },
-        { id: "version", header: "Kafka Version", cell: (i: any) => i.version },
-        { id: "created", header: "Created", cell: (i: any) => i.created },
+        { id: "brokers", header: "Brokers", cell: (i: any) => i.brokers, mono: true },
+        { id: "version", header: "Kafka Version", cell: (i: any) => i.version, mono: true },
+        { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
         {
           id: "actions",
           header: "",

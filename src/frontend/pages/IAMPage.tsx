@@ -75,7 +75,7 @@ function UsersTab() {
         columnDefinitions={[
           { id: "name", header: "User name", cell: (u: any) => u.name },
           { id: "arn", header: "ARN", cell: (u: any) => <span style={{ fontSize: 12 }} className="fd-text-muted">{u.arn}</span> },
-          { id: "created", header: "Created", cell: (u: any) => u.createDate ? new Date(u.createDate).toLocaleDateString() : "-" },
+          { id: "created", header: "Created", cell: (u: any) => u.createDate ? new Date(u.createDate).toLocaleDateString() : "-", mono: true },
           {
             id: "actions",
             header: "",
@@ -213,7 +213,7 @@ function UserDetailModal({ userName, onClose }: { userName: string; onClose: () 
                 columnDefinitions={[
                   { id: "id", header: "Access Key ID", cell: (k: any) => k.accessKeyId },
                   { id: "status", header: "Status", cell: (k: any) => <Badge color={k.status === "Active" ? "green" : "grey"}>{k.status}</Badge> },
-                  { id: "created", header: "Created", cell: (k: any) => k.createDate ? new Date(k.createDate).toLocaleDateString() : "-" },
+                  { id: "created", header: "Created", cell: (k: any) => k.createDate ? new Date(k.createDate).toLocaleDateString() : "-", mono: true },
                 ]}
                 items={[...(newKey ? [{ accessKeyId: newKey.accessKeyId, status: newKey.status || "Active", createDate: new Date() }] : []), ...accessKeys]}
                 trackBy={(k: any) => k.accessKeyId}
@@ -276,7 +276,7 @@ function RolesTab() {
           { id: "name", header: "Role name", cell: (r: any) => r.name },
           { id: "desc", header: "Description", cell: (r: any) => r.description || "-" },
           { id: "arn", header: "ARN", cell: (r: any) => <span style={{ fontSize: 12, color: "var(--sh-dim)" }}>{r.arn}</span> },
-          { id: "created", header: "Created", cell: (r: any) => r.createDate ? new Date(r.createDate).toLocaleDateString() : "-" },
+          { id: "created", header: "Created", cell: (r: any) => r.createDate ? new Date(r.createDate).toLocaleDateString() : "-", mono: true },
           {
             id: "actions",
             header: "",
@@ -458,8 +458,8 @@ function PoliciesTab() {
           { id: "name", header: "Policy name", cell: (p: any) => p.name },
           { id: "scope", header: "Scope", cell: (p: any) => <Badge color={p.scope === "AWS" ? "blue" : "green"}>{p.scope}</Badge> },
           { id: "version", header: "Default version", cell: (p: any) => p.defaultVersionId || "-" },
-          { id: "attached", header: "Attachments", cell: (p: any) => p.attachmentCount ?? 0 },
-          { id: "created", header: "Created", cell: (p: any) => p.createDate ? new Date(p.createDate).toLocaleDateString() : "-" },
+          { id: "attached", header: "Attachments", cell: (p: any) => p.attachmentCount ?? 0, mono: true },
+          { id: "created", header: "Created", cell: (p: any) => p.createDate ? new Date(p.createDate).toLocaleDateString() : "-", mono: true },
           {
             id: "actions",
             header: "",
@@ -622,7 +622,7 @@ function GroupsTab() {
         columnDefinitions={[
           { id: "name", header: "Group name", cell: (g: any) => g.name },
           { id: "arn", header: "ARN", cell: (g: any) => <span style={{ fontSize: 12, color: "var(--sh-dim)" }}>{g.arn}</span> },
-          { id: "created", header: "Created", cell: (g: any) => g.createDate ? new Date(g.createDate).toLocaleDateString() : "-" },
+          { id: "created", header: "Created", cell: (g: any) => g.createDate ? new Date(g.createDate).toLocaleDateString() : "-", mono: true },
           {
             id: "actions",
             header: "",

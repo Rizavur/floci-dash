@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -509,8 +508,6 @@ export function TranscribeDashboard() {
   const { data, isLoading } = useTranscriptionJobs();
   const deleteJob = useDeleteTranscriptionJob();
 
-  if (isLoading) return <TableSkeleton />;
-
   return (
     <ResourceTable
       resourceName="Job"
@@ -529,8 +526,8 @@ export function TranscribeDashboard() {
         { id: "name", header: "Job Name", cell: (i: any) => i.name, isRowHeader: true },
         { id: "status", header: "Status", cell: (i: any) => i.status },
         { id: "language", header: "Language", cell: (i: any) => i.language },
-        { id: "created", header: "Created", cell: (i: any) => i.created },
-        { id: "completed", header: "Completed", cell: (i: any) => i.completed },
+        { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
+        { id: "completed", header: "Completed", cell: (i: any) => i.completed, mono: true },
         {
           id: "actions",
           header: "",

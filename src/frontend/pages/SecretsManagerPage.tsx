@@ -81,6 +81,7 @@ function SecretsPage() {
             id: "created",
             header: "Created",
             cell: (s: any) => s.createdDate ? new Date(s.createdDate).toLocaleDateString() : "-",
+            mono: true,
           },
           {
             id: "tags",
@@ -298,7 +299,7 @@ function SecretDetailModal({ secretId, onClose }: { secretId: string; onClose: (
               header: "Stages",
               cell: (v: any) => (v.stages || []).map((st: string) => <Badge key={st} color={st === "AWSCURRENT" ? "green" : "grey"}>{st}</Badge>),
             },
-            { id: "created", header: "Created", cell: (v: any) => v.createdDate ? new Date(v.createdDate).toLocaleString() : "-" },
+            { id: "created", header: "Created", cell: (v: any) => v.createdDate ? new Date(v.createdDate).toLocaleString() : "-", mono: true },
           ]}
           items={versions}
           trackBy={(v: any) => v.versionId}
