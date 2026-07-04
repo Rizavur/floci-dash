@@ -42,7 +42,11 @@ export function Box({
 
   const computedStyle: CSSProperties = {
     color: resolveColor(color),
-    fontSize: fontSize ? resolveFontSize(fontSize) : isLabel ? "11px" : HEADING_TAGS.has(variant) ? HEADING_SIZE[variant] : undefined,
+    // ponytail: plain variants (div/p/span/strong/small/code) had no default and
+    // silently inherited the browser's ~16px, taller than the rest of this app's
+    // ~12-13px scale (e.g. "strong" row labels rendering bigger than their own
+    // section heading). 13px matches that scale; explicit fontSize still wins.
+    fontSize: fontSize ? resolveFontSize(fontSize) : isLabel ? "11px" : HEADING_TAGS.has(variant) ? HEADING_SIZE[variant] : "13px",
     fontWeight: fontWeight ?? (HEADING_TAGS.has(variant) ? 600 : isLabel ? 600 : undefined),
     textTransform: isLabel ? "uppercase" : undefined,
     letterSpacing: isLabel ? "0.04em" : undefined,
