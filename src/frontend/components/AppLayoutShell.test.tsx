@@ -39,6 +39,7 @@ import AppLayoutShell from "./AppLayoutShell";
 import { useHealth, useActiveServices } from "../hooks/useSystem";
 import { useSettings } from "../stores/settings";
 import { useLocation } from "react-router-dom";
+import { useRecentlyVisited } from "../hooks/useRecentlyVisited";
 
 function createWrapper() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -69,6 +70,12 @@ beforeEach(() => {
   });
   (useLocation as any).mockReturnValue({ pathname: "/", hash: "" });
   document.body.classList.remove("awsui-dark-mode");
+  // useRecentlyVisited is a real (unmocked) Zustand store — AppLayoutShell's
+  // navigation effect writes to it on mount when the active service changes,
+  // so without resetting it here, a service visited by one test (e.g. the
+  // "/services/s3" pathname test below) leaks into every later test's
+  // "Recent" sidebar section.
+  useRecentlyVisited.getState().clearVisited();
 });
 
 // ── Rendering ──────────────────────────────────────────────────────────────
@@ -204,6 +211,32 @@ describe("AppLayoutShell — navigation items", () => {
     const navEl = document.querySelector("nav");
     expect(navEl).toBeTruthy();
     expect(navEl!.textContent).toBeTruthy();
+  });
+
+  it("expands every category when 'Expand all' is clicked", async () => {
+    const user = userEvent.setup();
+    render(
+      <AppLayoutShell><div>Content</div></AppLayoutShell>,
+      { wrapper: createWrapper() },
+    );
+    expect(screen.queryByText("S3")).toBeNull();
+    expect(screen.queryByText("EC2")).toBeNull();
+    await user.click(screen.getByRole("button", { name: /expand all categories/i }));
+    expect(screen.getAllByText("S3").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("EC2").length).toBeGreaterThan(0);
+  });
+
+  it("collapses every category when 'Collapse all' is clicked", async () => {
+    const user = userEvent.setup();
+    render(
+      <AppLayoutShell><div>Content</div></AppLayoutShell>,
+      { wrapper: createWrapper() },
+    );
+    await user.click(screen.getByRole("button", { name: /expand all categories/i }));
+    expect(screen.getAllByText("S3").length).toBeGreaterThan(0);
+    await user.click(screen.getByRole("button", { name: /collapse all categories/i }));
+    expect(screen.queryByText("S3")).toBeNull();
+    expect(screen.queryByText("EC2")).toBeNull();
   });
 });
 
