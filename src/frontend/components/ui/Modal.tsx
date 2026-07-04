@@ -30,7 +30,8 @@ export function Modal({ visible, onDismiss, header, footer, size = "medium", chi
       }}
     >
       <div
-        style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)" }}
+        // ponytail: backdropFilter has no IE/old-Safari fallback, unsupported browsers just get the plain scrim
+        style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
         onClick={onDismiss}
       />
       <div
