@@ -53,7 +53,7 @@ function SectionHead({ title, action }: { title: string; action?: React.ReactNod
     <div className="tw:flex tw:items-center tw:justify-between tw:mb-3">
       <h2 style={{
         fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.06em",
-        textTransform: "uppercase", color: "var(--sh-faint)",
+        textTransform: "uppercase", color: "var(--sh-dim)",
         fontFamily: "var(--font-mono)", margin: 0,
       }}>
         {title}
@@ -123,7 +123,7 @@ export default function DashboardHome() {
   const favoriteKeys = (hasFavorites ? favorites : DEFAULT_FAVORITES).filter((k) => k in health.services);
 
   return (
-    <div className="tw:p-6 tw:max-w-[1280px] tw:min-[1600px]:max-w-[1600px] tw:min-[1920px]:max-w-[1800px] tw:min-[2560px]:max-w-[2200px] tw:mx-auto" style={{ fontFamily: "var(--font-ui)" }}>
+    <div className="tw:p-6" style={{ fontFamily: "var(--font-ui)" }}>
 
       {/* ── Page header ──────────────────────────────────────── */}
       <div className="tw:flex tw:items-baseline tw:justify-between tw:mb-8">

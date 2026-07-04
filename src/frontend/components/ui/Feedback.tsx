@@ -22,14 +22,57 @@ const STATUS_COLOR: Record<StatusType, string> = {
   "in-progress": "var(--sh-info)",
 };
 
-export function StatusIndicator({ type = "info", children }: { type?: StatusType; children?: ReactNode }) {
+// Soft halo ring behind the dot, reusing the same translucent *-bg tokens
+// used for status banners elsewhere — turns the previous flat, easy-to-miss
+// 6px dot into a proper "live status" indicator. pending/stopped stay plain
+// (no matching *-bg token, and they're meant to read as low-key/inactive).
+const STATUS_HALO: Partial<Record<StatusType, string>> = {
+  success: "var(--sh-ok-bg)",
+  error: "var(--sh-fail-bg)",
+  warning: "var(--sh-warn-bg)",
+  info: "var(--sh-info-bg)",
+  loading: "var(--sh-info-bg)",
+  "in-progress": "var(--sh-info-bg)",
+};
+
+interface StatusIndicatorProps {
+  type?: StatusType;
+  children?: ReactNode;
+  // "dot" (default) fits free-text messages (errors, loading text, sentences)
+  // where a colored pill would look like an oversized, wrapping blob. "pill"
+  // is for short, fixed-vocabulary labels (Running/Stopped/Active/Enabled)
+  // — see StatusBadge, the main consumer.
+  variant?: "dot" | "pill";
+}
+
+export function StatusIndicator({ type = "info", children, variant = "dot" }: StatusIndicatorProps) {
   const color = STATUS_COLOR[type] ?? "var(--sh-dim)";
+  const halo = STATUS_HALO[type];
+  const isSpinner = type === "loading" || type === "in-progress";
+
+  if (variant === "pill" && !isSpinner) {
+    return (
+      <span style={{
+        display: "inline-flex", alignItems: "center",
+        padding: "2px 9px", borderRadius: 999,
+        fontSize: "0.75rem", fontWeight: 600,
+        background: halo ?? "var(--sh-elevated)", color,
+        fontFamily: "var(--font-ui)",
+      }}>
+        {children}
+      </span>
+    );
+  }
+
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: "0.75rem", color, fontFamily: "var(--font-ui)" }}>
-      {type === "loading" || type === "in-progress" ? (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: "0.75rem", color, fontFamily: "var(--font-ui)" }}>
+      {isSpinner ? (
         <Spinner size="normal" />
       ) : (
-        <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 }} />
+        <span style={{
+          width: 7, height: 7, borderRadius: "50%", background: color, flexShrink: 0,
+          boxShadow: halo ? `0 0 0 3px ${halo}` : undefined,
+        }} />
       )}
       {children}
     </span>

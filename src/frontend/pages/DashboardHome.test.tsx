@@ -8,7 +8,6 @@ import React from "react";
 const mockHealth = vi.fn();
 const mockActive = vi.fn();
 const mockResourceCounts = vi.fn();
-const mockNavigate = vi.fn();
 
 vi.mock("../hooks/useSystem", () => ({
   useHealth: (...args: any[]) => mockHealth(...args),
@@ -19,8 +18,10 @@ vi.mock("../hooks/useResourceCounts", () => ({
   useResourceCounts: (...args: any[]) => mockResourceCounts(...args),
 }));
 
+// ServiceCard is a real <Link> now (not a div+onClick) so ctrl/cmd/middle-click
+// and "Open in new tab" work — mock it as a plain <a href> like the real thing.
 vi.mock("react-router-dom", () => ({
-  useNavigate: () => mockNavigate,
+  Link: ({ to, children, ...props }: any) => <a href={to} {...props}>{children}</a>,
 }));
 
 import DashboardHome from "./DashboardHome";
@@ -111,14 +112,12 @@ describe("DashboardHome", () => {
     expect(screen.queryByText("Resource Counts")).toBeNull();
   });
 
-  it("navigates to S3 when the S3 favorite card is clicked", async () => {
-    const user = userEvent.setup();
+  it("renders the S3 favorite card as a real link to its service page", () => {
     render(<DashboardHome />, { wrapper: createWrapper() });
     // S3 renders both in Favorites and in the full catalogue below; scope to Favorites.
     const favoritesSection = screen.getByText("Favorites").closest("div")!.parentElement!;
-    const card = within(favoritesSection).getByRole("button", { name: /^Open S3/ });
-    await user.click(card);
-    expect(mockNavigate).toHaveBeenCalledWith("/services/s3");
+    const card = within(favoritesSection).getByRole("link", { name: /^Open S3/ });
+    expect(card.getAttribute("href")).toBe("/services/s3");
   });
 
   it("shows only services with non-zero counts in resource counts", () => {
