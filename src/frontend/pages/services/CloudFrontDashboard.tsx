@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -516,8 +515,6 @@ export function CloudFrontDashboard() {
   const [invPaths, setInvPaths] = useState("/*");
   const [activeTab, setActiveTab] = useState<"distributions" | "invalidations" | "cache-policies" | "functions">("distributions");
 
-  if (isLoading) return <TableSkeleton />;
-
   return (
     <Tabs
       activeTabId={activeTab}
@@ -555,7 +552,7 @@ export function CloudFrontDashboard() {
                 { id: "domain", header: "Domain", cell: (i: any) => i.domain },
                 { id: "status", header: "Status", cell: (i: any) => i.status },
                 { id: "enabled", header: "Enabled", cell: (i: any) => (i.enabled ? "Yes" : "No") },
-                { id: "modified", header: "Last Modified", cell: (i: any) => i.modified },
+                { id: "modified", header: "Last Modified", cell: (i: any) => i.modified, mono: true },
               ]}
               filterEnabled
               filterPlaceholder="Find distributions by ID"
@@ -596,7 +593,7 @@ export function CloudFrontDashboard() {
                       { id: "id", header: "ID", cell: (i: any) => i.id, isRowHeader: true },
                       { id: "status", header: "Status", cell: (i: any) => i.status },
                       { id: "paths", header: "Paths", cell: (i: any) => i.paths },
-                      { id: "created", header: "Created", cell: (i: any) => i.created },
+                      { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
                     ]}
                   />
                   <Modal
@@ -684,7 +681,7 @@ export function CloudFrontDashboard() {
                 { id: "name", header: "Name", cell: (i: any) => i.name, isRowHeader: true },
                 { id: "stage", header: "Stage", cell: (i: any) => i.stage },
                 { id: "runtime", header: "Runtime", cell: (i: any) => i.runtime },
-                { id: "created", header: "Created", cell: (i: any) => i.created },
+                { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
               ]}
               filterEnabled
               filterPlaceholder="Find functions"

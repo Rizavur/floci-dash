@@ -160,14 +160,14 @@ function LambdaFunctionList({ onSelect }: { onSelect: (name: string) => void }) 
           { id: "name", header: "Function name", cell: (item: any) => <Button variant="link" onClick={() => onSelect(item.name)}>{item.name}</Button>, isRowHeader: true },
           { id: "runtime", header: "Runtime", cell: (item: any) => item.runtime || "-" },
           { id: "handler", header: "Handler", cell: (item: any) => item.handler || "-" },
-          { id: "memory", header: "Memory (MB)", cell: (item: any) => item.memorySize || "-" },
-          { id: "timeout", header: "Timeout (s)", cell: (item: any) => item.timeout || "-" },
+          { id: "memory", header: "Memory (MB)", cell: (item: any) => item.memorySize || "-", mono: true },
+          { id: "timeout", header: "Timeout (s)", cell: (item: any) => item.timeout || "-", mono: true },
           { id: "state", header: "State", cell: (item: any) => (
             <StatusIndicator type={item.state === "Active" ? "success" : item.state === "Failed" ? "error" : "in-progress"}>
               {item.state || "Active"}
             </StatusIndicator>
           )},
-          { id: "lastModified", header: "Last modified", cell: (item: any) => item.lastModified ? new Date(item.lastModified).toLocaleString() : "-" },
+          { id: "lastModified", header: "Last modified", cell: (item: any) => item.lastModified ? new Date(item.lastModified).toLocaleString() : "-", mono: true },
           { id: "actions", header: "", cell: (item: any) => (
             <DeleteButton itemName={item.name} resourceType="function" loading={deleteFunction.isPending} onDelete={() => deleteFunction.mutateAsync(item.name)} />
           )},
@@ -391,8 +391,8 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
           items={versions?.versions || []}
           columns={[
             { id: "version", header: "Version", cell: (item: any) => item.version || "-", isRowHeader: true },
-            { id: "lastModified", header: "Last modified", cell: (item: any) => item.lastModified ? new Date(item.lastModified).toLocaleString() : "-" },
-            { id: "codeSize", header: "Code size", cell: (item: any) => item.codeSize ? `${(item.codeSize / 1024).toFixed(1)} KB` : "-" },
+            { id: "lastModified", header: "Last modified", cell: (item: any) => item.lastModified ? new Date(item.lastModified).toLocaleString() : "-", mono: true },
+            { id: "codeSize", header: "Code size", cell: (item: any) => item.codeSize ? `${(item.codeSize / 1024).toFixed(1)} KB` : "-", mono: true },
             { id: "description", header: "Description", cell: (item: any) => item.description || "-" },
           ]}
           emptyMessage="No published versions"
@@ -431,7 +431,7 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
             { id: "state", header: "State", cell: (item: any) => (
               <StatusIndicator type={item.state === "Enabled" ? "success" : "in-progress"}>{item.state || "Enabling"}</StatusIndicator>
             )},
-            { id: "batchSize", header: "Batch size", cell: (item: any) => item.batchSize || "-" },
+            { id: "batchSize", header: "Batch size", cell: (item: any) => item.batchSize || "-", mono: true },
             { id: "lastResult", header: "Last processing result", cell: (item: any) => item.lastProcessingResult || "-" },
           ]}
           emptyMessage="No event source mappings"
@@ -493,9 +493,9 @@ function LambdaLayerList() {
         items={items}
         columns={[
           { id: "name", header: "Layer name", cell: (item: any) => item.name, isRowHeader: true },
-          { id: "version", header: "Latest version", cell: (item: any) => item.version || "-" },
+          { id: "version", header: "Latest version", cell: (item: any) => item.version || "-", mono: true },
           { id: "description", header: "Description", cell: (item: any) => item.description || "-" },
-          { id: "codeSize", header: "Code size", cell: (item: any) => item.codeSize ? `${(item.codeSize / 1024).toFixed(1)} KB` : "-" },
+          { id: "codeSize", header: "Code size", cell: (item: any) => item.codeSize ? `${(item.codeSize / 1024).toFixed(1)} KB` : "-", mono: true },
           { id: "runtimes", header: "Compatible runtimes", cell: (item: any) => (item.runtimes || []).join(", ") || "-" },
           { id: "actions", header: "", cell: (item: any) => (
             item.version ? (

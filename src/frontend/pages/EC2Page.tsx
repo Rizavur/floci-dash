@@ -576,7 +576,7 @@ function EC2SubnetList() {
           { id: "vpc", header: "VPC", cell: (item: any) => item.vpcId },
           { id: "cidr", header: "CIDR", cell: (item: any) => item.cidrBlock },
           { id: "az", header: "AZ", cell: (item: any) => item.az },
-          { id: "ips", header: "Available IPs", cell: (item: any) => item.ipCount },
+          { id: "ips", header: "Available IPs", cell: (item: any) => item.ipCount, mono: true },
           { id: "actions", header: "", cell: (item: any) => <DeleteButton itemName={item.id} resourceType="subnet" loading={deleteSubnet.isPending && deleteSubnet.variables === item.id} onDelete={() => deleteSubnet.mutateAsync(item.id)} /> },
         ]}
         loading={isLoading}
@@ -642,7 +642,7 @@ function EC2SecurityGroupList() {
           { id: "name", header: "Name", cell: (item: any) => item.name },
           { id: "description", header: "Description", cell: (item: any) => item.description },
           { id: "vpc", header: "VPC", cell: (item: any) => item.vpcId || "-" },
-          { id: "rules", header: "Inbound Rules", cell: (item: any) => item.rules },
+          { id: "rules", header: "Inbound Rules", cell: (item: any) => item.rules, mono: true },
           { id: "actions", header: "", cell: (item: any) => (
             <SpaceBetween direction="horizontal" size="xs">
               <Button variant="icon" iconName="add-plus" ariaLabel="Add rule" onClick={() => { setShowRule({ groupId: item.id, action: "add" }); setRuleForm({ ipProtocol: "tcp", fromPort: "22", toPort: "22", cidrIp: "0.0.0.0/0" }); }} />
@@ -915,8 +915,8 @@ function EC2RouteTableList() {
         columns={[
           { id: "id", header: "ID", cell: (item: any) => item.id, isRowHeader: true },
           { id: "vpc", header: "VPC", cell: (item: any) => item.vpcId },
-          { id: "routes", header: "Routes", cell: (item: any) => item.routeCount },
-          { id: "associations", header: "Associations", cell: (item: any) => item.assocCount },
+          { id: "routes", header: "Routes", cell: (item: any) => item.routeCount, mono: true },
+          { id: "associations", header: "Associations", cell: (item: any) => item.assocCount, mono: true },
           { id: "main", header: "Main", cell: (item: any) => item.main },
           { id: "actions", header: "", cell: (item: any) => item.main !== "Yes" && <DeleteButton itemName={item.id} resourceType="route table" loading={deleteRT.isPending && deleteRT.variables === item.id} onDelete={() => deleteRT.mutateAsync(item.id)} /> },
         ]}
@@ -999,7 +999,7 @@ function EC2VolumeList() {
       <ResourceTable resourceName="Volume" headerTitle="Volumes" headerCounter={data?.total} items={items}
         columns={[
           { id: "id", header: "Volume ID", cell: (item: any) => item.id, isRowHeader: true },
-          { id: "size", header: "Size", cell: (item: any) => `${item.size} GiB` },
+          { id: "size", header: "Size", cell: (item: any) => `${item.size} GiB`, mono: true },
           { id: "type", header: "Type", cell: (item: any) => item.type },
           { id: "state", header: "State", cell: (item: any) => <StatusIndicator type={item.state === "available" ? "success" : item.state === "in-use" ? "in-progress" : "warning"}>{item.state}</StatusIndicator> },
           { id: "az", header: "AZ", cell: (item: any) => item.az },

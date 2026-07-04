@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -518,9 +517,9 @@ export function ECSDashboard() {
   const clusterColumns = [
     { id: "name", header: "Cluster Name", cell: (item: any) => item.clusterName || "—", isRowHeader: true },
     { id: "status", header: "Status", cell: (item: any) => <StatusBadge status={item.status || "ACTIVE"} /> },
-    { id: "runningTasks", header: "Running Tasks", cell: (item: any) => item.runningTasksCount ?? 0 },
-    { id: "services", header: "Services", cell: (item: any) => item.activeServicesCount ?? 0 },
-    { id: "instances", header: "Container Instances", cell: (item: any) => item.registeredContainerInstancesCount ?? 0 },
+    { id: "runningTasks", header: "Running Tasks", cell: (item: any) => item.runningTasksCount ?? 0, mono: true },
+    { id: "services", header: "Services", cell: (item: any) => item.activeServicesCount ?? 0, mono: true },
+    { id: "instances", header: "Container Instances", cell: (item: any) => item.registeredContainerInstancesCount ?? 0, mono: true },
     {
       id: "actions",
       header: "",
@@ -644,8 +643,8 @@ function ECSClusterDetail({ clusterName, onBack }: { clusterName: string; onBack
             columns={[
               { id: "name", header: "Service Name", cell: (item: any) => item.serviceName, isRowHeader: true },
               { id: "status", header: "Status", cell: (item: any) => <StatusBadge status={item.status || "ACTIVE"} /> },
-              { id: "desired", header: "Desired", cell: (item: any) => item.desiredCount ?? 0 },
-              { id: "running", header: "Running", cell: (item: any) => item.runningCount ?? 0 },
+              { id: "desired", header: "Desired", cell: (item: any) => item.desiredCount ?? 0, mono: true },
+              { id: "running", header: "Running", cell: (item: any) => item.runningCount ?? 0, mono: true },
               { id: "taskDef", header: "Task Definition", cell: (item: any) => item.taskDefinition?.split("/").pop() || "—" },
               {
                 id: "actions",

@@ -719,7 +719,7 @@ function ArchivesTab({
               </StatusIndicator>
             ),
           },
-          { id: "count", header: "Events", cell: (item: EventArchive) => item.EventCount?.toString() || "0" },
+          { id: "count", header: "Events", cell: (item: EventArchive) => item.EventCount?.toString() || "0", mono: true },
           { id: "source", header: "Source", cell: (item: EventArchive) => <Box fontSize="body-s">{item.EventSourceArn}</Box> },
           {
             id: "actions",

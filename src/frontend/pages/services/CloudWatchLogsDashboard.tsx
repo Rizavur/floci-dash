@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -605,11 +604,13 @@ function CloudWatchLogGroupList({ onSelect }: { onSelect: (name: string) => void
             id: "retention",
             header: "Retention",
             cell: (item: any) => formatRetention(item.retentionInDays),
+            mono: true,
           },
           {
             id: "size",
             header: "Stored bytes",
             cell: (item: any) => formatBytes(item.storedBytes ?? 0),
+            mono: true,
           },
           {
             id: "actions",
@@ -1015,12 +1016,14 @@ function CloudWatchLogStreamList({
             id: "lastEvent",
             header: "Last event",
             cell: (item: any) => formatTimestamp(item.lastEventTimestamp),
+            mono: true,
           },
           {
             id: "size",
             header: "Stored bytes",
             cell: (item: any) =>
               item.storedBytes ? `${(item.storedBytes / 1024).toFixed(1)} KB` : "0 B",
+            mono: true,
           },
           {
             id: "actions",

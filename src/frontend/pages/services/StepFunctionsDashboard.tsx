@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -512,8 +511,6 @@ export function StepFunctionsDashboard() {
   const { data: execData } = useStateMachineExecutions(selectedSm);
   const { data: actData } = useActivities();
 
-  if (isLoading) return <TableSkeleton />;
-
   if (selectedSm) {
     return (
       <>
@@ -537,8 +534,8 @@ export function StepFunctionsDashboard() {
           columns={[
             { id: "name", header: "Name", cell: (i: any) => i.name, isRowHeader: true },
             { id: "status", header: "Status", cell: (i: any) => i.status },
-            { id: "started", header: "Started", cell: (i: any) => i.started },
-            { id: "stopped", header: "Stopped", cell: (i: any) => i.stopped },
+            { id: "started", header: "Started", cell: (i: any) => i.started, mono: true },
+            { id: "stopped", header: "Stopped", cell: (i: any) => i.stopped, mono: true },
           ]}
           filterEnabled
           filterPlaceholder="Find executions"
@@ -565,7 +562,7 @@ export function StepFunctionsDashboard() {
                 type: sm.type || "STANDARD",
                 created: sm.creationDate ? new Date(sm.creationDate).toLocaleDateString() : "-",
               }))}
-              loading={false}
+              loading={isLoading}
               emptyMessage="No state machines"
               columns={[
                 {
@@ -579,7 +576,7 @@ export function StepFunctionsDashboard() {
                   isRowHeader: true,
                 },
                 { id: "type", header: "Type", cell: (i: any) => i.type },
-                { id: "created", header: "Created", cell: (i: any) => i.created },
+                { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
                 {
                   id: "actions",
                   header: "",
@@ -617,7 +614,7 @@ export function StepFunctionsDashboard() {
               columns={[
                 { id: "name", header: "Name", cell: (i: any) => i.name, isRowHeader: true },
                 { id: "arn", header: "ARN", cell: (i: any) => i.arn },
-                { id: "created", header: "Created", cell: (i: any) => i.created },
+                { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
               ]}
               filterEnabled
               filterPlaceholder="Find activities"

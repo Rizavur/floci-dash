@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -521,8 +520,6 @@ export function DocDBDashboard() {
   const [iCluster, setICluster] = useState("");
   const [iClass, setIClass] = useState("");
 
-  if (clustersLoading) return <TableSkeleton />;
-
   return (
     <SpaceBetween size="l">
       <ResourceTable
@@ -536,10 +533,11 @@ export function DocDBDashboard() {
           status: c.Status || "-",
           endpoint: c.Endpoint || "-",
         }))}
+        loading={clustersLoading}
         columns={[
           { id: "id", header: "Identifier", cell: (i: any) => i.id, isRowHeader: true },
           { id: "engine", header: "Engine", cell: (i: any) => i.engine },
-          { id: "version", header: "Version", cell: (i: any) => i.version },
+          { id: "version", header: "Version", cell: (i: any) => i.version, mono: true },
           { id: "status", header: "Status", cell: (i: any) => i.status },
           { id: "endpoint", header: "Endpoint", cell: (i: any) => i.endpoint },
           { id: "actions", header: "", cell: (i: any) => (

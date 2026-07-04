@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -517,8 +516,6 @@ export function CodeBuildDashboard() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
-  if (projectsLoading) return <TableSkeleton />;
-
   const projects = (projectsData?.projects || []).map((p: any) => ({
     name: p.name,
     description: p.description || "-",
@@ -541,7 +538,7 @@ export function CodeBuildDashboard() {
           { id: "name", header: "Name", cell: (i: any) => i.name, isRowHeader: true },
           { id: "description", header: "Description", cell: (i: any) => i.description },
           { id: "language", header: "Language", cell: (i: any) => i.language },
-          { id: "created", header: "Created", cell: (i: any) => i.created },
+          { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
           {
             id: "actions",
             header: "",
@@ -584,7 +581,7 @@ export function CodeBuildDashboard() {
             { id: "id", header: "Build ID", cell: (i: any) => (i.id || "").split("/").pop() || i.id, isRowHeader: true },
             { id: "project", header: "Project", cell: (i: any) => i.project },
             { id: "status", header: "Status", cell: (i: any) => i.status },
-            { id: "started", header: "Started", cell: (i: any) => i.started },
+            { id: "started", header: "Started", cell: (i: any) => i.started, mono: true },
           ]}
           emptyMessage="No builds yet"
         />

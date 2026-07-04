@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -515,8 +514,6 @@ export function ApiGatewayV2Dashboard() {
   const { data: deploymentsData } = useApiGatewayV2Deployments(selectedApi);
   const createDeployment = useCreateApiGatewayV2Deployment(selectedApi || "");
 
-  if (isLoading) return <TableSkeleton />;
-
   if (selectedApi) {
     return (
       <>
@@ -601,7 +598,7 @@ export function ApiGatewayV2Dashboard() {
                     { id: "name", header: "Stage", cell: (i: any) => i.name, isRowHeader: true },
                     { id: "autoDeploy", header: "Auto Deploy", cell: (i: any) => i.autoDeploy },
                     { id: "deployment", header: "Deployment", cell: (i: any) => i.deployment },
-                    { id: "created", header: "Created", cell: (i: any) => i.created },
+                    { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
                   ]}
                   filterEnabled
                   filterPlaceholder="Find stages"
@@ -630,7 +627,7 @@ export function ApiGatewayV2Dashboard() {
                     { id: "id", header: "Deployment ID", cell: (i: any) => i.id, isRowHeader: true },
                     { id: "status", header: "Status", cell: (i: any) => i.status },
                     { id: "description", header: "Description", cell: (i: any) => i.description },
-                    { id: "created", header: "Created", cell: (i: any) => i.created },
+                    { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
                   ]}
                   filterEnabled
                   filterPlaceholder="Find deployments"
@@ -671,7 +668,7 @@ export function ApiGatewayV2Dashboard() {
         },
         { id: "protocol", header: "Protocol", cell: (i: any) => i.protocol },
         { id: "endpoint", header: "Endpoint", cell: (i: any) => i.endpoint },
-        { id: "created", header: "Created", cell: (i: any) => i.created },
+        { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
         {
           id: "actions",
           header: "",

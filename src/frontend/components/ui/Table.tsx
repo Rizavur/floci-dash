@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/16/solid";
-import { Spinner } from "./Feedback";
+import { Skeleton } from "./Feedback";
 
 // ── TextFilter ──────────────────────────────────────────────────────────
 interface TextFilterProps {
@@ -39,7 +39,13 @@ interface ColumnDefinition {
   isRowHeader?: boolean;
   width?: number;
   sortingField?: string;
+  /** Render this column's cells in the monospace font with tabular digits — use for dates, sizes, counts, and other numeric/aligned values. */
+  mono?: boolean;
 }
+
+// Deterministic (non-random) varied widths so skeleton bars look like real
+// text instead of a uniform block, without shifting on every re-render.
+const SKELETON_WIDTHS = ["70%", "45%", "60%", "35%"];
 
 interface TableProps {
   header?: ReactNode;
@@ -91,8 +97,42 @@ export function Table({
       )}
 
       {loading ? (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "48px 16px", color: "var(--sh-dim)", fontSize: 12.5 }}>
-          <Spinner size="normal" /> {loadingText || "Loading…"}
+        <div style={{ overflowX: "auto", overflowY: "hidden" }}>
+          <span className="tw:sr-only">{loadingText || "Loading…"}</span>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5, fontFamily: "var(--font-ui)" }}>
+            <thead>
+              <tr>
+                {isSelectable && (
+                  <th style={{ width: 36, padding: "8px 12px", borderBottom: "1px solid var(--sh-line)", background: "var(--sh-elevated)" }} />
+                )}
+                {columnDefinitions.map((col) => (
+                  <th
+                    key={col.id}
+                    style={{
+                      textAlign: "left", padding: "8px 16px", fontSize: 11, fontWeight: 600,
+                      textTransform: "uppercase", letterSpacing: "0.03em", color: "var(--sh-faint)",
+                      borderBottom: "1px solid var(--sh-line)", width: col.width, whiteSpace: "nowrap",
+                      background: "var(--sh-elevated)",
+                    }}
+                  >
+                    {col.header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 6 }).map((_, rowIdx) => (
+                <tr key={rowIdx} style={{ borderBottom: rowIdx === 5 ? "none" : "1px solid var(--sh-line-sub)" }}>
+                  {isSelectable && <td style={{ padding: "9px 12px" }} />}
+                  {columnDefinitions.map((col, colIdx) => (
+                    <td key={col.id} style={{ padding: "9px 16px" }}>
+                      <Skeleton height="14px" width={SKELETON_WIDTHS[(rowIdx + colIdx) % SKELETON_WIDTHS.length]} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       ) : items.length === 0 ? (
         <div style={{ padding: "32px 16px" }}>{empty}</div>
@@ -148,6 +188,8 @@ export function Table({
                       style={{
                         padding: "9px 16px", color: col.isRowHeader ? "var(--sh-ink)" : "var(--sh-dim)",
                         fontWeight: col.isRowHeader ? 500 : 400, verticalAlign: "middle",
+                        fontFamily: col.mono ? "var(--font-mono)" : undefined,
+                        fontVariantNumeric: col.mono ? "tabular-nums" : undefined,
                       }}
                     >
                       {col.cell(item)}

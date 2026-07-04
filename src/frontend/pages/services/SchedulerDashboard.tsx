@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -542,11 +541,13 @@ function SchedulerGroupList({ onSelectGroup }: { onSelectGroup: (name: string) =
       header: "Created",
       cell: (item: any) =>
         item.CreationDate ? new Date(item.CreationDate).toLocaleString() : "—",
+      mono: true,
     },
     {
       id: "schedules",
       header: "Schedules",
       cell: (item: any) => <GroupScheduleCount groupName={item.Name} />,
+      mono: true,
     },
     {
       id: "actions",

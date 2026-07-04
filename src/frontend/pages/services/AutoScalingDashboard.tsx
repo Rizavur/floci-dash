@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -517,8 +516,6 @@ export function AutoScalingDashboard() {
   const [desired, setDesired] = useState("2");
   const [lcName, setLcName] = useState("");
 
-  if (isLoading) return <TableSkeleton />;
-
   return (
     <Tabs
       tabs={[
@@ -544,12 +541,12 @@ export function AutoScalingDashboard() {
               emptyMessage="No auto scaling groups"
               columns={[
                 { id: "name", header: "Name", cell: (i: any) => i.name, isRowHeader: true },
-                { id: "min", header: "Min", cell: (i: any) => i.min },
-                { id: "max", header: "Max", cell: (i: any) => i.max },
-                { id: "desired", header: "Desired", cell: (i: any) => i.desired },
-                { id: "instances", header: "Instances", cell: (i: any) => i.instances },
+                { id: "min", header: "Min", cell: (i: any) => i.min, mono: true },
+                { id: "max", header: "Max", cell: (i: any) => i.max, mono: true },
+                { id: "desired", header: "Desired", cell: (i: any) => i.desired, mono: true },
+                { id: "instances", header: "Instances", cell: (i: any) => i.instances, mono: true },
                 { id: "health", header: "Health Check", cell: (i: any) => i.health },
-                { id: "created", header: "Created", cell: (i: any) => i.created },
+                { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
                 {
                   id: "actions",
                   header: "",
@@ -589,7 +586,7 @@ export function AutoScalingDashboard() {
                 { id: "name", header: "Name", cell: (i: any) => i.name, isRowHeader: true },
                 { id: "image", header: "AMI", cell: (i: any) => i.image },
                 { id: "type", header: "Instance Type", cell: (i: any) => i.type },
-                { id: "created", header: "Created", cell: (i: any) => i.created },
+                { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
               ]}
               filterEnabled
               filterPlaceholder="Find launch configs"

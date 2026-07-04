@@ -96,6 +96,7 @@ function KeysTab() {
             id: "deletion",
             header: "Deletion",
             cell: (k: any) => k.deletionDate ? new Date(k.deletionDate).toLocaleDateString() : "-",
+            mono: true,
           },
           {
             id: "actions",
@@ -295,7 +296,7 @@ function KeyDetailModal({ keyId, onClose }: { keyId: string; onClose: () => void
           columnDefinitions={[
             { id: "name", header: "Alias", cell: (a: any) => a.name },
             { id: "arn", header: "ARN", cell: (a: any) => <span style={{ fontSize: 12 }}>{a.arn}</span> },
-            { id: "created", header: "Created", cell: (a: any) => a.creationDate ? new Date(a.creationDate).toLocaleDateString() : "-" },
+            { id: "created", header: "Created", cell: (a: any) => a.creationDate ? new Date(a.creationDate).toLocaleDateString() : "-", mono: true },
           ]}
           items={aliases}
           trackBy={(a: any) => a.arn || a.name}
@@ -313,7 +314,7 @@ function KeyDetailModal({ keyId, onClose }: { keyId: string; onClose: () => void
             { id: "name", header: "Name", cell: (g: any) => g.name || "-" },
             { id: "principal", header: "Grantee principal", cell: (g: any) => <span style={{ fontSize: 12 }}>{g.granteePrincipal}</span> },
             { id: "ops", header: "Operations", cell: (g: any) => (g.operations || []).map((op: string) => <Badge key={op}>{op}</Badge>) },
-            { id: "created", header: "Created", cell: (g: any) => g.creationDate ? new Date(g.creationDate).toLocaleDateString() : "-" },
+            { id: "created", header: "Created", cell: (g: any) => g.creationDate ? new Date(g.creationDate).toLocaleDateString() : "-", mono: true },
           ]}
           items={grants}
           trackBy={(g: any) => g.grantId}
@@ -421,7 +422,7 @@ function AliasesTab() {
         columnDefinitions={[
           { id: "name", header: "Alias name", cell: (a: any) => a.name },
           { id: "target", header: "Target key ID", cell: (a: any) => <span style={{ fontSize: 12, fontFamily: "monospace" }}>{a.targetKeyId}</span> },
-          { id: "created", header: "Created", cell: (a: any) => a.creationDate ? new Date(a.creationDate).toLocaleDateString() : "-" },
+          { id: "created", header: "Created", cell: (a: any) => a.creationDate ? new Date(a.creationDate).toLocaleDateString() : "-", mono: true },
           {
             id: "actions",
             header: "",

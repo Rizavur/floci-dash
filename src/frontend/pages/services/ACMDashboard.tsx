@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -509,8 +508,6 @@ export function ACMDashboard() {
   const { data, isLoading } = useACMCertificates();
   const deleteCert = useDeleteACMCertificate();
 
-  if (isLoading) return <TableSkeleton />;
-
   return (
     <ResourceTable
       resourceName="Certificate"
@@ -533,7 +530,7 @@ export function ACMDashboard() {
         { id: "type", header: "Type", cell: (i: any) => i.type },
         { id: "keyAlgo", header: "Key Algorithm", cell: (i: any) => i.keyAlgo },
         { id: "inUse", header: "In Use", cell: (i: any) => i.inUse },
-        { id: "notAfter", header: "Expires", cell: (i: any) => i.notAfter },
+        { id: "notAfter", header: "Expires", cell: (i: any) => i.notAfter, mono: true },
         {
           id: "actions",
           header: "",

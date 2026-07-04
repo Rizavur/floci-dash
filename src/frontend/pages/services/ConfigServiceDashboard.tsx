@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -512,8 +511,6 @@ export function ConfigServiceDashboard() {
   const { data: packsData } = useConformancePacks();
   const deletePack = useDeleteConformancePack();
 
-  if (isLoading) return <TableSkeleton />;
-
   return (
     <Tabs
       tabs={[
@@ -531,7 +528,7 @@ export function ConfigServiceDashboard() {
                 owner: r.Source?.Owner || "-",
                 source: r.Source?.SourceIdentifier || "-",
               }))}
-              loading={false}
+              loading={isLoading}
               emptyMessage="No config rules"
               columns={[
                 { id: "name", header: "Rule Name", cell: (i: any) => i.name, isRowHeader: true },

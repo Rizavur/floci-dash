@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -752,6 +751,7 @@ function AppSyncApiDetail({ apiId, onBack }: { apiId: string; onBack: () => void
               id: "expires",
               header: "Expires",
               cell: (item: any) => (item.expires ? new Date(item.expires * 1000).toLocaleString() : "—"),
+              mono: true,
             },
             {
               id: "actions",

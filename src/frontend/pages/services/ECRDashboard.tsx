@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -512,8 +511,6 @@ export function ECRDashboard() {
   const [showCreate, setShowCreate] = useState(false);
   const [repoName, setRepoName] = useState("");
 
-  if (isLoading) return <TableSkeleton />;
-
   return (
     <>
       <ResourceTable
@@ -536,7 +533,7 @@ export function ECRDashboard() {
             isRowHeader: true,
           },
           { id: "uri", header: "URI", cell: (item: any) => item.uri },
-          { id: "created", header: "Created", cell: (item: any) => item.created },
+          { id: "created", header: "Created", cell: (item: any) => item.created, mono: true },
           {
             id: "actions",
             header: "",

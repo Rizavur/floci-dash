@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -518,8 +517,6 @@ export function STSDashboard() {
   const [assumeResult, setAssumeResult] = useState<any>(null);
   const [sessionResult, setSessionResult] = useState<any>(null);
   const [sessionDuration, setSessionDuration] = useState("");
-
-  if (isLoading) return <TableSkeleton />;
 
   return (
     <Tabs

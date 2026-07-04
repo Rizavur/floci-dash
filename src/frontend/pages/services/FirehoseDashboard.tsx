@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -509,8 +508,6 @@ export function FirehoseDashboard() {
   const { data, isLoading } = useFirehoseStreams();
   const deleteStream = useDeleteFirehoseStream();
 
-  if (isLoading) return <TableSkeleton />;
-
   return (
     <ResourceTable
       resourceName="Stream"
@@ -531,7 +528,7 @@ export function FirehoseDashboard() {
         { id: "status", header: "Status", cell: (i: any) => i.status },
         { id: "bucket", header: "S3 Bucket", cell: (i: any) => i.bucket },
         { id: "prefix", header: "Prefix", cell: (i: any) => i.prefix },
-        { id: "created", header: "Created", cell: (i: any) => i.created },
+        { id: "created", header: "Created", cell: (i: any) => i.created, mono: true },
         {
           id: "actions",
           header: "",

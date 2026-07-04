@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -511,8 +510,6 @@ export function AppConfigDashboard() {
   const [selectedApp, setSelectedApp] = useState<string | null>(null);
   const { data: envData } = useAppConfigEnvironments(selectedApp);
   const { data: profileData } = useAppConfigProfiles(selectedApp);
-
-  if (isLoading) return <TableSkeleton />;
 
   if (selectedApp) {
     return (

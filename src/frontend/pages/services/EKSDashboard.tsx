@@ -29,7 +29,6 @@ import {
 import { useHealth } from "../../hooks/useSystem";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
-import { TableSkeleton } from "../../components/LoadingSkeleton";
 import EmptyState from "../../components/EmptyState";
 import {
   useDynamoDBTables,
@@ -522,8 +521,6 @@ export function EKSDashboard() {
   const [ngNodeRole, setNgNodeRole] = useState("");
   const [ngSubnets, setNgSubnets] = useState("");
 
-  if (clustersLoading) return <TableSkeleton />;
-
   return (
     <Tabs
       activeTabId={selectedCluster ? "nodegroups" : "clusters"}
@@ -579,8 +576,8 @@ export function EKSDashboard() {
                         isRowHeader: true,
                       },
                       { id: "status", header: "Status", cell: (item: any) => item.status },
-                      { id: "version", header: "Version", cell: (item: any) => item.version },
-                      { id: "created", header: "Created", cell: (item: any) => item.created },
+                      { id: "version", header: "Version", cell: (item: any) => item.version, mono: true },
+                      { id: "created", header: "Created", cell: (item: any) => item.created, mono: true },
                       {
                         id: "actions",
                         header: "",
@@ -689,7 +686,6 @@ export function EKSDashboard() {
   );
 }
 
-
 function NodegroupsPanel({
   clusterName,
   nodegroupsData,
@@ -744,9 +740,9 @@ function NodegroupsPanel({
             isRowHeader: true,
           },
           { id: "status", header: "Status", cell: (item: any) => item.status },
-          { id: "version", header: "Version", cell: (item: any) => item.version },
+          { id: "version", header: "Version", cell: (item: any) => item.version, mono: true },
           { id: "instanceTypes", header: "Instance Types", cell: (item: any) => item.instanceTypes },
-          { id: "desired", header: "Desired", cell: (item: any) => item.desired },
+          { id: "desired", header: "Desired", cell: (item: any) => item.desired, mono: true },
           {
             id: "actions",
             header: "",
