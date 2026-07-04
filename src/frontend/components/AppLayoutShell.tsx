@@ -1,16 +1,19 @@
 import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import {
   MagnifyingGlassIcon,
   ChevronRightIcon,
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
+  ChevronDoubleLeftIcon,
+  ChevronDoubleRightIcon,
   HomeIcon,
   StarIcon,
   MoonIcon,
   SunIcon,
   Bars3Icon,
   Cog6ToothIcon,
+  XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { StarIcon as StarIconOutline } from "@heroicons/react/24/outline";
 import { useHealth, useActiveServices } from "../hooks/useSystem";
@@ -23,7 +26,7 @@ import {
   SERVICE_CATEGORY_MAP,
   getServiceLabel,
 } from "../types/services";
-import { getCategoryIcon, getCategoryColor, getCategoryColorBg } from "./categoryIcons";
+import { getCategoryIcon, getCategoryColor, getCategoryColorBg, getCategoryLabel } from "./categoryIcons";
 
 // Shared icon size — all nav/UI icons at 14×14 px
 const IC = "tw:w-3.5 tw:h-3.5 tw:flex-shrink-0";
@@ -50,16 +53,18 @@ function NavItem({ label, serviceKey, status, active, fav, onNavigate, onToggleF
   const categoryColor = getCategoryColor(category);
   const categoryColorBg = getCategoryColorBg(category);
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    // A real <Link>/<a>, not a div+onClick — that's what makes ctrl/cmd/middle
+    // click and "Open in new tab" work at all; a plain div click handler has
+    // no href for the browser to open.
+    <Link
+      to={`/services/${serviceKey}`}
       onClick={() => onNavigate(serviceKey)}
-      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onNavigate(serviceKey); } }}
       className="tw:group tw:relative tw:flex tw:items-center tw:gap-2 tw:px-3 tw:py-1.5 tw:cursor-pointer tw:select-none tw:rounded-[4px] tw:transition-colors tw:duration-100"
       style={{
         background: active ? "var(--sh-accent-bg)" : "transparent",
-        color: active ? "var(--sh-accent)" : "var(--sh-dim)",
+        color: active ? "var(--sh-accent)" : "var(--sh-ink)",
         outline: "none",
+        textDecoration: "none",
       }}
       onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = "var(--sh-hover)"; }}
       onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = "transparent"; }}
@@ -80,7 +85,7 @@ function NavItem({ label, serviceKey, status, active, fav, onNavigate, onToggleF
 
       {/* Label */}
       <span className="tw:flex-1 tw:text-[0.8125rem] tw:leading-none tw:truncate tw:font-medium"
-            style={{ color: active ? "var(--sh-accent)" : "var(--sh-dim)", fontFamily: "var(--font-ui)" }}>
+            style={{ color: active ? "var(--sh-accent)" : "var(--sh-ink)", fontFamily: "var(--font-ui)" }}>
         {label}
       </span>
 
@@ -102,7 +107,7 @@ function NavItem({ label, serviceKey, status, active, fav, onNavigate, onToggleF
           }
         </button>
       )}
-    </div>
+    </Link>
   );
 }
 
@@ -111,7 +116,6 @@ interface Props { children: React.ReactNode }
 // ── Main shell ─────────────────────────────────────────────────────────────
 
 export default function AppLayoutShell({ children }: Props) {
-  const navigate = useNavigate();
   const location = useLocation();
   const { darkMode, toggleDarkMode } = useSettings();
   const { data: health } = useHealth();
@@ -133,6 +137,20 @@ export default function AppLayoutShell({ children }: Props) {
     return new Set([...CATEGORY_ORDER, "Other"].filter((c) => c !== activeCategory));
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Desktop sidebar collapse — persisted so it survives reloads. Collapsing
+  // fully hides the sidebar (rather than shrinking to an icon rail) so the
+  // main content can use the full screen width, per the simplest reading of
+  // "collapsible sidebar".
+  const [desktopCollapsed, setDesktopCollapsed] = useState(
+    () => localStorage.getItem("fd-sidebar-collapsed") === "1"
+  );
+  const toggleDesktopCollapsed = useCallback(() => {
+    setDesktopCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem("fd-sidebar-collapsed", next ? "1" : "0");
+      return next;
+    });
+  }, []);
   const searchRef = useRef<HTMLInputElement>(null);
 
   // ── Apply dark mode ──────────────────────────────────────────────────────
@@ -167,15 +185,19 @@ export default function AppLayoutShell({ children }: Props) {
   }, []);
 
   const handleToggleFav = useCallback((e: React.MouseEvent, key: string) => {
+    // NavItem is now a real <a> (see NavItem/Link), so stopPropagation alone
+    // isn't enough — the anchor's default "follow link" action still fires
+    // on click unless preventDefault is called too.
+    e.preventDefault();
     e.stopPropagation();
     toggleFavorite(key);
   }, [toggleFavorite]);
 
-  const handleNavigate = useCallback((key: string) => {
-    const path = `/services/${key}`;
-    navigate(path);
+  // NavItem's <Link> now handles navigation itself; this just closes the
+  // mobile sidebar drawer after a click.
+  const handleNavigate = useCallback(() => {
     setSidebarOpen(false);
-  }, [navigate]);
+  }, []);
 
   const query = navQuery.trim().toLowerCase();
 
@@ -219,9 +241,10 @@ export default function AppLayoutShell({ children }: Props) {
       {/* ── Header ──────────────────────────────────────────────── */}
       <div className="tw:flex tw:items-center tw:justify-between tw:px-4 tw:py-3"
            style={{ borderBottom: "1px solid var(--sh-line)" }}>
-        <button
-          onClick={() => navigate("/")}
+        <Link
+          to="/"
           className="tw:flex tw:items-center tw:gap-2 tw:cursor-pointer tw:bg-transparent tw:border-0 tw:p-0"
+          style={{ textDecoration: "none" }}
         >
           <span className="tw:inline-flex tw:items-center tw:justify-center tw:w-[22px] tw:h-[22px] tw:rounded-[5px] tw:text-[0.6875rem] tw:font-bold"
                 style={{ background: "var(--sh-accent)", color: "var(--sh-bg)" }}>
@@ -230,19 +253,34 @@ export default function AppLayoutShell({ children }: Props) {
           <span className="tw:text-[0.875rem] tw:font-semibold" style={{ color: "var(--sh-ink)" }}>
             Floci Dash
           </span>
-        </button>
+        </Link>
 
-        {/* Health pill */}
-        <span className="tw:flex tw:items-center tw:gap-1 tw:text-[0.625rem] tw:font-mono tw:px-1.5 tw:py-0.5 tw:rounded"
-              style={{
-                color: running === total && total > 0 ? "var(--sh-ok)" : "var(--sh-warn)",
-                background: "var(--sh-elevated)",
-                border: "1px solid var(--sh-line)",
-              }}>
-          <span className="tw:w-1.5 tw:h-1.5 tw:rounded-full tw:flex-shrink-0"
-                style={{ background: running === total && total > 0 ? "var(--sh-ok)" : "var(--sh-warn)" }} />
-          {running}/{total}
-        </span>
+        <div className="tw:flex tw:items-center tw:gap-1.5">
+          {/* Health pill */}
+          <span className="tw:flex tw:items-center tw:gap-1 tw:text-[0.625rem] tw:font-mono tw:px-1.5 tw:py-0.5 tw:rounded"
+                style={{
+                  color: running === total && total > 0 ? "var(--sh-ok)" : "var(--sh-warn)",
+                  background: "var(--sh-elevated)",
+                  border: "1px solid var(--sh-line)",
+                }}>
+            <span className="tw:w-1.5 tw:h-1.5 tw:rounded-full tw:flex-shrink-0"
+                  style={{ background: running === total && total > 0 ? "var(--sh-ok)" : "var(--sh-warn)" }} />
+            {running}/{total}
+          </span>
+
+          {/* Collapse sidebar (desktop only) */}
+          <button
+            onClick={toggleDesktopCollapsed}
+            title="Collapse sidebar"
+            aria-label="Collapse sidebar"
+            className="tw:hidden tw:md:flex tw:items-center tw:justify-center tw:w-5 tw:h-5 tw:rounded tw:cursor-pointer tw:bg-transparent tw:border-0 tw:flex-shrink-0"
+            style={{ color: "var(--sh-faint)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--sh-hover)"; e.currentTarget.style.color = "var(--sh-dim)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sh-faint)"; }}
+          >
+            <ChevronDoubleLeftIcon className={IC} />
+          </button>
+        </div>
       </div>
 
       {/* ── Search ──────────────────────────────────────────────── */}
@@ -258,14 +296,27 @@ export default function AppLayoutShell({ children }: Props) {
             value={navQuery}
             onChange={(e) => setNavQuery(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Escape") setNavQuery(""); }}
-            className="tw:w-full tw:pl-7 tw:pr-3 tw:py-1.5 tw:text-[0.8125rem] tw:rounded-[5px] tw:outline-none"
+            className="tw:w-full tw:pl-7 tw:py-1.5 tw:text-[0.8125rem] tw:rounded-[5px] tw:outline-none"
             style={{
+              paddingRight: navQuery ? 26 : 12,
               background: "var(--sh-elevated)",
               border: "1px solid var(--sh-line)",
               color: "var(--sh-ink)",
               fontFamily: "var(--font-ui)",
             }}
           />
+          {navQuery && (
+            <button
+              onClick={() => { setNavQuery(""); searchRef.current?.focus(); }}
+              aria-label="Clear search"
+              className="tw:absolute tw:right-1.5 tw:top-1/2 tw:-translate-y-1/2 tw:flex tw:items-center tw:justify-center tw:w-5 tw:h-5 tw:rounded tw:cursor-pointer tw:bg-transparent tw:border-0"
+              style={{ color: "var(--sh-faint)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--sh-hover)"; e.currentTarget.style.color = "var(--sh-dim)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sh-faint)"; }}
+            >
+              <XMarkIcon className={IC} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -292,16 +343,17 @@ export default function AppLayoutShell({ children }: Props) {
         {/* Normal view */}
         {searchResults === null && (
           <>
-            {/* Dashboard link */}
-            <div
-              role="button" tabIndex={0}
-              onClick={() => { navigate("/"); setSidebarOpen(false); }}
-              onKeyDown={(e) => { if (e.key === "Enter") { navigate("/"); setSidebarOpen(false); } }}
+            {/* Dashboard link — a real <Link>, not a div+onClick, so ctrl/cmd/
+                middle-click and "Open in new tab" work. */}
+            <Link
+              to="/"
+              onClick={() => setSidebarOpen(false)}
               className="tw:flex tw:items-center tw:gap-2 tw:px-3 tw:py-1.5 tw:mb-1 tw:cursor-pointer tw:rounded-[4px] tw:transition-colors tw:duration-100 tw:text-[0.8125rem] tw:font-medium"
               style={{
                 background: location.pathname === "/" ? "var(--sh-accent-bg)" : "transparent",
-                color: location.pathname === "/" ? "var(--sh-accent)" : "var(--sh-dim)",
+                color: location.pathname === "/" ? "var(--sh-accent)" : "var(--sh-ink)",
                 outline: "none",
+                textDecoration: "none",
               }}
               onMouseEnter={(e) => { if (location.pathname !== "/") e.currentTarget.style.background = "var(--sh-hover)"; }}
               onMouseLeave={(e) => { if (location.pathname !== "/") e.currentTarget.style.background = "transparent"; }}
@@ -315,7 +367,7 @@ export default function AppLayoutShell({ children }: Props) {
                 <HomeIcon className="tw:w-2.5 tw:h-2.5" />
               </span>
               Dashboard
-            </div>
+            </Link>
 
             {/* Favorites */}
             {favorites.length > 0 && (
@@ -388,10 +440,10 @@ export default function AppLayoutShell({ children }: Props) {
                     className="tw:flex tw:items-center tw:gap-1.5 tw:w-full tw:px-2 tw:py-1.5 tw:cursor-pointer tw:rounded-[3px]"
                     style={{
                       background: "transparent", border: "none",
-                      color: "var(--sh-faint)", fontFamily: "var(--font-mono)",
+                      color: "var(--sh-dim)", fontFamily: "var(--font-mono)",
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = "var(--sh-dim)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = "var(--sh-faint)"; }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = "var(--sh-ink)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = "var(--sh-dim)"; }}
                   >
                     <ChevronRightIcon
                       className={IC}
@@ -399,7 +451,7 @@ export default function AppLayoutShell({ children }: Props) {
                     />
                     <span style={{ color: categoryColor, display: "flex" }}><CategoryIcon className={IC} /></span>
                     <span className="tw:text-[0.6875rem] tw:uppercase tw:tracking-widest tw:font-semibold tw:truncate">
-                      {cat}
+                      {getCategoryLabel(cat)}
                     </span>
                     <span className="tw:ml-auto tw:text-[0.6875rem] tw:font-mono">{keys.length}</span>
                   </button>
@@ -424,15 +476,15 @@ export default function AppLayoutShell({ children }: Props) {
       {/* ── Footer ──────────────────────────────────────────────── */}
       <div className="tw:flex tw:items-center tw:justify-between tw:px-3 tw:py-2"
            style={{ borderTop: "1px solid var(--sh-line)" }}>
-        <button
-          onClick={() => navigate("/settings")}
+        <Link
+          to="/settings"
           className="tw:flex tw:items-center tw:gap-1.5 tw:text-[0.75rem] tw:cursor-pointer tw:rounded-[4px] tw:px-2 tw:py-1 tw:bg-transparent tw:border-0 tw:transition-colors"
-          style={{ color: "var(--sh-faint)", fontFamily: "var(--font-ui)" }}
+          style={{ color: "var(--sh-faint)", fontFamily: "var(--font-ui)", textDecoration: "none" }}
           onMouseEnter={(e) => { e.currentTarget.style.color = "var(--sh-dim)"; e.currentTarget.style.background = "var(--sh-hover)"; }}
           onMouseLeave={(e) => { e.currentTarget.style.color = "var(--sh-faint)"; e.currentTarget.style.background = "transparent"; }}
         >
           <Cog6ToothIcon className={IC} /> Settings
-        </button>
+        </Link>
 
         <button
           onClick={toggleDarkMode}
@@ -469,20 +521,47 @@ export default function AppLayoutShell({ children }: Props) {
       <a href="#main-content" className="fd-skip-link">Skip to content</a>
 
       {/* ── Sidebar (desktop) ─────────────────────────────────── */}
-      <aside
-        className="tw:hidden tw:md:flex tw:flex-col"
-        style={{
-          width: 220,
-          flexShrink: 0,
-          height: "100%",
-          background: "var(--sh-surface)",
-          borderRight: "1px solid var(--sh-line)",
-          // Fallback: show on wider screens even without Tailwind
-          display: window.innerWidth >= 768 ? undefined : "none",
-        }}
-      >
-        {SidebarContent}
-      </aside>
+      {!desktopCollapsed && (
+        <aside
+          className="tw:hidden tw:md:flex tw:flex-col"
+          style={{
+            width: 220,
+            flexShrink: 0,
+            height: "100%",
+            background: "var(--sh-surface)",
+            borderRight: "1px solid var(--sh-line)",
+            // Fallback: show on wider screens even without Tailwind
+            display: window.innerWidth >= 768 ? undefined : "none",
+          }}
+        >
+          {SidebarContent}
+        </aside>
+      )}
+
+      {/* ── Collapsed sidebar expand tab (desktop) ────────────── */}
+      {/* Accent-tinted (not the faint grey used before) and wider, so it
+          reads as an obvious control rather than blending into the edge. */}
+      {desktopCollapsed && (
+        <button
+          onClick={toggleDesktopCollapsed}
+          title="Expand sidebar"
+          aria-label="Expand sidebar"
+          className="tw:hidden tw:md:flex tw:items-center tw:justify-center tw:cursor-pointer tw:border-0"
+          style={{
+            width: 20,
+            flexShrink: 0,
+            height: "100%",
+            background: "var(--sh-accent-bg)",
+            borderRight: "1px solid var(--sh-line)",
+            color: "var(--sh-accent)",
+            transition: "width 0.1s",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.width = "26px"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.width = "20px"; }}
+        >
+          <ChevronDoubleRightIcon className={IC} />
+        </button>
+      )}
 
       {/* ── Mobile sidebar overlay ────────────────────────────── */}
       {sidebarOpen && (
