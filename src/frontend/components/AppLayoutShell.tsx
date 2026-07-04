@@ -5,6 +5,7 @@ import {
   ChevronRightIcon,
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
+  HomeIcon,
   StarIcon,
   MoonIcon,
   SunIcon,
@@ -305,8 +306,14 @@ export default function AppLayoutShell({ children }: Props) {
               onMouseEnter={(e) => { if (location.pathname !== "/") e.currentTarget.style.background = "var(--sh-hover)"; }}
               onMouseLeave={(e) => { if (location.pathname !== "/") e.currentTarget.style.background = "transparent"; }}
             >
-              <span className="tw:w-1.5 tw:h-1.5 tw:rounded-full"
-                    style={{ background: location.pathname === "/" ? "var(--sh-accent)" : "var(--sh-faint)" }} />
+              {/* Solid accent badge (matches the brand logo mark at the top of the
+                  sidebar) instead of a category color — Dashboard isn't a service
+                  in any category, so it should read as its own distinct "home"
+                  destination rather than blend in with the color-coded nav items. */}
+              <span className="tw:flex tw:items-center tw:justify-center tw:flex-shrink-0"
+                    style={{ width: 18, height: 18, borderRadius: 5, background: "var(--sh-accent)", color: "var(--sh-bg)" }}>
+                <HomeIcon className="tw:w-2.5 tw:h-2.5" />
+              </span>
               Dashboard
             </div>
 
