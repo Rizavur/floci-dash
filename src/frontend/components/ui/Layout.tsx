@@ -79,11 +79,10 @@ export function SpaceBetween({ direction = "vertical", size = "m", alignItems, c
         display: "flex",
         flexDirection: direction === "horizontal" ? "row" : "column",
         flexWrap: direction === "horizontal" ? "wrap" : undefined,
-        // ponytail: browser default (align-items: normal -> stretch) silently full-width-stretches
-        // vertical children (e.g. a lone Button), which then look centered because Button's own
-        // content is justify-center'd. flex-start matches Cloudscape's real behavior; inputs still
-        // go full width via their own explicit width: 100%.
-        alignItems: alignItems ?? (direction === "horizontal" ? "center" : "flex-start"),
+        // Vertical SpaceBetween intentionally leaves cross-axis stretch as the
+        // default: Container/Table/Alert etc. rely on it to go full-width.
+        // Button opts itself out via `self-start` instead (see Button.tsx).
+        alignItems: alignItems ?? (direction === "horizontal" ? "center" : undefined),
         gap: SPACE[size] ?? size,
         width: direction === "vertical" ? "100%" : undefined,
       }}

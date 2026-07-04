@@ -16,8 +16,10 @@ import {
   Spinner,
   Table,
   Modal,
+  Tabs,
   type ToggleProps,
   type SelectProps,
+  type TabsProps,
 } from "./ui";
 import {
   useS3BucketVersioning,
@@ -70,49 +72,21 @@ const STORAGE_CLASSES: SelectProps.Option[] = [
 ];
 
 export default function S3BucketConfig({ bucket }: Props) {
-  const [activeTab, setActiveTab] = useState("overview");
-
-  const tabs = [
-    { label: "Overview", id: "overview" },
-    { label: "Versioning", id: "versioning" },
-    { label: "Tags", id: "tags" },
-    { label: "Policy", id: "policy" },
-    { label: "Encryption", id: "encryption" },
-    { label: "Lifecycle", id: "lifecycle" },
-    { label: "CORS", id: "cors" },
-    { label: "Website", id: "website" },
-    { label: "Notifications", id: "notifications" },
-    { label: "Public Access", id: "public-access" },
-    { label: "Logging", id: "logging" },
+  const tabs: TabsProps.Tab[] = [
+    { id: "overview", label: "Overview", content: <BucketOverview bucket={bucket} /> },
+    { id: "versioning", label: "Versioning", content: <BucketVersioning bucket={bucket} /> },
+    { id: "tags", label: "Tags", content: <BucketTags bucket={bucket} /> },
+    { id: "policy", label: "Policy", content: <BucketPolicy bucket={bucket} /> },
+    { id: "encryption", label: "Encryption", content: <BucketEncryption bucket={bucket} /> },
+    { id: "lifecycle", label: "Lifecycle", content: <BucketLifecycle bucket={bucket} /> },
+    { id: "cors", label: "CORS", content: <BucketCors bucket={bucket} /> },
+    { id: "website", label: "Website", content: <BucketWebsite bucket={bucket} /> },
+    { id: "notifications", label: "Notifications", content: <BucketNotifications bucket={bucket} /> },
+    { id: "public-access", label: "Public Access", content: <BucketPublicAccess bucket={bucket} /> },
+    { id: "logging", label: "Logging", content: <BucketLogging bucket={bucket} /> },
   ];
 
-  return (
-    <SpaceBetween size="l">
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {tabs.map((tab) => (
-          <Button
-            key={tab.id}
-            variant={activeTab === tab.id ? "primary" : "normal"}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.label}
-          </Button>
-        ))}
-      </div>
-
-      {activeTab === "overview" && <BucketOverview bucket={bucket} />}
-      {activeTab === "versioning" && <BucketVersioning bucket={bucket} />}
-      {activeTab === "tags" && <BucketTags bucket={bucket} />}
-      {activeTab === "policy" && <BucketPolicy bucket={bucket} />}
-      {activeTab === "encryption" && <BucketEncryption bucket={bucket} />}
-      {activeTab === "lifecycle" && <BucketLifecycle bucket={bucket} />}
-      {activeTab === "cors" && <BucketCors bucket={bucket} />}
-      {activeTab === "website" && <BucketWebsite bucket={bucket} />}
-      {activeTab === "notifications" && <BucketNotifications bucket={bucket} />}
-      {activeTab === "public-access" && <BucketPublicAccess bucket={bucket} />}
-      {activeTab === "logging" && <BucketLogging bucket={bucket} />}
-    </SpaceBetween>
-  );
+  return <Tabs tabs={tabs} />;
 }
 
 function BucketOverview({ bucket }: Props) {
@@ -763,7 +737,9 @@ function BucketWebsite({ bucket }: Props) {
     <Container header={<Header variant="h3">Static Website Hosting</Header>}>
       <SpaceBetween size="m">
         <Box variant="p" color="text-body-secondary">
-          S3 can host a static website with index and error documents. The website endpoint is: <code>http://{bucket}.s3-website-{process.env.AWS_REGION || "us-east-1"}.amazonaws.com</code>
+          {/* ponytail: process.env isn't available in the browser (Vite only special-cases NODE_ENV); this is
+              a static display string anyway, and the emulator's default region is always us-east-1. */}
+          S3 can host a static website with index and error documents. The website endpoint is: <code>http://{bucket}.s3-website-us-east-1.amazonaws.com</code>
         </Box>
         <Form>
           <FormField label="Index document" description="The default file served when a visitor requests the root URL (e.g., index.html).">
