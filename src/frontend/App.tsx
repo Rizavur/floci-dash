@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HashRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AppLayoutShell from "./components/AppLayoutShell";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ToastProvider, useToast } from "./components/Toast";
@@ -77,7 +77,7 @@ export default function App() {
       </Suspense>
       <ToastProvider>
         <ToastProviderWithErrorReporter>
-          <HashRouter>
+          <BrowserRouter>
             <ErrorBoundary>
               <AppLayoutShell>
                 <ErrorBoundary>
@@ -103,7 +103,7 @@ export default function App() {
                 </ErrorBoundary>
               </AppLayoutShell>
             </ErrorBoundary>
-          </HashRouter>
+          </BrowserRouter>
         </ToastProviderWithErrorReporter>
       </ToastProvider>
     </QueryClientProvider>
