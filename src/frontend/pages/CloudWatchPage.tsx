@@ -76,7 +76,7 @@ function Sparkline({ values }: { values: number[] }) {
   const pts = values.map((v, i) => `${i * step},${h - ((v - min) / range) * h}`).join(" ");
   return (
     <svg width={w} height={h} style={{ verticalAlign: "middle" }}>
-      <polyline points={pts} fill="none" stroke="var(--color-text-status-info, #0073bb)" strokeWidth="1.5" />
+      <polyline points={pts} fill="none" stroke="var(--sh-info)" strokeWidth="1.5" />
     </svg>
   );
 }

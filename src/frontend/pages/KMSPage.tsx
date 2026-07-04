@@ -200,7 +200,7 @@ function KeyDetailModal({ keyId, onClose }: { keyId: string; onClose: () => void
             <div><b>Origin:</b> {k.origin}</div>
             <div><b>Manager:</b> <Badge color={k.keyManager === "AWS" ? "blue" : "green"}>{k.keyManager}</Badge></div>
             <div><b>Created:</b> {k.creationDate ? new Date(k.creationDate).toLocaleString() : "-"}</div>
-            {k.deletionDate && <div><b>Deletion date:</b> <span style={{ color: "var(--color-text-status-error)" }}>{new Date(k.deletionDate).toLocaleString()}</span></div>}
+            {k.deletionDate && <div><b>Deletion date:</b> <span style={{ color: "var(--sh-fail)" }}>{new Date(k.deletionDate).toLocaleString()}</span></div>}
             <div><b>Multi-Region:</b> {k.multiRegion ? "Yes" : "No"}</div>
             <div><b>Rotation:</b> {rotationEnabled ? <Badge color="green">Enabled</Badge> : <Badge color="grey">Off</Badge>}</div>
           </ColumnLayout>

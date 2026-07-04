@@ -71,7 +71,7 @@ export default class ErrorBoundary extends Component<Props, State> {
                     fontSize: 12,
                     margin: 0,
                     padding: "8px",
-                    background: "var(--color-background-container-secondary, #f2f3f3)",
+                    background: "var(--sh-elevated)",
                     borderRadius: "4px",
                   }}
                 >

@@ -458,7 +458,7 @@ export default function DynamoDBTableDetail({
             justifyContent: "space-between",
             gap: 8,
             padding: "10px 14px",
-            background: "var(--color-background-container-secondary, #f2f3f3)",
+            background: "var(--sh-elevated)",
             borderRadius: 8,
           }}
         >
@@ -566,8 +566,8 @@ export default function DynamoDBTableDetail({
                 marginBottom: 4,
                 cursor: "pointer",
                 borderRadius: 4,
-                background: cond.enabled ? "var(--color-text-status-success, #037f0c)" : "var(--color-background-control-default, #d5dbdb)",
-                color: cond.enabled ? "var(--color-text-status-inverted, #fff)" : "var(--color-text-body-default, inherit)",
+                background: cond.enabled ? "var(--sh-ok)" : "var(--sh-elevated)",
+                color: cond.enabled ? "var(--sh-bg)" : "var(--sh-dim)",
                 fontSize: 14,
                 fontWeight: 700,
                 flexShrink: 0,
@@ -1071,7 +1071,7 @@ export default function DynamoDBTableDetail({
                     gap: 12,
                     padding: "8px 12px",
                     borderRadius: 6,
-                    borderBottom: "1px solid var(--color-border-divider-default, #e9ebed)",
+                    borderBottom: "1px solid var(--sh-line)",
                   }}
                 >
                   <span
@@ -1079,7 +1079,7 @@ export default function DynamoDBTableDetail({
                       minWidth: 160,
                       flexShrink: 0,
                       fontWeight: 600,
-                      color: "var(--color-text-body-secondary, #545b64)",
+                      color: "var(--sh-dim)",
                     }}
                   >
                     {key}
@@ -1087,7 +1087,7 @@ export default function DynamoDBTableDetail({
                   <span
                     style={{
                       wordBreak: "break-all",
-                      color: "var(--color-text-body-secondary, #545b64)",
+                      color: "var(--sh-dim)",
                     }}
                   >
                     {formatItemValue(value)}
@@ -1100,7 +1100,7 @@ export default function DynamoDBTableDetail({
               style={{
                 marginTop: 8,
                 padding: "12px 0",
-                borderTop: "2px solid var(--color-border-divider-default, #e9ebed)",
+                borderTop: "2px solid var(--sh-line)",
               }}
             >
               <Box variant="h3" padding={{ bottom: "s" }}>
@@ -1249,7 +1249,7 @@ export default function DynamoDBTableDetail({
                   gap: 12,
                   padding: "8px 12px",
                   borderRadius: 6,
-                  border: "1px solid var(--color-border-divider-default, #e9ebed)",
+                  border: "1px solid var(--sh-line)",
                 }}
               >
                 <div>

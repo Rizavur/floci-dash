@@ -346,7 +346,7 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
               </Box>
               <Box padding={{ top: "s" }}>
                 <pre className="fd-code-block" style={{
-                  background: "var(--color-background-container-secondary, #f2f3f3)",
+                  background: "var(--sh-elevated)",
                   padding: "12px",
                   borderRadius: "8px",
                   fontSize: 13,

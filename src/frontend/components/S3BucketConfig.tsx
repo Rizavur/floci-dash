@@ -125,23 +125,23 @@ function BucketOverview({ bucket }: Props) {
     <SpaceBetween size="m">
       <Container header={<Header variant="h3">Bucket Configuration Summary</Header>}>
         <SpaceBetween size="s">
-          <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--color-border-divider-default, #e9ebed)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--sh-line)" }}>
             <Box variant="strong">Versioning</Box>
             <StatusIndicator type={versioning?.status === "Enabled" ? "success" : "info"}>
               {versioning?.status || "Unknown"}
             </StatusIndicator>
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--color-border-divider-default, #e9ebed)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--sh-line)" }}>
             <Box variant="strong">Default Encryption</Box>
             <StatusIndicator type={encryption?.configured ? "success" : "info"}>
               {encryption?.configured ? "Enabled" : "Not configured"}
             </StatusIndicator>
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--color-border-divider-default, #e9ebed)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--sh-line)" }}>
             <Box variant="strong">Tags</Box>
             <Box>{tags?.total || 0} tag(s)</Box>
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--color-border-divider-default, #e9ebed)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--sh-line)" }}>
             <Box variant="strong">Access Logging</Box>
             <StatusIndicator type={logging?.enabled ? "success" : "info"}>
               {logging?.enabled ? `Enabled → ${logging.targetBucket}` : "Disabled"}
