@@ -20,7 +20,7 @@ import {
   SERVICE_CATEGORY_MAP,
   getServiceLabel,
 } from "../types/services";
-import { getCategoryIcon, getCategoryColor } from "./categoryIcons";
+import { getCategoryIcon, getCategoryColor, getCategoryColorBg } from "./categoryIcons";
 
 // Shared icon size — all nav/UI icons at 14×14 px
 const IC = "tw:w-3.5 tw:h-3.5 tw:flex-shrink-0";
@@ -39,6 +39,13 @@ interface NavItemProps {
 
 function NavItem({ label, serviceKey, status, active, fav, onNavigate, onToggleFav }: NavItemProps) {
   const isRunning = status === "running";
+  // Same category icon badge as the Dashboard home page's service cards —
+  // a flat colored dot next to every single row read as very plain/samey,
+  // the badge gives each row a distinct, recognizable identity at a glance.
+  const category = SERVICE_CATEGORY_MAP[serviceKey] || "Other";
+  const CategoryIcon = getCategoryIcon(category);
+  const categoryColor = getCategoryColor(category);
+  const categoryColorBg = getCategoryColorBg(category);
   return (
     <div
       role="button"
@@ -60,9 +67,13 @@ function NavItem({ label, serviceKey, status, active, fav, onNavigate, onToggleF
               style={{ background: "var(--sh-accent)" }} />
       )}
 
-      {/* Status dot */}
-      <span className="tw:w-1.5 tw:h-1.5 tw:rounded-full tw:flex-shrink-0"
-            style={{ background: isRunning ? "var(--sh-ok)" : "var(--sh-faint)" }} />
+      {/* Category icon badge, with a small presence dot for running/available */}
+      <span className="tw:relative tw:flex tw:items-center tw:justify-center tw:flex-shrink-0"
+            style={{ width: 18, height: 18, borderRadius: 5, background: categoryColorBg, color: categoryColor, opacity: isRunning ? 1 : 0.55 }}>
+        <CategoryIcon className="tw:w-2.5 tw:h-2.5" />
+        <span className="tw:absolute tw:rounded-full"
+              style={{ width: 6, height: 6, right: -1, bottom: -1, background: isRunning ? "var(--sh-ok)" : "var(--sh-faint)", border: "1.5px solid var(--sh-surface)" }} />
+      </span>
 
       {/* Label */}
       <span className="tw:flex-1 tw:text-[12px] tw:leading-none tw:truncate tw:font-medium"
