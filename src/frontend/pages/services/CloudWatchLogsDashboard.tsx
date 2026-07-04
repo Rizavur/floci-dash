@@ -1849,31 +1849,56 @@ const LOG_VIEW_LIMIT_OPTIONS: SelectProps.Option[] = [
 // ─── Log level highlighting ─────────────────────────────
 // Shared between the live stream viewer and the cross-stream search view.
 
+// Covers the level vocabularies of the log frameworks/formats actually seen
+// in AWS logs: Log4j/Logback/Python logging (ERROR/WARN/INFO/DEBUG/TRACE/
+// CRITICAL), java.util.logging (SEVERE/CONFIG/FINE/FINER/FINEST), syslog
+// (EMERG/ALERT/CRIT/ERR/NOTICE), and generic pass/fail words apps print
+// directly (SUCCESS/FAIL/FAILED/EXCEPTION/PANIC). Grouped by severity color.
 const LOG_LEVEL_COLORS: Record<string, string> = {
-  ERROR: "var(--sh-fail)",
-  FATAL: "var(--sh-fail)",
-  WARN: "var(--sh-warn)",
-  WARNING: "var(--sh-warn)",
-  INFO: "var(--sh-info)",
-  DEBUG: "var(--sh-dim)",
-  TRACE: "var(--sh-dim)",
+  // Fatal / error — red
+  EMERGENCY: "var(--sh-fail)", EMERG: "var(--sh-fail)", ALERT: "var(--sh-fail)",
+  CRITICAL: "var(--sh-fail)", CRIT: "var(--sh-fail)", FATAL: "var(--sh-fail)",
+  PANIC: "var(--sh-fail)", SEVERE: "var(--sh-fail)",
+  ERROR: "var(--sh-fail)", ERR: "var(--sh-fail)", EXCEPTION: "var(--sh-fail)",
+  FAILED: "var(--sh-fail)", FAIL: "var(--sh-fail)",
+  // Warning — amber
+  WARNING: "var(--sh-warn)", WARN: "var(--sh-warn)",
+  // Informational — blue
+  INFORMATION: "var(--sh-info)", INFO: "var(--sh-info)", NOTICE: "var(--sh-info)",
+  // Success — green
+  SUCCESS: "var(--sh-ok)", OK: "var(--sh-ok)",
+  // Verbose / low-level — dim
+  DEBUG: "var(--sh-dim)", TRACE: "var(--sh-dim)", VERBOSE: "var(--sh-dim)",
+  CONFIG: "var(--sh-dim)", FINE: "var(--sh-dim)", FINER: "var(--sh-dim)", FINEST: "var(--sh-dim)",
 };
 
-const LOG_LEVEL_PATTERN = /\b(ERROR|FATAL|WARNING|WARN|INFO|DEBUG|TRACE)\b/g;
+const LOG_LEVEL_WORDS = Object.keys(LOG_LEVEL_COLORS).join("|");
 
-/** Renders a log message with level keywords (ERROR, WARN, INFO, ...) colored
- * and bolded so they stand out while scanning. Splitting on a capturing-group
- * regex keeps the matched keywords in the resulting array alongside the
- * surrounding plain text. */
-function highlightLogLevels(message: string) {
+// Matches level keywords OR a whole [bracketed] chunk (thread names, request
+// IDs, tags like "[http-nio-exec-1]") in one pass so a single split keeps
+// both kinds of matches, in order, alongside the surrounding plain text.
+const LOG_LEVEL_PATTERN = new RegExp(`(\\b(?:${LOG_LEVEL_WORDS})\\b|\\[[^\\]\\n]*\\])`, "g");
+
+/** Renders a log message with level keywords (ERROR, WARNING, SUCCESS, ...)
+ * colored by severity and bolded, and [bracketed] chunks colored (using the
+ * severity color if the bracket wraps a level keyword, e.g. "[ERROR]"), so
+ * both stand out while scanning. */
+export function highlightLogLevels(message: string) {
   const parts = message.split(LOG_LEVEL_PATTERN);
   return parts.map((part, i) => {
-    const color = LOG_LEVEL_COLORS[part];
-    return color ? (
-      <span key={i} style={{ color, fontWeight: 700 }}>{part}</span>
-    ) : (
-      <Fragment key={i}>{part}</Fragment>
-    );
+    const levelColor = LOG_LEVEL_COLORS[part];
+    if (levelColor) {
+      return <span key={i} style={{ color: levelColor, fontWeight: 700 }}>{part}</span>;
+    }
+    if (part.startsWith("[") && part.endsWith("]")) {
+      const innerColor = LOG_LEVEL_COLORS[part.slice(1, -1)];
+      return (
+        <span key={i} style={{ color: innerColor ?? "var(--sh-accent)", fontWeight: innerColor ? 700 : 400 }}>
+          {part}
+        </span>
+      );
+    }
+    return <Fragment key={i}>{part}</Fragment>;
   });
 }
 
