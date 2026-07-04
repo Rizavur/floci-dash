@@ -196,6 +196,7 @@ export default function AppLayoutShell({ children }: Props) {
 
   const expandAll = useCallback(() => setCollapsed(new Set()), []);
   const collapseAll = useCallback(() => setCollapsed(new Set(orderedCategories)), [orderedCategories]);
+  const allCategoriesExpanded = collapsed.size === 0;
 
   // Filtered view when searching
   const searchResults = useMemo(() => {
@@ -346,30 +347,19 @@ export default function AppLayoutShell({ children }: Props) {
               </div>
             )}
 
-            {/* Divider before categories, with expand/collapse-all inline on the same line */}
+            {/* Divider before categories, with a single expand/collapse-all toggle inline */}
             <div className="tw:flex tw:items-center tw:gap-1 tw:my-1 tw:mx-2">
               <div className="tw:flex-1" style={{ height: "1px", background: "var(--sh-line-sub)" }} />
               <button
-                onClick={expandAll}
-                title="Expand all"
-                aria-label="Expand all categories"
+                onClick={allCategoriesExpanded ? collapseAll : expandAll}
+                title={allCategoriesExpanded ? "Collapse all" : "Expand all"}
+                aria-label={allCategoriesExpanded ? "Collapse all categories" : "Expand all categories"}
                 className="tw:flex tw:items-center tw:justify-center tw:w-5 tw:h-5 tw:rounded tw:cursor-pointer tw:bg-transparent tw:border-0 tw:flex-shrink-0"
                 style={{ color: "var(--sh-faint)" }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = "var(--sh-hover)"; e.currentTarget.style.color = "var(--sh-dim)"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sh-faint)"; }}
               >
-                <ChevronDoubleDownIcon className={IC} />
-              </button>
-              <button
-                onClick={collapseAll}
-                title="Collapse all"
-                aria-label="Collapse all categories"
-                className="tw:flex tw:items-center tw:justify-center tw:w-5 tw:h-5 tw:rounded tw:cursor-pointer tw:bg-transparent tw:border-0 tw:flex-shrink-0"
-                style={{ color: "var(--sh-faint)" }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--sh-hover)"; e.currentTarget.style.color = "var(--sh-dim)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sh-faint)"; }}
-              >
-                <ChevronDoubleUpIcon className={IC} />
+                {allCategoriesExpanded ? <ChevronDoubleUpIcon className={IC} /> : <ChevronDoubleDownIcon className={IC} />}
               </button>
             </div>
 
