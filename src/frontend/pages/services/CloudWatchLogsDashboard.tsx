@@ -1,7 +1,7 @@
 // Auto-split from ServicePage.tsx. Shared import preamble is intentional;
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { useState, useRef, useEffect, Fragment } from "react";
+import { useState, useRef, useEffect, Fragment, type ReactNode } from "react";
 import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -937,7 +937,7 @@ function CloudWatchLogGroupSearch({
                     color: "var(--sh-ink)",
                   }}
                 >
-                  {highlightLogLevels(event.message || "")}
+                  {renderLogMessage(event.message || "")}
                 </span>
               </div>
             );
@@ -1299,7 +1299,7 @@ function CloudWatchLogStreamDetail({
                 color: "var(--sh-ink)",
               }}
             >
-              {highlightLogLevels(event.message || "")}
+              {renderLogMessage(event.message || "")}
             </span>
           </div>
         ))}
@@ -1874,32 +1874,48 @@ const LOG_LEVEL_COLORS: Record<string, string> = {
 
 const LOG_LEVEL_WORDS = Object.keys(LOG_LEVEL_COLORS).join("|");
 
-// Matches level keywords OR a whole [bracketed] chunk (thread names, request
-// IDs, tags like "[http-nio-exec-1]") in one pass so a single split keeps
-// both kinds of matches, in order, alongside the surrounding plain text.
-const LOG_LEVEL_PATTERN = new RegExp(`(\\b(?:${LOG_LEVEL_WORDS})\\b|\\[[^\\]\\n]*\\])`, "g");
+const LOG_LEVEL_PATTERN = new RegExp(`\\b(?:${LOG_LEVEL_WORDS})\\b`, "g");
 
 /** Renders a log message with level keywords (ERROR, WARNING, SUCCESS, ...)
- * colored by severity and bolded, and [bracketed] chunks colored (using the
- * severity color if the bracket wraps a level keyword, e.g. "[ERROR]"), so
- * both stand out while scanning. */
+ * colored by severity and bolded, so they stand out while scanning. */
 export function highlightLogLevels(message: string) {
   const parts = message.split(LOG_LEVEL_PATTERN);
-  return parts.map((part, i) => {
-    const levelColor = LOG_LEVEL_COLORS[part];
-    if (levelColor) {
-      return <span key={i} style={{ color: levelColor, fontWeight: 700 }}>{part}</span>;
+  const matches = message.match(LOG_LEVEL_PATTERN) ?? [];
+  const result: ReactNode[] = [];
+  parts.forEach((part, i) => {
+    result.push(<Fragment key={`t${i}`}>{part}</Fragment>);
+    if (matches[i]) {
+      result.push(
+        <span key={`m${i}`} style={{ color: LOG_LEVEL_COLORS[matches[i]], fontWeight: 700 }}>
+          {matches[i]}
+        </span>,
+      );
     }
-    if (part.startsWith("[") && part.endsWith("]")) {
-      const innerColor = LOG_LEVEL_COLORS[part.slice(1, -1)];
+  });
+  return result;
+}
+
+/** Renders a log message as structured `key=value` fields if it parses as a
+ * JSON object, falling back to level-keyword highlighting for plain text. */
+export function renderLogMessage(message: string) {
+  try {
+    const parsed = JSON.parse(message);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
       return (
-        <span key={i} style={{ color: innerColor ?? "var(--sh-accent)", fontWeight: innerColor ? 700 : 400 }}>
-          {part}
+        <span className="tw:inline-flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5">
+          {Object.entries(parsed).map(([key, value]) => (
+            <span key={key}>
+              <span className="tw:text-[var(--sh-dim)]">{key}=</span>
+              <span>{typeof value === "string" ? value : JSON.stringify(value)}</span>
+            </span>
+          ))}
         </span>
       );
     }
-    return <Fragment key={i}>{part}</Fragment>;
-  });
+  } catch {
+    // not JSON, fall through to plain text highlighting
+  }
+  return highlightLogLevels(message);
 }
 
 const DISTRIBUTION_OPTIONS: SelectProps.Option[] = [
