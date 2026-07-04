@@ -770,6 +770,7 @@ function S3ObjectViewer({ bucket, objectKey, onBack }: { bucket: string; objectK
   const isAudio = /^audio\//.test(contentType);
   const isPdf = contentType === "application/pdf";
   const isText = /^text\//.test(contentType) || contentType === "application/json" || contentType === "application/javascript" || contentType === "application/xml";
+  const isJson = contentType === "application/json";
 
   useEffect(() => {
     if (isText && data) {
@@ -777,10 +778,12 @@ function S3ObjectViewer({ bucket, objectKey, onBack }: { bucket: string; objectK
       setTextPreviewError(false);
       fetch(rawUrl)
         .then((r) => r.text())
+        // ponytail: JSON.stringify(JSON.parse(x), null, 2) is the whole feature; invalid JSON just falls back to raw text.
+        .then((t) => (isJson ? (() => { try { return JSON.stringify(JSON.parse(t), null, 2); } catch { return t; } })() : t))
         .then(setTextPreview)
         .catch(() => setTextPreviewError(true));
     }
-  }, [rawUrl, isText, data]);
+  }, [rawUrl, isText, isJson, data]);
 
   if (isLoading) return <DetailSkeleton />;
   if (isError) return (

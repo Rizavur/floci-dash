@@ -236,6 +236,46 @@ describe("S3Page", () => {
     vi.unstubAllGlobals();
   });
 
+  it("pretty-prints application/json object previews", async () => {
+    mockSearchParams.mockReturnValue([new URLSearchParams("?bucket=my-bucket&object=app-config.json"), vi.fn()]);
+    mockObjectDetail.mockReturnValue({
+      data: { size: 55, contentType: "application/json", lastModified: "2024-01-01T00:00:00Z", etag: "abc123" },
+      isLoading: false, isError: false, error: null,
+    });
+    mockObjectTags.mockReturnValue({ data: { tags: [], total: 0 } });
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      text: () => Promise.resolve('{"cache_ttl":300,"db_host":"localhost"}'),
+    });
+    vi.stubGlobal("fetch", mockFetch);
+
+    render(<S3Page />, { wrapper: createWrapper() });
+    await waitFor(() => {
+      expect(screen.getByText(/"cache_ttl": 300/)).toBeTruthy();
+    });
+
+    vi.unstubAllGlobals();
+  });
+
+  it("falls back to raw text when application/json content isn't valid JSON", async () => {
+    mockSearchParams.mockReturnValue([new URLSearchParams("?bucket=my-bucket&object=broken.json"), vi.fn()]);
+    mockObjectDetail.mockReturnValue({
+      data: { size: 10, contentType: "application/json", lastModified: "2024-01-01T00:00:00Z", etag: "abc123" },
+      isLoading: false, isError: false, error: null,
+    });
+    mockObjectTags.mockReturnValue({ data: { tags: [], total: 0 } });
+
+    const mockFetch = vi.fn().mockResolvedValue({ text: () => Promise.resolve("not valid json") });
+    vi.stubGlobal("fetch", mockFetch);
+
+    render(<S3Page />, { wrapper: createWrapper() });
+    await waitFor(() => {
+      expect(screen.getByText("not valid json")).toBeTruthy();
+    });
+
+    vi.unstubAllGlobals();
+  });
+
   it("shows spinner when object detail is loading", () => {
     mockSearchParams.mockReturnValue([new URLSearchParams("?bucket=my-bucket&object=file.txt"), vi.fn()]);
     mockObjectDetail.mockReturnValue({ data: undefined, isLoading: true });
