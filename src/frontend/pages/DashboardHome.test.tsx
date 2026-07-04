@@ -129,4 +129,17 @@ describe("DashboardHome", () => {
     // lambda has 0 count, should not appear in counts section
     expect(screen.queryByText("LAMBDA")).toBeNull();
   });
+
+  it("collapses and re-expands the service catalogue via the header buttons", async () => {
+    const user = userEvent.setup();
+    render(<DashboardHome />, { wrapper: createWrapper() });
+    // S3 also renders in the Favorites section, so scope to the catalogue.
+    const catalogue = screen.getByText(/Services ·/).closest("div")!.parentElement!;
+    // All categories start expanded — service cards are visible.
+    expect(within(catalogue).getAllByText("S3").length).toBeGreaterThan(0);
+    await user.click(within(catalogue).getByRole("button", { name: /collapse all categories/i }));
+    expect(within(catalogue).queryByText("S3")).toBeNull();
+    await user.click(within(catalogue).getByRole("button", { name: /expand all categories/i }));
+    expect(within(catalogue).getAllByText("S3").length).toBeGreaterThan(0);
+  });
 });

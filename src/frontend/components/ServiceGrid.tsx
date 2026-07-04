@@ -1,3 +1,5 @@
+import { useImperativeHandle, useState, forwardRef } from "react";
+import { ChevronRightIcon } from "@heroicons/react/16/solid";
 import { SERVICE_LABELS, CATEGORY_ORDER, SERVICE_CATEGORY_MAP } from "../types/services";
 import { getCategoryIcon, getCategoryColor, getCategoryColorBg } from "./categoryIcons";
 import ServiceCard from "./ServiceCard";
@@ -10,8 +12,20 @@ interface Props {
   resourceCounts?: Record<string, number>;
 }
 
-export default function ServiceGrid({ services, activeServices, resourceCounts }: Props) {
+export interface ServiceGridHandle {
+  expandAll: () => void;
+  collapseAll: () => void;
+}
+
+const ServiceGrid = forwardRef<ServiceGridHandle, Props>(function ServiceGrid(
+  { services, activeServices, resourceCounts },
+  ref,
+) {
   const activeSet = new Set(activeServices ?? []);
+  // Collapsing is self-contained here (not lifted to DashboardHome) since
+  // ServiceGrid already owns the category grouping — expandAll/collapseAll
+  // are exposed via ref so the page's header buttons can drive it.
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
   const grouped: Record<string, string[]> = {};
   for (const key of Object.keys(services)) {
@@ -21,6 +35,19 @@ export default function ServiceGrid({ services, activeServices, resourceCounts }
 
   const orderedCategories: string[] = CATEGORY_ORDER.filter((c) => grouped[c]?.length);
   if (grouped["Other"]?.length) orderedCategories.push("Other");
+
+  useImperativeHandle(ref, () => ({
+    expandAll: () => setCollapsed(new Set()),
+    collapseAll: () => setCollapsed(new Set(orderedCategories)),
+  }), [orderedCategories]);
+
+  const toggleCategory = (cat: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      next.has(cat) ? next.delete(cat) : next.add(cat);
+      return next;
+    });
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
@@ -34,10 +61,20 @@ export default function ServiceGrid({ services, activeServices, resourceCounts }
         const categoryColor = getCategoryColor(category);
         const categoryColorBg = getCategoryColorBg(category);
 
+        const isOpen = !collapsed.has(category);
+
         return (
           <div key={category}>
             {/* Category header */}
-            <div className="tw:flex tw:items-center tw:gap-2 tw:mb-2">
+            <button
+              onClick={() => toggleCategory(category)}
+              aria-expanded={isOpen}
+              className="tw:flex tw:items-center tw:gap-2 tw:mb-2 tw:w-full tw:cursor-pointer tw:bg-transparent tw:border-0 tw:p-0 tw:text-left"
+            >
+              <ChevronRightIcon
+                className="tw:w-2.5 tw:h-2.5 tw:flex-shrink-0"
+                style={{ color: "var(--sh-faint)", transform: isOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }}
+              />
               <span
                 className="tw:flex tw:items-center tw:justify-center tw:flex-shrink-0"
                 style={{
@@ -78,23 +115,27 @@ export default function ServiceGrid({ services, activeServices, resourceCounts }
               }}>
                 {running}/{keys.length}
               </span>
-            </div>
+            </button>
 
             {/* Service cards */}
-            <div className="tw:grid tw:grid-cols-[repeat(auto-fill,minmax(190px,1fr))] tw:gap-2 tw:max-sm:grid-cols-[repeat(auto-fill,minmax(140px,1fr))]">
-              {keys.map((key) => (
-                <ServiceCard
-                  key={key}
-                  serviceKey={key}
-                  status={services[key]}
-                  isActive={activeSet.has(key)}
-                  resourceCount={resourceCounts?.[key]}
-                />
-              ))}
-            </div>
+            {isOpen && (
+              <div className="tw:grid tw:grid-cols-[repeat(auto-fill,minmax(190px,1fr))] tw:gap-2 tw:max-sm:grid-cols-[repeat(auto-fill,minmax(140px,1fr))]">
+                {keys.map((key) => (
+                  <ServiceCard
+                    key={key}
+                    serviceKey={key}
+                    status={services[key]}
+                    isActive={activeSet.has(key)}
+                    resourceCount={resourceCounts?.[key]}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         );
       })}
     </div>
   );
-}
+});
+
+export default ServiceGrid;
