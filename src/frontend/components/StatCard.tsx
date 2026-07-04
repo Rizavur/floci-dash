@@ -92,13 +92,16 @@ export default function StatCard({
         )}
       </div>
 
-      {/* Value — monospace for numbers */}
+      {/* Value — monospace for numbers. Wraps long unbroken text (e.g. an ETag
+          hash) onto multiple lines instead of overflowing the card or clipping
+          it against `overflow: hidden` above — full value stays visible. */}
       <span style={{
         fontSize: isText ? 14 : size === "sm" ? 20 : 26,
         fontWeight: 600,
-        lineHeight: 1,
+        lineHeight: isText ? 1.4 : 1,
         color: accent,
         fontFamily: isText ? "var(--font-ui)" : "var(--font-mono)",
+        wordBreak: "break-all",
       }}>
         {value}
       </span>
