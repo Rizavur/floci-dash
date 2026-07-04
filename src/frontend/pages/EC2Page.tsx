@@ -417,7 +417,7 @@ function EC2InstanceDetail({ id, onBack }: { id: string; onBack: () => void }) {
               { label: "Root device", value: data.rootDeviceName || "N/A" },
               { label: "Root device type", value: data.rootDeviceType || "N/A" },
             ].map((row) => (
-              <tr key={row.label} style={{ borderBottom: "1px solid var(--color-border-divider-default, #eaeded)" }}>
+              <tr key={row.label} style={{ borderBottom: "1px solid var(--sh-line)" }}>
                 <td style={{ padding: "8px 12px", fontWeight: 600, width: "220px", verticalAlign: "top" }}>{row.label}</td>
                 <td style={{ padding: "8px 12px" }}>{row.value}</td>
               </tr>
@@ -537,7 +537,7 @@ function EC2VpcDetail({ id, onBack }: { id: string; onBack: () => void }) {
               { label: "Default VPC", value: data.isDefault ? "Yes" : "No" },
               { label: "Instance tenancy", value: data.instanceTenancy },
             ].map((row) => (
-              <tr key={row.label} style={{ borderBottom: "1px solid var(--color-border-divider-default, #eaeded)" }}>
+              <tr key={row.label} style={{ borderBottom: "1px solid var(--sh-line)" }}>
                 <td style={{ padding: "8px 12px", fontWeight: 600, width: "220px", verticalAlign: "top" }}>{row.label}</td>
                 <td style={{ padding: "8px 12px" }}>{row.value}</td>
               </tr>

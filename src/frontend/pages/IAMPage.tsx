@@ -226,7 +226,7 @@ function UserDetailModal({ userName, onClose }: { userName: string; onClose: () 
               <Table
                 columnDefinitions={[
                   { id: "name", header: "Policy", cell: (p: any) => p.name },
-                  { id: "arn", header: "ARN", cell: (p: any) => <span style={{ fontSize: 12, color: "#888" }}>{p.arn}</span> },
+                  { id: "arn", header: "ARN", cell: (p: any) => <span style={{ fontSize: 12, color: "var(--sh-dim)" }}>{p.arn}</span> },
                 ]}
                 items={attachedPolicies}
                 trackBy={(p: any) => p.arn}
@@ -275,7 +275,7 @@ function RolesTab() {
         columnDefinitions={[
           { id: "name", header: "Role name", cell: (r: any) => r.name },
           { id: "desc", header: "Description", cell: (r: any) => r.description || "-" },
-          { id: "arn", header: "ARN", cell: (r: any) => <span style={{ fontSize: 12, color: "#888" }}>{r.arn}</span> },
+          { id: "arn", header: "ARN", cell: (r: any) => <span style={{ fontSize: 12, color: "var(--sh-dim)" }}>{r.arn}</span> },
           { id: "created", header: "Created", cell: (r: any) => r.createDate ? new Date(r.createDate).toLocaleDateString() : "-" },
           {
             id: "actions",
@@ -394,7 +394,7 @@ function RoleDetailModal({ roleName, onClose }: { roleName: string; onClose: () 
               <Table
                 columnDefinitions={[
                   { id: "name", header: "Policy", cell: (p: any) => p.name },
-                  { id: "arn", header: "ARN", cell: (p: any) => <span style={{ fontSize: 12, color: "#888" }}>{p.arn}</span> },
+                  { id: "arn", header: "ARN", cell: (p: any) => <span style={{ fontSize: 12, color: "var(--sh-dim)" }}>{p.arn}</span> },
                 ]}
                 items={attachedPolicies}
                 trackBy={(p: any) => p.arn}
@@ -621,7 +621,7 @@ function GroupsTab() {
         }
         columnDefinitions={[
           { id: "name", header: "Group name", cell: (g: any) => g.name },
-          { id: "arn", header: "ARN", cell: (g: any) => <span style={{ fontSize: 12, color: "#888" }}>{g.arn}</span> },
+          { id: "arn", header: "ARN", cell: (g: any) => <span style={{ fontSize: 12, color: "var(--sh-dim)" }}>{g.arn}</span> },
           { id: "created", header: "Created", cell: (g: any) => g.createDate ? new Date(g.createDate).toLocaleDateString() : "-" },
           {
             id: "actions",

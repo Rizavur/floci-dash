@@ -10,6 +10,12 @@
 /* Dark is the default; .light overrides for light mode.                    */
 
 #app-shell {
+  /* Base text color for the whole app. Without this, any element that
+     doesn't set an explicit color (e.g. plain <div>/<Box> text) falls back
+     to the browser's initial black — invisible/near-invisible on the dark
+     background. Setting it here means it's inherited everywhere by default,
+     and .light below overrides it for light mode. */
+  color: var(--sh-ink);
   /* Tells the browser to draw its own UI (scrollbars, form controls) in dark
      theme instead of always defaulting to the light OS theme — without this,
      scrollbars stay light/mismatched even when the app is in dark mode. */

@@ -155,7 +155,7 @@ function VpcCard({
   return (
     <div
       style={{
-        border: "2px solid var(--color-border-container-top, #0972d3)",
+        border: "2px solid var(--sh-accent)",
         borderRadius: "12px",
         overflow: "hidden",
       }}
@@ -163,9 +163,9 @@ function VpcCard({
       {/* VPC Header */}
       <div
         style={{
-          background: "var(--color-background-container-header, #f2f3f3)",
+          background: "var(--sh-elevated)",
           padding: "12px 16px",
-          borderBottom: "1px solid var(--color-border-divider-default, #eaeded)",
+          borderBottom: "1px solid var(--sh-line)",
         }}
       >
         <Box variant="awsui-gen-ai-label" fontSize="heading-s" fontWeight="bold">
@@ -185,7 +185,7 @@ function VpcCard({
       <div
         style={{
           padding: "16px",
-          background: "var(--color-background-container-content, #fff)",
+          background: "var(--sh-surface)",
         }}
       >
         <SpaceBetween size="m">
@@ -205,7 +205,7 @@ function VpcCard({
               style={{
                 marginTop: "8px",
                 paddingTop: "12px",
-                borderTop: "1px dashed var(--color-border-divider-default, #eaeded)",
+                borderTop: "1px dashed var(--sh-line)",
               }}
             >
               <Box fontSize="body-s" fontWeight="bold" color="text-label" padding={{ bottom: "xxs" }}>
@@ -238,7 +238,7 @@ function VpcCard({
               style={{
                 marginTop: "4px",
                 paddingTop: "8px",
-                borderTop: "1px dashed var(--color-border-divider-default, #eaeded)",
+                borderTop: "1px dashed var(--sh-line)",
               }}
             >
               <Box fontSize="body-s" fontWeight="bold" color="text-label" padding={{ bottom: "xxs" }}>
@@ -252,7 +252,7 @@ function VpcCard({
                   </span>
                 ))}
                 {routeTables.length > 3 && (
-                  <span style={{ fontSize: 11, color: "var(--color-text-body-secondary)" }}>
+                  <span style={{ fontSize: 11, color: "var(--sh-dim)" }}>
                     +{routeTables.length - 3} more
                   </span>
                 )}
@@ -274,7 +274,7 @@ function SubnetCard({ subnetGroup }: { subnetGroup: SubnetGroup }) {
     <div
       style={{
         marginLeft: "12px",
-        borderLeft: "3px solid var(--color-border-divider-default, #eaeded)",
+        borderLeft: "3px solid var(--sh-line)",
         paddingLeft: "12px",
       }}
     >
@@ -356,14 +356,14 @@ function InstanceRow({
       <span style={{ fontFamily: "monospace", fontWeight: 600 }}>
         {instance.id}
       </span>
-      <span style={{ color: "var(--color-text-body-secondary, #545b64)" }}>
+      <span style={{ color: "var(--sh-dim)" }}>
         {instance.instanceType || "-"}
       </span>
-      <span style={{ color: "var(--color-text-body-secondary, #545b64)" }}>
+      <span style={{ color: "var(--sh-dim)" }}>
         {instance.privateIp || "-"}
       </span>
       {instance.publicIp && (
-        <span style={{ color: "var(--color-text-body-secondary, #545b64)" }}>
+        <span style={{ color: "var(--sh-dim)" }}>
           {instance.publicIp}
         </span>
       )}

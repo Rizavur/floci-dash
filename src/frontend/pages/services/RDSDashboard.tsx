@@ -935,7 +935,7 @@ function RDSDBInstanceDetail({
             ].map((row) => (
               <tr
                 key={row.label}
-                style={{ borderBottom: "1px solid var(--color-border-divider-default, #eaeded)" }}
+                style={{ borderBottom: "1px solid var(--sh-line)" }}
               >
                 <td style={{ padding: "8px 12px", fontWeight: 600, width: "220px", verticalAlign: "top" }}>
                   {row.label}
@@ -1259,7 +1259,7 @@ function RDSDBClusterDetail({
             ].map((row) => (
               <tr
                 key={row.label}
-                style={{ borderBottom: "1px solid var(--color-border-divider-default, #eaeded)" }}
+                style={{ borderBottom: "1px solid var(--sh-line)" }}
               >
                 <td style={{ padding: "8px 12px", fontWeight: 600, width: "220px", verticalAlign: "top" }}>
                   {row.label}
