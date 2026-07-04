@@ -194,7 +194,7 @@ export default function AppLayoutShell({ children }: Props) {
           className="tw:flex tw:items-center tw:gap-2 tw:cursor-pointer tw:bg-transparent tw:border-0 tw:p-0"
         >
           <span className="tw:inline-flex tw:items-center tw:justify-center tw:w-[22px] tw:h-[22px] tw:rounded-[5px] tw:text-[11px] tw:font-bold"
-                style={{ background: "var(--sh-accent)", color: "#0d1117" }}>
+                style={{ background: "var(--sh-accent)", color: "var(--sh-bg)" }}>
             F
           </span>
           <span className="tw:text-[13px] tw:font-semibold" style={{ color: "var(--sh-ink)" }}>

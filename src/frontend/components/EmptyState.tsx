@@ -31,7 +31,7 @@ export default function EmptyState({ title, description, actionText, onAction, i
           style={{
             marginTop: "8px", padding: "8px 16px",
             fontSize: 12, fontWeight: 500, cursor: "pointer",
-            background: "var(--sh-accent)", color: "#0d1117",
+            background: "var(--sh-accent)", color: "var(--sh-bg)",
             border: "none", borderRadius: "5px",
             fontFamily: "var(--font-ui)",
           }}
