@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   BreadcrumbGroup,
   ContentLayout,
@@ -53,7 +53,12 @@ const STATUS_COLORS: Record<string, "green" | "red" | "blue" | "grey"> = {
 function StacksTab() {
   const { showToast } = useToast();
   const [showCreate, setShowCreate] = useState(false);
-  const [selectedStack, setSelectedStack] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedStack = searchParams.get("stack");
+  const setSelectedStack = (name: string | null) => {
+    if (name) setSearchParams({ stack: name });
+    else { searchParams.delete("stack"); setSearchParams(searchParams); }
+  };
 
   const stacksQuery = useStacks();
   const deleteStack = useDeleteStack();

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ContentLayout,
   Header,
@@ -75,32 +75,49 @@ import StatusBadge from "../components/StatusBadge";
 
 export default function EC2Page() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: health } = useHealth();
   const [selectedTab, setSelectedTab] = useState("instances");
-  const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
-  const [selectedVpc, setSelectedVpc] = useState<string | null>(null);
+  const selectedInstance = searchParams.get("instance");
+  const selectedVpc = searchParams.get("vpc");
 
   const ec2Status = health?.services?.ec2;
   const statusText = ec2Status === "running" ? "running" : ec2Status === "available" ? "available" : "connected";
 
   if (selectedInstance) {
-    return <EC2InstanceDetail id={selectedInstance} onBack={() => setSelectedInstance(null)} />;
+    return (
+      <EC2InstanceDetail
+        id={selectedInstance}
+        onBack={() => {
+          searchParams.delete("instance");
+          setSearchParams(searchParams);
+        }}
+      />
+    );
   }
 
   if (selectedVpc) {
-    return <EC2VpcDetail id={selectedVpc} onBack={() => setSelectedVpc(null)} />;
+    return (
+      <EC2VpcDetail
+        id={selectedVpc}
+        onBack={() => {
+          searchParams.delete("vpc");
+          setSearchParams(searchParams);
+        }}
+      />
+    );
   }
 
   const tabs: TabsProps.Tab[] = [
     {
       id: "instances",
       label: "Instances",
-      content: <EC2InstanceList onSelect={(id) => setSelectedInstance(id)} />,
+      content: <EC2InstanceList onSelect={(id) => setSearchParams({ instance: id })} />,
     },
     {
       id: "vpcs",
       label: "VPCs",
-      content: <EC2VpcList onSelect={(id) => setSelectedVpc(id)} />,
+      content: <EC2VpcList onSelect={(id) => setSearchParams({ vpc: id })} />,
     },
     {
       id: "subnets",

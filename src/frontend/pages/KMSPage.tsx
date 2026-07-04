@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   BreadcrumbGroup,
   ContentLayout,
@@ -59,7 +59,12 @@ const KEY_SPEC_OPTIONS: SelectProps.Option[] = [
 function KeysTab() {
   const { showToast } = useToast();
   const [showCreate, setShowCreate] = useState(false);
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedKey = searchParams.get("key");
+  const setSelectedKey = (id: string | null) => {
+    if (id) setSearchParams({ key: id });
+    else { searchParams.delete("key"); setSearchParams(searchParams); }
+  };
 
   const keysQuery = useKMSKeys();
   const createKey = useCreateKey();

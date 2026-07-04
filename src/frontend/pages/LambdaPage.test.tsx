@@ -3,13 +3,22 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { clickButton, createWrapper } from "../../test/helpers";
-import React from "react";
+import React, { useState } from "react";
 
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate,
   useParams: () => ({}),
-  useSearchParams: () => [new URLSearchParams(), vi.fn()],
+  // Fake but stateful — a real useState behind the hook, so selecting a
+  // function and clicking "Back" actually toggles LambdaPage's detail view,
+  // matching real react-router behavior without needing a <Router>.
+  useSearchParams: () => {
+    const [params, setParams] = useState(new URLSearchParams());
+    return [
+      params,
+      (next: any) => setParams(new URLSearchParams(next instanceof URLSearchParams ? next.toString() : next)),
+    ];
+  },
 }));
 
 const mockFunctions = vi.fn();

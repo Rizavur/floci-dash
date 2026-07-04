@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   BreadcrumbGroup,
   ContentLayout,
@@ -52,7 +52,12 @@ import {
 function UsersTab() {
   const { showToast } = useToast();
   const [showCreate, setShowCreate] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedUser = searchParams.get("user");
+  const setSelectedUser = (name: string | null) => {
+    if (name) setSearchParams({ user: name });
+    else { searchParams.delete("user"); setSearchParams(searchParams); }
+  };
 
   const usersQuery = useIAMUsers();
   const createUser = useCreateUser();
@@ -252,7 +257,12 @@ function UserDetailModal({ userName, onClose }: { userName: string; onClose: () 
 function RolesTab() {
   const { showToast } = useToast();
   const [showCreate, setShowCreate] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedRole = searchParams.get("role");
+  const setSelectedRole = (name: string | null) => {
+    if (name) setSearchParams({ role: name });
+    else { searchParams.delete("role"); setSearchParams(searchParams); }
+  };
 
   const rolesQuery = useIAMRoles();
   const createRole = useCreateRole();
@@ -421,7 +431,12 @@ function PoliciesTab() {
   const { showToast } = useToast();
   const [showCreate, setShowCreate] = useState(false);
   const [scope, setScope] = useState<SelectProps.Option>({ label: "Local", value: "Local" });
-  const [selectedPolicyArn, setSelectedPolicyArn] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedPolicyArn = searchParams.get("policy");
+  const setSelectedPolicyArn = (arn: string | null) => {
+    if (arn) setSearchParams({ policy: arn });
+    else { searchParams.delete("policy"); setSearchParams(searchParams); }
+  };
 
   const policiesQuery = useIAMPolicies(scope.value);
   const createPolicy = useCreatePolicy();
