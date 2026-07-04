@@ -254,7 +254,7 @@ function SecretDetailModal({ secretId, onClose }: { secretId: string; onClose: (
                   </Box>
                   <Box>
                     {showValue ? (
-                      <pre className="fd-code-bg" style={{ fontSize: 13, padding: 12, borderRadius: 4, overflow: "auto", maxHeight: 300 }}>
+                      <pre className="fd-code-bg" style={{ fontSize: "0.8125rem", padding: 12, borderRadius: 4, overflow: "auto", maxHeight: 300 }}>
                         {valueQuery.data?.secretString || "(binary)"}
                       </pre>
                     ) : (

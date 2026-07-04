@@ -25,7 +25,7 @@ const STATUS_COLOR: Record<StatusType, string> = {
 export function StatusIndicator({ type = "info", children }: { type?: StatusType; children?: ReactNode }) {
   const color = STATUS_COLOR[type] ?? "var(--sh-dim)";
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color, fontFamily: "var(--font-ui)" }}>
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: "0.75rem", color, fontFamily: "var(--font-ui)" }}>
       {type === "loading" || type === "in-progress" ? (
         <Spinner size="normal" />
       ) : (
@@ -82,7 +82,7 @@ export function Badge({ color = "grey", children }: { color?: BadgeColor; childr
         alignItems: "center",
         padding: "1px 7px",
         borderRadius: 999,
-        fontSize: 11,
+        fontSize: "0.6875rem",
         fontWeight: 600,
         background: c.bg,
         color: c.fg,
@@ -139,7 +139,7 @@ export function Alert({ type = "info", header, dismissible, onDismiss, action, s
         background: elevated ? "var(--sh-surface)" : s.bg,
         border: `1px solid ${s.fg}${elevated ? "55" : "33"}`,
         boxShadow: elevated ? "0 8px 24px rgba(0,0,0,0.35)" : undefined,
-        fontSize: 12.5,
+        fontSize: "0.78125rem",
         fontFamily: "var(--font-ui)",
         color: "var(--sh-ink)",
       }}

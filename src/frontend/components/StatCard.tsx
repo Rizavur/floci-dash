@@ -68,7 +68,7 @@ export default function StatCard({
       {/* Header row: label + icon badge */}
       <div className="tw:flex tw:items-center tw:justify-between">
         <span style={{
-          fontSize: 11,
+          fontSize: "0.6875rem",
           fontWeight: 500,
           letterSpacing: "0.02em",
           color: "var(--sh-faint)",
@@ -96,7 +96,7 @@ export default function StatCard({
           hash) onto multiple lines instead of overflowing the card or clipping
           it against `overflow: hidden` above — full value stays visible. */}
       <span style={{
-        fontSize: isText ? 14 : size === "sm" ? 20 : 26,
+        fontSize: isText ? "0.875rem" : size === "sm" ? "1.25rem" : "1.625rem",
         fontWeight: 600,
         lineHeight: isText ? 1.4 : 1,
         color: accent,
@@ -109,7 +109,7 @@ export default function StatCard({
       {/* Subtext */}
       {subtext && (
         <span style={{
-          fontSize: 11,
+          fontSize: "0.6875rem",
           color: "var(--sh-faint)",
           lineHeight: 1.4,
           whiteSpace: "nowrap",

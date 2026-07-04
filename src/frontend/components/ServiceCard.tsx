@@ -83,7 +83,7 @@ export default function ServiceCard({ serviceKey, status, isActive, resourceCoun
         >
           <Icon className="tw:w-3 tw:h-3" />
         </span>
-        <span className="tw:flex-1 tw:truncate tw:text-[12px] tw:font-medium" style={{ color: textColor }}>
+        <span className="tw:flex-1 tw:truncate tw:text-[0.75rem] tw:font-medium" style={{ color: textColor }}>
           {label}
         </span>
         <button
@@ -106,7 +106,7 @@ export default function ServiceCard({ serviceKey, status, isActive, resourceCoun
       {/* Row 2: status dot + text + resource count badge */}
       <div className="tw:flex tw:items-center tw:gap-1.5" style={{ paddingLeft: 30 }}>
         <span className="tw:flex-shrink-0 tw:w-1.5 tw:h-1.5 tw:rounded-full" style={{ background: accent }} />
-        <span style={{ fontSize: 10, color: "var(--sh-faint)", fontFamily: "var(--font-mono)" }}>
+        <span style={{ fontSize: "0.625rem", color: "var(--sh-faint)", fontFamily: "var(--font-mono)" }}>
           {isRunning ? "Running" : "Available"}
         </span>
 
@@ -115,7 +115,7 @@ export default function ServiceCard({ serviceKey, status, isActive, resourceCoun
           <span
             className="tw:ml-auto tw:flex-shrink-0"
             style={{
-              fontSize: 10,
+              fontSize: "0.625rem",
               fontWeight: 700,
               fontFamily: "var(--font-mono)",
               color: "var(--sh-accent)",

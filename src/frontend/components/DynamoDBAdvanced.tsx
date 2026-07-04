@@ -392,7 +392,7 @@ function PartiQLEditor() {
                   id: key,
                   header: key,
                   cell: (item: any) => (
-                    <span style={{ wordBreak: "break-all", fontSize: 13 }}>
+                    <span style={{ wordBreak: "break-all", fontSize: "0.8125rem" }}>
                       {formatItemValue(item[key])}
                     </span>
                   ),

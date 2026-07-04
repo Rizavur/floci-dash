@@ -358,7 +358,7 @@ export default function S3Page() {
                     <StatusIndicator type={r.status === "uploaded" ? "success" : "error"}>
                       {r.status === "uploaded" ? "Uploaded" : "Failed"}
                     </StatusIndicator>
-                    <code style={{ fontSize: 13, flex: 1, wordBreak: "break-all" }}>{r.key}</code>
+                    <code style={{ fontSize: "0.8125rem", flex: 1, wordBreak: "break-all" }}>{r.key}</code>
                     <Box variant="small" color="text-body-secondary">
                       {formatBytes(r.size)}
                     </Box>
@@ -825,7 +825,7 @@ function S3ObjectViewer({ bucket, objectKey, onBack }: { bucket: string; objectK
         <SpaceBetween size="s">
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <Box variant="small" color="text-body-secondary" padding={{ right: "s" }}>S3 URI:</Box>
-            <code style={{ fontSize: 13 }}>{s3Uri}</code>
+            <code style={{ fontSize: "0.8125rem" }}>{s3Uri}</code>
             <Button variant="icon" iconName="copy" ariaLabel="Copy S3 URI" onClick={async () => { await navigator.clipboard.writeText(s3Uri); showToast("info", "S3 URI copied"); }} />
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>

@@ -568,7 +568,7 @@ export default function DynamoDBTableDetail({
                 borderRadius: 4,
                 background: cond.enabled ? "var(--sh-ok)" : "var(--sh-elevated)",
                 color: cond.enabled ? "var(--sh-bg)" : "var(--sh-dim)",
-                fontSize: 14,
+                fontSize: "0.875rem",
                 fontWeight: 700,
                 flexShrink: 0,
               }}

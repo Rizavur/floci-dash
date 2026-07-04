@@ -4,7 +4,7 @@ import { ArrowUpTrayIcon, DocumentIcon, XMarkIcon } from "@heroicons/react/16/so
 
 const CONTROL_BASE: React.CSSProperties = {
   width: "100%",
-  fontSize: 12.5,
+  fontSize: "0.78125rem",
   fontFamily: "var(--font-ui)",
   color: "var(--sh-ink)",
   background: "var(--sh-elevated)",
@@ -45,14 +45,14 @@ export function FormField({ label, description, errorText, constraintText, secon
     <div style={{ display: "flex", flexDirection: "column", gap: 4, fontFamily: "var(--font-ui)" }}>
       {(label || secondaryControl) && (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-          {label && <label style={{ fontSize: 12.5, fontWeight: 600, color: "var(--sh-ink)" }}>{label}</label>}
+          {label && <label style={{ fontSize: "0.78125rem", fontWeight: 600, color: "var(--sh-ink)" }}>{label}</label>}
           {secondaryControl}
         </div>
       )}
-      {description && <div style={{ fontSize: 11.5, color: "var(--sh-dim)" }}>{description}</div>}
+      {description && <div style={{ fontSize: "0.71875rem", color: "var(--sh-dim)" }}>{description}</div>}
       {children}
-      {constraintText && <div style={{ fontSize: 11, color: "var(--sh-faint)" }}>{constraintText}</div>}
-      {errorText && <div style={{ fontSize: 11.5, color: "var(--sh-fail)" }}>{errorText}</div>}
+      {constraintText && <div style={{ fontSize: "0.6875rem", color: "var(--sh-faint)" }}>{constraintText}</div>}
+      {errorText && <div style={{ fontSize: "0.71875rem", color: "var(--sh-fail)" }}>{errorText}</div>}
     </div>
   );
 }
@@ -208,7 +208,7 @@ export function Select({ selectedOption, onChange, options, placeholder, disable
               aria-disabled={opt.disabled}
               onClick={() => { if (!opt.disabled) choose(opt); }}
               style={{
-                padding: "6px 10px", borderRadius: 4, fontSize: 12.5, cursor: opt.disabled ? "default" : "pointer",
+                padding: "6px 10px", borderRadius: 4, fontSize: "0.78125rem", cursor: opt.disabled ? "default" : "pointer",
                 opacity: opt.disabled ? 0.5 : 1,
                 color: opt.value === selectedOption?.value ? "var(--sh-accent)" : "var(--sh-ink)",
                 background: opt.value === selectedOption?.value ? "var(--sh-accent-bg)" : "transparent",
@@ -218,7 +218,7 @@ export function Select({ selectedOption, onChange, options, placeholder, disable
             >
               <div>{opt.label}</div>
               {opt.description && (
-                <div style={{ fontSize: 11, color: "var(--sh-faint)" }}>{opt.description}</div>
+                <div style={{ fontSize: "0.6875rem", color: "var(--sh-faint)" }}>{opt.description}</div>
               )}
             </li>
           ))}
@@ -238,7 +238,7 @@ interface CheckboxProps {
 
 export function Checkbox({ checked, onChange, disabled, children }: CheckboxProps) {
   return (
-    <label style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12.5, color: "var(--sh-ink)", cursor: disabled ? "default" : "pointer", fontFamily: "var(--font-ui)" }}>
+    <label style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: "0.78125rem", color: "var(--sh-ink)", cursor: disabled ? "default" : "pointer", fontFamily: "var(--font-ui)" }}>
       <input
         type="checkbox"
         checked={checked}
@@ -265,7 +265,7 @@ interface ToggleComponentProps {
 
 export function Toggle({ checked, onChange, disabled, children }: ToggleComponentProps) {
   return (
-    <label style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12.5, color: "var(--sh-ink)", cursor: disabled ? "default" : "pointer", fontFamily: "var(--font-ui)" }}>
+    <label style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: "0.78125rem", color: "var(--sh-ink)", cursor: disabled ? "default" : "pointer", fontFamily: "var(--font-ui)" }}>
       <button
         type="button"
         role="checkbox"
@@ -343,11 +343,11 @@ export function FileUpload({ value, onChange, multiple, showFileSize, showFileLa
         }}
       >
         <ArrowUpTrayIcon className="tw:w-5 tw:h-5" style={{ color: "var(--sh-faint)", margin: "0 auto 6px" }} />
-        <div style={{ fontSize: 12, color: "var(--sh-dim)", marginBottom: 8 }}>{dropText}</div>
+        <div style={{ fontSize: "0.75rem", color: "var(--sh-dim)", marginBottom: 8 }}>{dropText}</div>
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          style={{ fontSize: 12, fontWeight: 500, padding: "6px 12px", borderRadius: 5, border: "1px solid var(--sh-line)", background: "var(--sh-surface)", color: "var(--sh-ink)", cursor: "pointer" }}
+          style={{ fontSize: "0.75rem", fontWeight: 500, padding: "6px 12px", borderRadius: 5, border: "1px solid var(--sh-line)", background: "var(--sh-surface)", color: "var(--sh-ink)", cursor: "pointer" }}
         >
           {uploadText}
         </button>
@@ -356,11 +356,11 @@ export function FileUpload({ value, onChange, multiple, showFileSize, showFileLa
       {value.length > 0 && (
         <ul style={{ display: "flex", flexDirection: "column", gap: 4, listStyle: "none", padding: 0, margin: 0 }}>
           {value.map((file, idx) => (
-            <li key={`${file.name}-${idx}`} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--sh-ink)", padding: "4px 8px", background: "var(--sh-elevated)", borderRadius: 5 }}>
+            <li key={`${file.name}-${idx}`} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.75rem", color: "var(--sh-ink)", padding: "4px 8px", background: "var(--sh-elevated)", borderRadius: 5 }}>
               <DocumentIcon className="tw:w-3.5 tw:h-3.5" style={{ color: "var(--sh-faint)", flexShrink: 0 }} />
               <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file.name}</span>
-              {showFileSize && <span style={{ color: "var(--sh-faint)", fontSize: 11 }}>{formatBytes(file.size)}</span>}
-              {showFileLastModified && <span style={{ color: "var(--sh-faint)", fontSize: 11 }}>{new Date(file.lastModified).toLocaleDateString()}</span>}
+              {showFileSize && <span style={{ color: "var(--sh-faint)", fontSize: "0.6875rem" }}>{formatBytes(file.size)}</span>}
+              {showFileLastModified && <span style={{ color: "var(--sh-faint)", fontSize: "0.6875rem" }}>{new Date(file.lastModified).toLocaleDateString()}</span>}
               <button
                 type="button"
                 aria-label={i18nStrings?.removeFileAriaLabel?.(idx, file.name) ?? `Remove ${file.name}`}

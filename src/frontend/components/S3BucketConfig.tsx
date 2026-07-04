@@ -794,7 +794,7 @@ function BucketNotifications({ bucket }: Props) {
                 return "SNS";
               }},
               { id: "arn", header: "ARN", cell: (item: any) => (
-                <code style={{ fontSize: 12, wordBreak: "break-all" }}>
+                <code style={{ fontSize: "0.75rem", wordBreak: "break-all" }}>
                   {item.LambdaFunctionArn || item.QueueArn || item.TopicArn || "—"}
                 </code>
               )},

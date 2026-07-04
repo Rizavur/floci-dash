@@ -79,7 +79,7 @@ function NavItem({ label, serviceKey, status, active, fav, onNavigate, onToggleF
       </span>
 
       {/* Label */}
-      <span className="tw:flex-1 tw:text-[12px] tw:leading-none tw:truncate tw:font-medium"
+      <span className="tw:flex-1 tw:text-[0.8125rem] tw:leading-none tw:truncate tw:font-medium"
             style={{ color: active ? "var(--sh-accent)" : "var(--sh-dim)", fontFamily: "var(--font-ui)" }}>
         {label}
       </span>
@@ -223,17 +223,17 @@ export default function AppLayoutShell({ children }: Props) {
           onClick={() => navigate("/")}
           className="tw:flex tw:items-center tw:gap-2 tw:cursor-pointer tw:bg-transparent tw:border-0 tw:p-0"
         >
-          <span className="tw:inline-flex tw:items-center tw:justify-center tw:w-[22px] tw:h-[22px] tw:rounded-[5px] tw:text-[11px] tw:font-bold"
+          <span className="tw:inline-flex tw:items-center tw:justify-center tw:w-[22px] tw:h-[22px] tw:rounded-[5px] tw:text-[0.6875rem] tw:font-bold"
                 style={{ background: "var(--sh-accent)", color: "var(--sh-bg)" }}>
             F
           </span>
-          <span className="tw:text-[13px] tw:font-semibold" style={{ color: "var(--sh-ink)" }}>
+          <span className="tw:text-[0.875rem] tw:font-semibold" style={{ color: "var(--sh-ink)" }}>
             Floci Dash
           </span>
         </button>
 
         {/* Health pill */}
-        <span className="tw:flex tw:items-center tw:gap-1 tw:text-[10px] tw:font-mono tw:px-1.5 tw:py-0.5 tw:rounded"
+        <span className="tw:flex tw:items-center tw:gap-1 tw:text-[0.625rem] tw:font-mono tw:px-1.5 tw:py-0.5 tw:rounded"
               style={{
                 color: running === total && total > 0 ? "var(--sh-ok)" : "var(--sh-warn)",
                 background: "var(--sh-elevated)",
@@ -258,7 +258,7 @@ export default function AppLayoutShell({ children }: Props) {
             value={navQuery}
             onChange={(e) => setNavQuery(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Escape") setNavQuery(""); }}
-            className="tw:w-full tw:pl-7 tw:pr-3 tw:py-1.5 tw:text-[12px] tw:rounded-[5px] tw:outline-none"
+            className="tw:w-full tw:pl-7 tw:pr-3 tw:py-1.5 tw:text-[0.8125rem] tw:rounded-[5px] tw:outline-none"
             style={{
               background: "var(--sh-elevated)",
               border: "1px solid var(--sh-line)",
@@ -276,7 +276,7 @@ export default function AppLayoutShell({ children }: Props) {
         {/* Search results */}
         {searchResults !== null && (
           <div>
-            <p className="tw:px-2 tw:pt-2 tw:pb-1 tw:text-[10px] tw:uppercase tw:tracking-widest tw:font-semibold"
+            <p className="tw:px-2 tw:pt-2 tw:pb-1 tw:text-[0.6875rem] tw:uppercase tw:tracking-widest tw:font-semibold"
                style={{ color: "var(--sh-faint)", fontFamily: "var(--font-mono)" }}>
               {searchResults.length ? `${searchResults.length} match${searchResults.length !== 1 ? "es" : ""}` : "No matches"}
             </p>
@@ -297,7 +297,7 @@ export default function AppLayoutShell({ children }: Props) {
               role="button" tabIndex={0}
               onClick={() => { navigate("/"); setSidebarOpen(false); }}
               onKeyDown={(e) => { if (e.key === "Enter") { navigate("/"); setSidebarOpen(false); } }}
-              className="tw:flex tw:items-center tw:gap-2 tw:px-3 tw:py-1.5 tw:mb-1 tw:cursor-pointer tw:rounded-[4px] tw:transition-colors tw:duration-100 tw:text-[12px] tw:font-medium"
+              className="tw:flex tw:items-center tw:gap-2 tw:px-3 tw:py-1.5 tw:mb-1 tw:cursor-pointer tw:rounded-[4px] tw:transition-colors tw:duration-100 tw:text-[0.8125rem] tw:font-medium"
               style={{
                 background: location.pathname === "/" ? "var(--sh-accent-bg)" : "transparent",
                 color: location.pathname === "/" ? "var(--sh-accent)" : "var(--sh-dim)",
@@ -320,7 +320,7 @@ export default function AppLayoutShell({ children }: Props) {
             {/* Favorites */}
             {favorites.length > 0 && (
               <div className="tw:mb-1">
-                <p className="tw:px-2 tw:pt-2 tw:pb-1 tw:text-[10px] tw:uppercase tw:tracking-widest tw:font-semibold"
+                <p className="tw:px-2 tw:pt-2 tw:pb-1 tw:text-[0.6875rem] tw:uppercase tw:tracking-widest tw:font-semibold"
                    style={{ color: "var(--sh-faint)", fontFamily: "var(--font-mono)" }}>
                   Starred
                 </p>
@@ -338,7 +338,7 @@ export default function AppLayoutShell({ children }: Props) {
             {/* Recently visited */}
             {recentlyVisited.filter((k) => k in services).length > 0 && (
               <div className="tw:mb-1">
-                <p className="tw:px-2 tw:pt-2 tw:pb-1 tw:text-[10px] tw:uppercase tw:tracking-widest tw:font-semibold"
+                <p className="tw:px-2 tw:pt-2 tw:pb-1 tw:text-[0.6875rem] tw:uppercase tw:tracking-widest tw:font-semibold"
                    style={{ color: "var(--sh-faint)", fontFamily: "var(--font-mono)" }}>
                   Recent
                 </p>
@@ -398,10 +398,10 @@ export default function AppLayoutShell({ children }: Props) {
                       style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }}
                     />
                     <span style={{ color: categoryColor, display: "flex" }}><CategoryIcon className={IC} /></span>
-                    <span className="tw:text-[10px] tw:uppercase tw:tracking-widest tw:font-semibold tw:truncate">
+                    <span className="tw:text-[0.6875rem] tw:uppercase tw:tracking-widest tw:font-semibold tw:truncate">
                       {cat}
                     </span>
-                    <span className="tw:ml-auto tw:text-[10px] tw:font-mono">{keys.length}</span>
+                    <span className="tw:ml-auto tw:text-[0.6875rem] tw:font-mono">{keys.length}</span>
                   </button>
 
                   {isOpen && (
@@ -426,7 +426,7 @@ export default function AppLayoutShell({ children }: Props) {
            style={{ borderTop: "1px solid var(--sh-line)" }}>
         <button
           onClick={() => navigate("/settings")}
-          className="tw:flex tw:items-center tw:gap-1.5 tw:text-[11px] tw:cursor-pointer tw:rounded-[4px] tw:px-2 tw:py-1 tw:bg-transparent tw:border-0 tw:transition-colors"
+          className="tw:flex tw:items-center tw:gap-1.5 tw:text-[0.75rem] tw:cursor-pointer tw:rounded-[4px] tw:px-2 tw:py-1 tw:bg-transparent tw:border-0 tw:transition-colors"
           style={{ color: "var(--sh-faint)", fontFamily: "var(--font-ui)" }}
           onMouseEnter={(e) => { e.currentTarget.style.color = "var(--sh-dim)"; e.currentTarget.style.background = "var(--sh-hover)"; }}
           onMouseLeave={(e) => { e.currentTarget.style.color = "var(--sh-faint)"; e.currentTarget.style.background = "transparent"; }}
@@ -521,10 +521,10 @@ export default function AppLayoutShell({ children }: Props) {
           >
             <Bars3Icon className="tw:w-4 tw:h-4" />
           </button>
-          <span className="tw:text-[13px] tw:font-semibold" style={{ color: "var(--sh-ink)" }}>
+          <span className="tw:text-[0.875rem] tw:font-semibold" style={{ color: "var(--sh-ink)" }}>
             Floci Dash
           </span>
-          <span className="tw:ml-auto tw:font-mono tw:text-[11px]" style={{ color: "var(--sh-ok)" }}>
+          <span className="tw:ml-auto tw:font-mono tw:text-[0.6875rem]" style={{ color: "var(--sh-ok)" }}>
             v{version}
           </span>
         </div>
