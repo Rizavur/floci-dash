@@ -10,6 +10,10 @@
 /* Dark is the default; .light overrides for light mode.                    */
 
 #app-shell {
+  /* Tells the browser to draw its own UI (scrollbars, form controls) in dark
+     theme instead of always defaulting to the light OS theme — without this,
+     scrollbars stay light/mismatched even when the app is in dark mode. */
+  color-scheme: dark;
   --sh-bg:       #0d1117;
   --sh-surface:  #161b22;
   --sh-elevated: #21262d;
@@ -32,6 +36,7 @@
 }
 
 #app-shell.light {
+  color-scheme: light;
   --sh-bg:       #f6f8fa;
   --sh-surface:  #ffffff;
   --sh-elevated: #eaeef2;
@@ -51,6 +56,33 @@
   --sh-fail-bg:  rgba(207, 34, 46, 0.08);
   --sh-info:     #0e8a7f;
   --sh-info-bg:  rgba(14, 138, 127, 0.08);
+}
+
+/* ─── Themed scrollbars ─────────────────────────────────────────────────── */
+/* Default browser scrollbars ignore the app's dark/light theme and always
+   render in the OS-light style, which looks out of place (e.g. on tab lists
+   with horizontal overflow). Style them to match the current theme tokens. */
+#app-shell * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sh-line) transparent;
+}
+
+#app-shell *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+#app-shell *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#app-shell *::-webkit-scrollbar-thumb {
+  background: var(--sh-line);
+  border-radius: 4px;
+}
+
+#app-shell *::-webkit-scrollbar-thumb:hover {
+  background: var(--sh-dim);
 }
 
 /* ─── Dark-mode-safe utility classes ─── */
