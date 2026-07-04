@@ -36,7 +36,7 @@ function variantStyle(variant: ButtonVariant, disabled?: boolean) {
     case "primary":
       return {
         className: `${BASE} tw:px-3 tw:py-1.5 tw:border-transparent`,
-        style: { background: disabled ? "var(--sh-faint)" : "var(--sh-accent)", color: "#0d1117" },
+        style: { background: disabled ? "var(--sh-faint)" : "var(--sh-accent)", color: "var(--sh-bg)" },
       };
     case "link":
       return {
