@@ -1,4 +1,4 @@
-import { useImperativeHandle, useState, forwardRef } from "react";
+import { useImperativeHandle, useState, useEffect, forwardRef } from "react";
 import { ChevronRightIcon } from "@heroicons/react/16/solid";
 import { SERVICE_LABELS, CATEGORY_ORDER, SERVICE_CATEGORY_MAP } from "../types/services";
 import { getCategoryIcon, getCategoryColor, getCategoryColorBg } from "./categoryIcons";
@@ -10,6 +10,8 @@ interface Props {
   activeServices?: string[];
   /** Resource count per service key, used for the small badge on active cards. */
   resourceCounts?: Record<string, number>;
+  /** Called whenever every category becomes fully expanded/collapsed, so a parent toggle button can show the right icon. */
+  onAllExpandedChange?: (allExpanded: boolean) => void;
 }
 
 export interface ServiceGridHandle {
@@ -18,7 +20,7 @@ export interface ServiceGridHandle {
 }
 
 const ServiceGrid = forwardRef<ServiceGridHandle, Props>(function ServiceGrid(
-  { services, activeServices, resourceCounts },
+  { services, activeServices, resourceCounts, onAllExpandedChange },
   ref,
 ) {
   const activeSet = new Set(activeServices ?? []);
@@ -40,6 +42,10 @@ const ServiceGrid = forwardRef<ServiceGridHandle, Props>(function ServiceGrid(
     expandAll: () => setCollapsed(new Set()),
     collapseAll: () => setCollapsed(new Set(orderedCategories)),
   }), [orderedCategories]);
+
+  useEffect(() => {
+    onAllExpandedChange?.(collapsed.size === 0);
+  }, [collapsed, onAllExpandedChange]);
 
   const toggleCategory = (cat: string) => {
     setCollapsed((prev) => {

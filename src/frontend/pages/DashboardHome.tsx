@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   Squares2X2Icon,
   SignalIcon,
@@ -72,6 +72,7 @@ export default function DashboardHome() {
   const { entries, clearActivity } = useActivityFeed();
   const favorites = useFavorites((s) => s.favorites);
   const serviceGridRef = useRef<ServiceGridHandle>(null);
+  const [allCategoriesExpanded, setAllCategoriesExpanded] = useState(true);
 
   if (isLoading) {
     return (
@@ -318,30 +319,17 @@ export default function DashboardHome() {
         <SectionHead
           title={`Services · ${health.stats.running}/${health.stats.total} running`}
           action={
-            <div className="tw:flex tw:items-center tw:gap-0.5">
-              <button
-                onClick={() => serviceGridRef.current?.expandAll()}
-                title="Expand all"
-                aria-label="Expand all categories"
-                className="tw:flex tw:items-center tw:justify-center tw:w-6 tw:h-6 tw:rounded tw:cursor-pointer tw:bg-transparent tw:border-0"
-                style={{ color: "var(--sh-faint)" }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--sh-hover)"; e.currentTarget.style.color = "var(--sh-dim)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sh-faint)"; }}
-              >
-                <ChevronDoubleDownIcon className="tw:w-3.5 tw:h-3.5" />
-              </button>
-              <button
-                onClick={() => serviceGridRef.current?.collapseAll()}
-                title="Collapse all"
-                aria-label="Collapse all categories"
-                className="tw:flex tw:items-center tw:justify-center tw:w-6 tw:h-6 tw:rounded tw:cursor-pointer tw:bg-transparent tw:border-0"
-                style={{ color: "var(--sh-faint)" }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--sh-hover)"; e.currentTarget.style.color = "var(--sh-dim)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sh-faint)"; }}
-              >
-                <ChevronDoubleUpIcon className="tw:w-3.5 tw:h-3.5" />
-              </button>
-            </div>
+            <button
+              onClick={() => allCategoriesExpanded ? serviceGridRef.current?.collapseAll() : serviceGridRef.current?.expandAll()}
+              title={allCategoriesExpanded ? "Collapse all" : "Expand all"}
+              aria-label={allCategoriesExpanded ? "Collapse all categories" : "Expand all categories"}
+              className="tw:flex tw:items-center tw:justify-center tw:w-6 tw:h-6 tw:rounded tw:cursor-pointer tw:bg-transparent tw:border-0"
+              style={{ color: "var(--sh-faint)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--sh-hover)"; e.currentTarget.style.color = "var(--sh-dim)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sh-faint)"; }}
+            >
+              {allCategoriesExpanded ? <ChevronDoubleUpIcon className="tw:w-3.5 tw:h-3.5" /> : <ChevronDoubleDownIcon className="tw:w-3.5 tw:h-3.5" />}
+            </button>
           }
         />
         <ServiceGrid
@@ -349,6 +337,7 @@ export default function DashboardHome() {
           services={health.services}
           activeServices={activeServices}
           resourceCounts={resourceCounts}
+          onAllExpandedChange={setAllCategoriesExpanded}
         />
       </div>
 
