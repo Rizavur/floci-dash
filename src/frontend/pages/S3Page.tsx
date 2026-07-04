@@ -99,6 +99,18 @@ export default function S3Page() {
   const createBucket = useS3CreateBucket();
   const uploadFilesMutation = useS3UploadFiles(selectedBucket || "");
 
+  function handleCreateBucket() {
+    if (!newBucketName) return;
+    createBucket.mutate(newBucketName, {
+      onSuccess: () => {
+        setShowCreateBucket(false);
+        setNewBucketName("");
+        showToast("success", `Bucket "${newBucketName}" created`);
+      },
+      onError: (err) => showToast("error", err.message),
+    });
+  }
+
   function closeUpload() {
     if (isUploading) return;
     setShowUploadObject(false);
@@ -231,18 +243,7 @@ export default function S3Page() {
               <Button
                 variant="primary"
                 loading={createBucket.isPending}
-                onClick={() => {
-                  if (newBucketName) {
-                    createBucket.mutate(newBucketName, {
-                      onSuccess: () => {
-                        setShowCreateBucket(false);
-                        setNewBucketName("");
-                        showToast("success", `Bucket "${newBucketName}" created`);
-                      },
-                      onError: (err) => showToast("error", err.message),
-                    });
-                  }
-                }}
+                onClick={handleCreateBucket}
               >
                 Create bucket
               </Button>
@@ -250,14 +251,18 @@ export default function S3Page() {
           </Box>
         }
       >
-        <Form>
-          {createBucket.isError && (
-            <Alert type="error" dismissible>{(createBucket.error as Error)?.message || "Failed to create bucket"}</Alert>
-          )}
-          <FormField label="Bucket name" description="Must be globally unique. Use lowercase letters, numbers, and hyphens.">
-            <Input value={newBucketName} onChange={(e) => setNewBucketName(e.detail.value)} placeholder="my-bucket" />
-          </FormField>
-        </Form>
+        {/* Native <form> so pressing Enter in the bucket name field submits,
+            same as any other browser form — no manual keydown handling needed. */}
+        <form onSubmit={(e) => { e.preventDefault(); handleCreateBucket(); }}>
+          <Form>
+            {createBucket.isError && (
+              <Alert type="error" dismissible>{(createBucket.error as Error)?.message || "Failed to create bucket"}</Alert>
+            )}
+            <FormField label="Bucket name" description="Must be globally unique. Use lowercase letters, numbers, and hyphens.">
+              <Input value={newBucketName} onChange={(e) => setNewBucketName(e.detail.value.replace(/\s/g, "-"))} placeholder="my-bucket" />
+            </FormField>
+          </Form>
+        </form>
       </Modal>
 
       <Modal
