@@ -518,28 +518,20 @@ export function KinesisDashboard() {
   const [showPutRecord, setShowPutRecord] = useState(false);
   const [recordData, setRecordData] = useState("");
   const [recordKey, setRecordKey] = useState("");
+  const [activeTab, setActiveTab] = useState<"streams" | "detail">("streams");
 
   if (isLoading) return <TableSkeleton />;
 
   return (
     <Tabs
-      activeTabId={selectedStream ? "detail" : "streams"}
-      onChange={({ detail }) => {
-        if (detail.activeTabId === "streams") setSelectedStream(null);
-      }}
+      activeTabId={activeTab}
+      onChange={({ detail }) => setActiveTab(detail.activeTabId as "streams" | "detail")}
       tabs={[
         {
           id: "streams",
           label: "Streams",
           content: (
             <>
-              {selectedStream && (
-                <Box margin={{ bottom: "s" }}>
-                  <Button iconName="arrow-left" onClick={() => setSelectedStream(null)}>
-                    Back to streams
-                  </Button>
-                </Box>
-              )}
               <ResourceTable
                 resourceName="Stream"
                 headerTitle="Kinesis Streams"
@@ -562,7 +554,7 @@ export function KinesisDashboard() {
                     id: "name",
                     header: "Name",
                     cell: (i: any) => (
-                      <Button variant="link" onClick={() => setSelectedStream(i.name)}>
+                      <Button variant="link" onClick={() => { setSelectedStream(i.name); setActiveTab("detail"); }}>
                         {i.name}
                       </Button>
                     ),
