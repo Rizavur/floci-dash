@@ -1,7 +1,8 @@
 // Auto-split from ServicePage.tsx. Shared import preamble is intentional;
 // unused imports are tree-shaken at build (noUnusedLocals is off).
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -507,7 +508,7 @@ const CLUSTER_PG_FAMILY_OPTIONS: SelectProps.Option[] = [
 
 export function CloudWatchLogsDashboard() {
   const [selectedTab, setSelectedTab] = useState("log-groups");
-  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [selectedGroup, setSelectedGroup] = useUrlSelection("logGroup");
 
   if (selectedGroup) {
     return (
@@ -705,7 +706,13 @@ function CloudWatchLogGroupDetail({
   onBack: () => void;
 }) {
   const [selectedTab, setSelectedTab] = useState("streams");
-  const [selectedStream, setSelectedStream] = useState<string | null>(null);
+  // Not a plain useUrlSelection: the log group name must stay in the URL
+  // alongside the stream name so browser back steps stream → group → list
+  // instead of dropping the group.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedStream = searchParams.get("logStream");
+  const setSelectedStream = (streamName: string | null) =>
+    setSearchParams(streamName ? { logGroup: name, logStream: streamName } : { logGroup: name });
 
   if (selectedStream) {
     return (

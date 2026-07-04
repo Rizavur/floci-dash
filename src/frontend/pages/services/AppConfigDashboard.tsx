@@ -2,6 +2,7 @@
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -507,7 +508,7 @@ const CLUSTER_PG_FAMILY_OPTIONS: SelectProps.Option[] = [
 export function AppConfigDashboard() {
   const { data, isLoading } = useAppConfigApplications();
   const deleteApp = useDeleteAppConfigApplication();
-  const [selectedApp, setSelectedApp] = useState<string | null>(null);
+  const [selectedApp, setSelectedApp] = useUrlSelection("app");
   const { data: envData } = useAppConfigEnvironments(selectedApp);
   const { data: profileData } = useAppConfigProfiles(selectedApp);
 

@@ -2,6 +2,7 @@
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -509,7 +510,7 @@ export function SSMDashboard() {
   const putParam = usePutSSMParameter();
   const deleteParam = useDeleteSSMParameter();
   const [showCreate, setShowCreate] = useState(false);
-  const [selectedParam, setSelectedParam] = useState<string | null>(null);
+  const [selectedParam, setSelectedParam] = useUrlSelection("parameter");
 
   const [form, setForm] = useState({
     name: "",

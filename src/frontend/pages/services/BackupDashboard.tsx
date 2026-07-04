@@ -2,6 +2,7 @@
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -513,7 +514,7 @@ export function BackupDashboard() {
   const createVault = useCreateBackupVault();
   const deleteVault = useDeleteBackupVault();
   const stopJob = useStopBackupJob();
-  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+  const [selectedPlanId, setSelectedPlanId] = useUrlSelection("plan");
   const { data: selectionsData } = useBackupSelections(selectedPlanId);
   const [showCreatePlan, setShowCreatePlan] = useState(false);
   const [showCreateVault, setShowCreateVault] = useState(false);

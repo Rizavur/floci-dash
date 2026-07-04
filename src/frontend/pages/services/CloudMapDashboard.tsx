@@ -1,6 +1,6 @@
 // Auto-split from ServicePage.tsx. Shared import preamble is intentional;
 // unused imports are tree-shaken at build (noUnusedLocals is off).
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -507,10 +507,17 @@ const CLUSTER_PG_FAMILY_OPTIONS: SelectProps.Option[] = [
 export function CloudMapDashboard() {
   const { data: nsData, isLoading } = useCloudMapNamespaces();
   const deleteNs = useDeleteCloudMapNamespace();
-  const [selectedNs, setSelectedNs] = useState<string | null>(null);
+  // Namespace and service selection both live in the URL at once (?ns=&svc=)
+  // so browser back steps instances → services → namespaces → list, instead
+  // of local state that only useUrlSelection's single-key replace supports.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedNs = searchParams.get("ns");
+  const selectedSvc = searchParams.get("svc");
+  const setSelectedNs = (id: string | null) => setSearchParams(id ? { ns: id } : {});
+  const setSelectedSvc = (id: string | null) =>
+    setSearchParams(id ? { ns: selectedNs!, svc: id } : { ns: selectedNs! });
   const { data: svcData } = useCloudMapServices(selectedNs);
   const deleteSvc = useDeleteCloudMapService();
-  const [selectedSvc, setSelectedSvc] = useState<string | null>(null);
   const { data: instData } = useCloudMapInstances(selectedSvc);
 
   if (selectedNs && selectedSvc) {

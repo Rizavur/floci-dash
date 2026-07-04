@@ -2,8 +2,19 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
+import React from "react";
 import { createWrapper } from "../../../test/helpers";
 import { KinesisDashboard } from "./KinesisDashboard";
+
+function pageWrapper() {
+  const Wrapper = createWrapper();
+  return ({ children }: { children: React.ReactNode }) => (
+    <MemoryRouter>
+      <Wrapper>{children}</Wrapper>
+    </MemoryRouter>
+  );
+}
 
 vi.mock("../../hooks/useKinesis", () => ({
   useKinesisStreams: () => ({
@@ -25,7 +36,7 @@ vi.mock("../../hooks/useKinesis", () => ({
 describe("KinesisDashboard tabs", () => {
   it("switches to the Stream Details tab when clicked with no stream selected", async () => {
     const user = userEvent.setup();
-    render(<KinesisDashboard />, { wrapper: createWrapper() });
+    render(<KinesisDashboard />, { wrapper: pageWrapper() });
 
     expect(screen.getByText("Kinesis Streams")).toBeTruthy();
 
@@ -36,7 +47,7 @@ describe("KinesisDashboard tabs", () => {
 
   it("jumps to the Stream Details tab when a stream name is clicked", async () => {
     const user = userEvent.setup();
-    render(<KinesisDashboard />, { wrapper: createWrapper() });
+    render(<KinesisDashboard />, { wrapper: pageWrapper() });
 
     await user.click(screen.getByRole("button", { name: "my-stream" }));
 

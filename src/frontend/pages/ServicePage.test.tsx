@@ -136,7 +136,16 @@ vi.mock("../lib/utils", () => ({
 vi.mock("react-router-dom", () => ({
   useParams: (...args: any[]) => mockParams(...args),
   useNavigate: () => vi.fn(),
-  useSearchParams: () => [new URLSearchParams(), vi.fn()],
+  // Fake but stateful — a real useState behind the hook, so selecting a
+  // resource and clicking "Back" actually toggles the detail view, matching
+  // real react-router behavior without needing a <Router>.
+  useSearchParams: () => {
+    const [params, setParams] = React.useState(new URLSearchParams());
+    return [
+      params,
+      (next: any) => setParams(new URLSearchParams(next instanceof URLSearchParams ? next.toString() : next)),
+    ];
+  },
 }));
 
 import ServicePage from "./ServicePage";

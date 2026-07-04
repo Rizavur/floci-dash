@@ -2,8 +2,19 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
+import React from "react";
 import { createWrapper } from "../../../test/helpers";
 import { CloudFrontDashboard } from "./CloudFrontDashboard";
+
+function pageWrapper() {
+  const Wrapper = createWrapper();
+  return ({ children }: { children: React.ReactNode }) => (
+    <MemoryRouter>
+      <Wrapper>{children}</Wrapper>
+    </MemoryRouter>
+  );
+}
 
 vi.mock("../../hooks/useCloudFront", () => ({
   useCloudFrontDistributions: () => ({
@@ -30,7 +41,7 @@ vi.mock("../../hooks/useCloudFront", () => ({
 describe("CloudFrontDashboard tabs", () => {
   it("switches to the Cache Policies tab when clicked", async () => {
     const user = userEvent.setup();
-    render(<CloudFrontDashboard />, { wrapper: createWrapper() });
+    render(<CloudFrontDashboard />, { wrapper: pageWrapper() });
 
     expect(screen.getByText("CloudFront Distributions")).toBeTruthy();
 
@@ -41,7 +52,7 @@ describe("CloudFrontDashboard tabs", () => {
 
   it("switches to the Functions tab when clicked", async () => {
     const user = userEvent.setup();
-    render(<CloudFrontDashboard />, { wrapper: createWrapper() });
+    render(<CloudFrontDashboard />, { wrapper: pageWrapper() });
 
     await user.click(screen.getByRole("tab", { name: "Functions" }));
 
@@ -51,7 +62,7 @@ describe("CloudFrontDashboard tabs", () => {
 
   it("switches to Invalidations tab when a distribution ID is clicked", async () => {
     const user = userEvent.setup();
-    render(<CloudFrontDashboard />, { wrapper: createWrapper() });
+    render(<CloudFrontDashboard />, { wrapper: pageWrapper() });
 
     await user.click(screen.getByRole("button", { name: "DIST123" }));
 

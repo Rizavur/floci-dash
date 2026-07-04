@@ -2,6 +2,7 @@
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -511,7 +512,7 @@ export function KinesisDashboard() {
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState("");
   const [shardCount, setShardCount] = useState("1");
-  const [selectedStream, setSelectedStream] = useState<string | null>(null);
+  const [selectedStream, setSelectedStream] = useUrlSelection("stream");
   const { data: shardsData } = useKinesisShards(selectedStream);
   const putRecord = usePutKinesisRecord(selectedStream || "");
   const [showPutRecord, setShowPutRecord] = useState(false);

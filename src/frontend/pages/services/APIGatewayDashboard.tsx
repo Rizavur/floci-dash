@@ -2,6 +2,7 @@
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -508,7 +509,7 @@ export function APIGatewayDashboard() {
   const { data, isLoading, isError, error } = useAPIGatewayApis();
   const createApi = useCreateAPIGatewayApi();
   const deleteApi = useDeleteAPIGatewayApi();
-  const [selectedApi, setSelectedApi] = useState<string | null>(null);
+  const [selectedApi, setSelectedApi] = useUrlSelection("api");
   const [showCreate, setShowCreate] = useState(false);
 
   const [form, setForm] = useState({ name: "", description: "" });

@@ -2,6 +2,7 @@
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -507,7 +508,7 @@ const CLUSTER_PG_FAMILY_OPTIONS: SelectProps.Option[] = [
 export function RGTDashboard() {
   const { data: resourcesData, isLoading: resourcesLoading } = useRGTResources();
   const { data: tagKeysData } = useRGTTagKeys();
-  const [selectedTagKey, setSelectedTagKey] = useState<string | null>(null);
+  const [selectedTagKey, setSelectedTagKey] = useUrlSelection("tagKey");
   const { data: tagValuesData } = useRGTTagValues(selectedTagKey);
   const tagResources = useRGTTagResources();
   const untagResources = useRGTUntagResources();

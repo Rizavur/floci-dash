@@ -2,6 +2,7 @@
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
   ContentLayout,
@@ -512,7 +513,7 @@ export function EKSDashboard() {
   const [clusterName, setClusterName] = useState("");
   const [clusterRoleArn, setClusterRoleArn] = useState("");
   const [clusterVersion, setClusterVersion] = useState("");
-  const [selectedCluster, setSelectedCluster] = useState<string | null>(null);
+  const [selectedCluster, setSelectedCluster] = useUrlSelection("cluster");
   const { data: nodegroupsData, isLoading: nodegroupsLoading } = useEKSNodegroups(selectedCluster);
   const createNodegroup = useEKSCreateNodegroup(selectedCluster || "");
   const deleteNodegroup = useEKSDeleteNodegroup(selectedCluster || "");
