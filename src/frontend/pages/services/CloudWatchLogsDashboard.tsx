@@ -1,7 +1,7 @@
 // Auto-split from ServicePage.tsx. Shared import preamble is intentional;
 // unused imports are tree-shaken at build (noUnusedLocals is off).
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Fragment } from "react";
 import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -24,6 +24,7 @@ import {
   Container,
   Spinner,
   Checkbox,
+  TextFilter,
   type SelectProps,
   type TabsProps,
 } from "../../components/ui";
@@ -896,6 +897,7 @@ function CloudWatchLogGroupSearch({
                 onClick={() => stream && onSelectStream(stream)}
                 style={{
                   display: "flex",
+                  gap: "16px",
                   padding: "2px 8px",
                   borderBottom: "1px solid var(--sh-line-sub)",
                   cursor: stream ? "pointer" : "default",
@@ -935,7 +937,7 @@ function CloudWatchLogGroupSearch({
                     color: "var(--sh-ink)",
                   }}
                 >
-                  {event.message}
+                  {highlightLogLevels(event.message || "")}
                 </span>
               </div>
             );
@@ -1134,6 +1136,7 @@ function CloudWatchLogStreamDetail({
 }) {
   const [limit, setLimit] = useState(LOG_VIEW_LIMIT_OPTIONS[2]); // 500 default
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [filterText, setFilterText] = useState("");
   const deleteLogStream = useDeleteLogStream();
 
   const { data, isLoading, isError, error, refetch } = useLogEvents(
@@ -1157,6 +1160,9 @@ function CloudWatchLogStreamDetail({
   }, [data?.events, autoScroll]);
 
   const events = (data?.events || []).slice().reverse(); // newest first
+  const filteredEvents = filterText.trim()
+    ? events.filter((e: any) => (e.message || "").toLowerCase().includes(filterText.toLowerCase()))
+    : events;
 
   return (
     <SpaceBetween size="l">
@@ -1230,6 +1236,14 @@ function CloudWatchLogStreamDetail({
         </Box>
       )}
 
+      {events.length > 0 && (
+        <TextFilter
+          filteringText={filterText}
+          filteringPlaceholder="Filter loaded events, e.g. ERROR or a request ID"
+          onChange={({ detail }) => setFilterText(detail.filteringText)}
+        />
+      )}
+
       <div
         ref={eventsContainerRef}
         style={{
@@ -1250,11 +1264,17 @@ function CloudWatchLogStreamDetail({
           if (!atBottom) setAutoScroll(false);
         }}
       >
-        {events.map((event: any, idx: number) => (
+        {filteredEvents.length === 0 && filterText.trim() && (
+          <Box textAlign="center" padding="l" color="text-body-secondary">
+            No events match "{filterText}".
+          </Box>
+        )}
+        {filteredEvents.map((event: any, idx: number) => (
           <div
             key={event.eventId || idx}
             style={{
               display: "flex",
+              gap: "16px",
               padding: "2px 8px",
               borderBottom:
                 "1px solid var(--sh-line-sub)",
@@ -1279,7 +1299,7 @@ function CloudWatchLogStreamDetail({
                 color: "var(--sh-ink)",
               }}
             >
-              {event.message}
+              {highlightLogLevels(event.message || "")}
             </span>
           </div>
         ))}
@@ -1291,7 +1311,7 @@ function CloudWatchLogStreamDetail({
 
       {data && (
         <Box textAlign="center" fontSize="body-s" color="text-body-secondary">
-          {events.length} events displayed
+          {filterText.trim() ? `${filteredEvents.length} of ${events.length} events displayed` : `${events.length} events displayed`}
         </Box>
       )}
     </SpaceBetween>
@@ -1825,6 +1845,37 @@ const LOG_VIEW_LIMIT_OPTIONS: SelectProps.Option[] = [
   { label: "1000", value: "1000" },
   { label: "10000", value: "10000" },
 ];
+
+// ─── Log level highlighting ─────────────────────────────
+// Shared between the live stream viewer and the cross-stream search view.
+
+const LOG_LEVEL_COLORS: Record<string, string> = {
+  ERROR: "var(--sh-fail)",
+  FATAL: "var(--sh-fail)",
+  WARN: "var(--sh-warn)",
+  WARNING: "var(--sh-warn)",
+  INFO: "var(--sh-info)",
+  DEBUG: "var(--sh-dim)",
+  TRACE: "var(--sh-dim)",
+};
+
+const LOG_LEVEL_PATTERN = /\b(ERROR|FATAL|WARNING|WARN|INFO|DEBUG|TRACE)\b/g;
+
+/** Renders a log message with level keywords (ERROR, WARN, INFO, ...) colored
+ * and bolded so they stand out while scanning. Splitting on a capturing-group
+ * regex keeps the matched keywords in the resulting array alongside the
+ * surrounding plain text. */
+function highlightLogLevels(message: string) {
+  const parts = message.split(LOG_LEVEL_PATTERN);
+  return parts.map((part, i) => {
+    const color = LOG_LEVEL_COLORS[part];
+    return color ? (
+      <span key={i} style={{ color, fontWeight: 700 }}>{part}</span>
+    ) : (
+      <Fragment key={i}>{part}</Fragment>
+    );
+  });
+}
 
 const DISTRIBUTION_OPTIONS: SelectProps.Option[] = [
   { label: "ByLogStream (default)", value: "" },
