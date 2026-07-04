@@ -415,9 +415,11 @@ function S3BucketList({ onSelectBucket, onCreateClick }: { onSelectBucket: (name
   const { confirm, dialog } = useConfirmDialog();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredBuckets = (data?.buckets || []).filter(
-    (b) => !searchTerm || b.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Real AWS S3 returns ListBuckets results sorted by name; Floci returns
+  // its raw storage-scan order instead, so sort here to match.
+  const filteredBuckets = (data?.buckets || [])
+    .filter((b) => !searchTerm || b.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <>
