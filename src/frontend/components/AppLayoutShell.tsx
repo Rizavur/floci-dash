@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   MagnifyingGlassIcon,
@@ -20,6 +20,7 @@ import {
   SERVICE_CATEGORY_MAP,
   getServiceLabel,
 } from "../types/services";
+import { getCategoryIcon, getCategoryColor } from "./categoryIcons";
 
 // Shared icon size — all nav/UI icons at 14×14 px
 const IC = "tw:w-3.5 tw:h-3.5 tw:flex-shrink-0";
@@ -121,8 +122,11 @@ export default function AppLayoutShell({ children }: Props) {
   const searchRef = useRef<HTMLInputElement>(null);
 
   // ── Apply dark mode ──────────────────────────────────────────────────────
-  useEffect(() => {
-    // Keep Cloudscape dark mode in sync (for tables/forms in service pages)
+  // useLayoutEffect (not useEffect): this class now drives the entire theme's
+  // CSS variables (see dashboard.css, scoped to body), not just the legacy
+  // Cloudscape compat classes it originally covered — running after paint
+  // would flash the wrong theme for a frame on every load/toggle.
+  useLayoutEffect(() => {
     if (darkMode) {
       document.body.classList.add("awsui-dark-mode");
     } else {
@@ -335,6 +339,11 @@ export default function AppLayoutShell({ children }: Props) {
                 (SERVICE_LABELS[a] || a).localeCompare(SERVICE_LABELS[b] || b)
               );
               const isOpen = !collapsed.has(cat);
+              // Same per-category color/icon used on the Dashboard home page's
+              // service cards — without it every category header was the same
+              // flat grey, so the whole sidebar read as one uniform block.
+              const CategoryIcon = getCategoryIcon(cat);
+              const categoryColor = getCategoryColor(cat);
               return (
                 <div key={cat} className="tw:mb-0.5">
                   <button
@@ -351,6 +360,7 @@ export default function AppLayoutShell({ children }: Props) {
                       className={IC}
                       style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }}
                     />
+                    <span style={{ color: categoryColor, display: "flex" }}><CategoryIcon className={IC} /></span>
                     <span className="tw:text-[10px] tw:uppercase tw:tracking-widest tw:font-semibold tw:truncate">
                       {cat}
                     </span>
@@ -405,7 +415,9 @@ export default function AppLayoutShell({ children }: Props) {
   return (
     <div
       id="app-shell"
-      className={darkMode ? "" : "light"}
+      // Theme variables are scoped to `body` (see dashboard.css), keyed off
+      // the awsui-dark-mode class toggled below — not a class here — so
+      // elements rendered outside this div (e.g. Toast) still theme correctly.
       // Structural layout uses inline styles so the shell ALWAYS renders
       // correctly regardless of whether Tailwind CSS is emitted.
       style={{
