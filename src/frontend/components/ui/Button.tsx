@@ -13,6 +13,8 @@ interface ButtonProps {
   disabled?: boolean;
   iconName?: string;
   ariaLabel?: string;
+  /** Style a "primary" button as a destructive action (red) instead of the accent color. */
+  danger?: boolean;
   href?: string;
   target?: string;
   rel?: string;
@@ -35,12 +37,12 @@ function normalize(variant: ButtonVariant): "primary" | "normal" | "link" | "ico
   return variant;
 }
 
-function variantStyle(variant: ButtonVariant, disabled?: boolean) {
+function variantStyle(variant: ButtonVariant, disabled?: boolean, danger?: boolean) {
   switch (normalize(variant)) {
     case "primary":
       return {
         className: `${BASE} tw:px-3 tw:py-1.5 tw:border-transparent`,
-        style: { background: disabled ? "var(--sh-faint)" : "var(--sh-accent)", color: "var(--sh-bg)" },
+        style: { background: disabled ? "var(--sh-faint)" : danger ? "var(--sh-fail)" : "var(--sh-accent)", color: "var(--sh-bg)" },
       };
     case "link":
       return {
@@ -62,14 +64,14 @@ function variantStyle(variant: ButtonVariant, disabled?: boolean) {
 }
 
 export function Button({
-  variant = "normal", onClick, onFollow, loading, disabled, iconName, ariaLabel,
+  variant = "normal", onClick, onFollow, loading, disabled, iconName, ariaLabel, danger,
   href, target, rel, type = "button", fullWidth, children, className,
 }: ButtonProps) {
   const base = normalize(variant);
   const isIconOnly = base === "icon";
-  const isDestructive = base === "icon" && iconName === "remove";
+  const isDestructive = (base === "icon" && iconName === "remove") || (base === "primary" && danger);
   const Icon = resolveIcon(iconName);
-  const { className: variantClassName, style } = variantStyle(variant, disabled);
+  const { className: variantClassName, style } = variantStyle(variant, disabled, danger);
   const isDisabled = disabled || loading;
   const handleClick = onClick ?? (onFollow ? () => onFollow() : undefined);
   const content = (
