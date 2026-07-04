@@ -6,10 +6,15 @@
 }
 
 /* ─── Shell design tokens ───────────────────────────────────────────────── */
-/* Applied by AppLayoutShell on the root <div id="app-shell">               */
-/* Dark is the default; .light overrides for light mode.                    */
+/* Scoped to <body> (not just #app-shell) so anything rendered outside the
+   shell's own DOM subtree — e.g. Toast, which mounts as a sibling of
+   AppLayoutShell — still resolves these variables instead of getting
+   transparent backgrounds and default black text. Keyed off the existing
+   "awsui-dark-mode" body class (AppLayoutShell already toggles it) rather
+   than adding a second class, so there's one source of truth for the mode.
+   Dark is the default; :not(.awsui-dark-mode) overrides for light mode. */
 
-#app-shell {
+body {
   /* Base text color for the whole app. Without this, any element that
      doesn't set an explicit color (e.g. plain <div>/<Box> text) falls back
      to the browser's initial black — invisible/near-invisible on the dark
@@ -46,7 +51,7 @@
   --sh-star:     #e3b341;
 }
 
-#app-shell.light {
+body:not(.awsui-dark-mode) {
   color-scheme: light;
   --sh-bg:       #f6f8fa;
   --sh-surface:  #ffffff;
@@ -73,26 +78,26 @@
 /* Default browser scrollbars ignore the app's dark/light theme and always
    render in the OS-light style, which looks out of place (e.g. on tab lists
    with horizontal overflow). Style them to match the current theme tokens. */
-#app-shell * {
+body * {
   scrollbar-width: thin;
   scrollbar-color: var(--sh-line) transparent;
 }
 
-#app-shell *::-webkit-scrollbar {
+body *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-#app-shell *::-webkit-scrollbar-track {
+body *::-webkit-scrollbar-track {
   background: transparent;
 }
 
-#app-shell *::-webkit-scrollbar-thumb {
+body *::-webkit-scrollbar-thumb {
   background: var(--sh-line);
   border-radius: 4px;
 }
 
-#app-shell *::-webkit-scrollbar-thumb:hover {
+body *::-webkit-scrollbar-thumb:hover {
   background: var(--sh-dim);
 }
 
