@@ -76,7 +76,7 @@ function NavItem({ label, serviceKey, status, active, fav, onNavigate, onToggleF
           className="tw:opacity-0 tw:group-hover:opacity-100 tw:transition-opacity tw:duration-100 tw:p-0.5 tw:rounded"
           style={{
             opacity: fav ? 1 : undefined,
-            color: fav ? "var(--sh-warn)" : "var(--sh-faint)",
+            color: fav ? "var(--sh-star)" : "var(--sh-faint)",
             background: "transparent", border: "none", cursor: "pointer",
           }}
           aria-label={fav ? `Unstar ${label}` : `Star ${label}`}

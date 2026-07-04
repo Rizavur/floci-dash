@@ -93,7 +93,7 @@ export default function ServiceCard({ serviceKey, status, isActive, resourceCoun
           className="tw:flex-shrink-0 tw:opacity-0 tw:group-hover:opacity-100 tw:transition-opacity tw:duration-100 tw:p-0.5 tw:rounded tw:bg-transparent tw:border-0 tw:cursor-pointer"
           style={{
             opacity: fav ? 1 : undefined,
-            color: fav ? "var(--sh-warn)" : "var(--sh-faint)",
+            color: fav ? "var(--sh-star)" : "var(--sh-faint)",
           }}
         >
           {fav
