@@ -6,8 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 
 vi.mock("react-router-dom", () => ({
-  useNavigate: () => vi.fn(),
   useLocation: vi.fn(() => ({ pathname: "/", hash: "" })),
+  Link: ({ to, children, ...props }: any) => <a href={to} {...props}>{children}</a>,
 }));
 
 vi.mock("../hooks/useSystem", () => ({
@@ -259,9 +259,10 @@ describe("AppLayoutShell — search", () => {
     );
     const input = screen.getByPlaceholderText("Search services…");
     await user.type(input, "S3");
-    // S3 matches, DynamoDB should not appear in results
+    // S3 matches, DynamoDB should not appear in results. Nav items are real
+    // <a> links now (not role="button" divs), so query by anchor tag.
     const nav = document.querySelector("nav");
-    const resultLabels = Array.from(nav!.querySelectorAll("[role='button']"))
+    const resultLabels = Array.from(nav!.querySelectorAll("a"))
       .map((el) => el.textContent?.trim());
     expect(resultLabels.some((t) => t?.includes("S3"))).toBe(true);
     expect(resultLabels.some((t) => t?.includes("DynamoDB"))).toBe(false);
@@ -276,6 +277,21 @@ describe("AppLayoutShell — search", () => {
     const input = screen.getByPlaceholderText("Search services…");
     await user.type(input, "zzzzzzz");
     expect(screen.getByText(/no matches/i)).toBeTruthy();
+  });
+
+  it("shows a clear button only while there's a query, and clears it when clicked", async () => {
+    const user = userEvent.setup();
+    render(
+      <AppLayoutShell><div>Content</div></AppLayoutShell>,
+      { wrapper: createWrapper() },
+    );
+    expect(screen.queryByLabelText("Clear search")).toBeNull();
+    const input = screen.getByPlaceholderText("Search services…") as HTMLInputElement;
+    await user.type(input, "S3");
+    expect(screen.getByLabelText("Clear search")).toBeTruthy();
+    await user.click(screen.getByLabelText("Clear search"));
+    expect(input.value).toBe("");
+    expect(screen.queryByLabelText("Clear search")).toBeNull();
   });
 });
 

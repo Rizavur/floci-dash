@@ -40,6 +40,27 @@ export function getCategoryIcon(category: string): IconComponent {
 }
 
 /**
+ * Short display names for the sidebar's ~220px category headers — the full
+ * AWS category names (e.g. "Security, Identity & Compliance") ellipsis in
+ * that width. Only used for that cramped label; the full name (the map key
+ * everywhere else) still appears in tooltips/full-width contexts.
+ */
+const CATEGORY_SHORT_LABELS: Record<string, string> = {
+  "Application Integration": "Integration",
+  "Developer Tools": "Dev Tools",
+  "Networking & Content Delivery": "Networking",
+  "Security, Identity & Compliance": "Security",
+  "Management & Governance": "Management",
+  "Machine Learning": "AI/ML",
+  "Cost Management": "Cost",
+  "Migration & Transfer": "Migration",
+};
+
+export function getCategoryLabel(category: string): string {
+  return CATEGORY_SHORT_LABELS[category] ?? category;
+}
+
+/**
  * Per-category accent colors, loosely inspired by AWS's own category color
  * coding (orange for Compute, green for Storage, blue for Database, purple
  * for Networking, red for Security, teal for ML, pink for App Integration,
