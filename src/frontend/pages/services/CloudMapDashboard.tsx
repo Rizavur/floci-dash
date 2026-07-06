@@ -525,6 +525,7 @@ export function CloudMapDashboard() {
       <>
         <Box margin={{ bottom: "s" }}>
           <Button
+            variant="link"
             iconName="arrow-left"
             onClick={() => setSelectedSvc(null)}
           >
@@ -554,7 +555,7 @@ export function CloudMapDashboard() {
     return (
       <>
         <Box margin={{ bottom: "s" }}>
-          <Button iconName="arrow-left" onClick={() => setSelectedNs(null)}>
+          <Button variant="link" iconName="arrow-left" onClick={() => setSelectedNs(null)}>
             Back to namespaces
           </Button>
         </Box>

@@ -163,7 +163,6 @@ export default function S3Page() {
               onPrefixChange={selectPrefix}
               selectedObject={selectedObject}
               onSelectObject={selectObject}
-              onBack={() => selectBucket(null)}
               onUploadClick={() => { setUploadPrefix(currentPrefix); setShowUploadObject(true); }}
             />
           ),
@@ -225,11 +224,16 @@ export default function S3Page() {
         </SpaceBetween>
       }
     >
-      <Tabs
-        activeTabId={activeTab}
-        onChange={({ detail }) => setActiveTab(detail.activeTabId)}
-        tabs={tabs}
-      />
+      <SpaceBetween size="s">
+        {selectedBucket && (
+          <Button variant="link" iconName="arrow-left" onClick={() => selectBucket(null)}>Buckets</Button>
+        )}
+        <Tabs
+          activeTabId={activeTab}
+          onChange={({ detail }) => setActiveTab(detail.activeTabId)}
+          tabs={tabs}
+        />
+      </SpaceBetween>
 
       <Modal
         visible={showCreateBucket}
@@ -477,8 +481,8 @@ function S3BucketList({ onSelectBucket, onCreateClick }: { onSelectBucket: (name
   );
 }
 
-function S3ObjectBrowser({ bucket, prefix, onPrefixChange, selectedObject, onSelectObject, onBack, onUploadClick }: {
-  bucket: string; prefix: string; onPrefixChange: (prefix: string) => void; selectedObject: string | null; onSelectObject: (key: string | null) => void; onBack: () => void; onUploadClick: () => void;
+function S3ObjectBrowser({ bucket, prefix, onPrefixChange, selectedObject, onSelectObject, onUploadClick }: {
+  bucket: string; prefix: string; onPrefixChange: (prefix: string) => void; selectedObject: string | null; onSelectObject: (key: string | null) => void; onUploadClick: () => void;
 }) {
   const { data, isLoading } = useS3Objects(bucket, prefix);
   const deleteObject = useS3DeleteObject(bucket);
@@ -512,7 +516,7 @@ function S3ObjectBrowser({ bucket, prefix, onPrefixChange, selectedObject, onSel
   }
 
   const breadcrumbItems: Array<{ text: string; href: string; prefix?: string }> = [
-    { text: bucket, href: "#" },
+    { text: bucket, href: "#", prefix: "" },
     ...prefix
       .replace(/\/$/, "")
       .split("/")
@@ -529,7 +533,28 @@ function S3ObjectBrowser({ bucket, prefix, onPrefixChange, selectedObject, onSel
   const totalCount = folders.length + filteredObjects.length;
 
   return (
-    <>
+    <SpaceBetween size="s">
+      {prefix && (
+        <>
+          <div style={{ fontSize: "0.8125rem", color: "var(--sh-dim)" }}>
+            {breadcrumbItems.map((item, i) => (
+              <span key={i}>
+                {i > 0 && <span style={{ margin: "0 4px" }} className="fd-text-muted">/</span>}
+                {item.prefix != null ? (
+                  <button
+                    onClick={() => navigateToFolder(item.prefix!)}
+                    style={{ background: "none", border: "none", padding: 0, cursor: "pointer", color: "var(--sh-accent)", fontFamily: "inherit", fontSize: "inherit", fontWeight: 500 }}
+                  >
+                    {item.text}
+                  </button>
+                ) : (
+                  <span style={{ fontWeight: 600, color: "var(--sh-ink)" }}>{item.text}</span>
+                )}
+              </span>
+            ))}
+          </div>
+        </>
+      )}
       <Table
         variant="full-page"
         selectedItems={selectedItems}
@@ -541,7 +566,6 @@ function S3ObjectBrowser({ bucket, prefix, onPrefixChange, selectedObject, onSel
           <Header
             variant="h2"
             counter={`(${totalCount})`}
-            description={bucket}
             actions={
               <SpaceBetween direction="horizontal" size="xs">
                 {selectedItems.length > 0 && (
@@ -577,35 +601,12 @@ function S3ObjectBrowser({ bucket, prefix, onPrefixChange, selectedObject, onSel
                     Delete selected ({selectedItems.length})
                   </Button>
                 )}
-                <Button variant="normal" onClick={onBack}>← Buckets</Button>
                 <Button variant="normal" onClick={() => setCreateFolderOpen(true)}>Create folder</Button>
                 <Button variant="primary" onClick={onUploadClick}>Upload</Button>
               </SpaceBetween>
             }
           >
-            {prefix ? (
-              <SpaceBetween direction="horizontal" size="xs" alignItems="center">
-                <Button variant="link" iconName="arrow-left" onClick={navigateUp}>
-                  Back
-                </Button>
-                <span style={{ fontSize: "0.85em" }}>
-                  {breadcrumbItems.map((item, i) => (
-                    <span key={i}>
-                      {i > 0 && <span style={{ margin: "0 4px" }} className="fd-text-muted">/</span>}
-                      {item.prefix != null ? (
-                        <Button variant="link" onClick={() => navigateToFolder(item.prefix!)}>
-                          {item.text}
-                        </Button>
-                      ) : (
-                        <span style={{ fontWeight: i === 0 ? 600 : 400 }}>{item.text}</span>
-                      )}
-                    </span>
-                  ))}
-                </span>
-              </SpaceBetween>
-            ) : (
-              "Objects"
-            )}
+            Objects
           </Header>
         }
         filter={
@@ -695,7 +696,7 @@ function S3ObjectBrowser({ bucket, prefix, onPrefixChange, selectedObject, onSel
               <Box variant="p" color="text-body-secondary" padding={{ bottom: "l" }}>This folder is empty. Upload an object or go back.</Box>
               <Box textAlign="center">
                 <SpaceBetween direction="horizontal" size="xs">
-                  <Button onClick={navigateUp}>← Back</Button>
+                  <Button variant="link" iconName="arrow-left" onClick={navigateUp}>Back</Button>
                   <Button variant="primary" onClick={onUploadClick}>Upload object</Button>
                 </SpaceBetween>
               </Box>
@@ -754,7 +755,7 @@ function S3ObjectBrowser({ bucket, prefix, onPrefixChange, selectedObject, onSel
           </FormField>
         </Form>
       </Modal>
-    </>
+    </SpaceBetween>
   );
 }
 
@@ -794,10 +795,10 @@ function S3ObjectViewer({ bucket, objectKey, onBack }: { bucket: string; objectK
 
   if (isLoading) return <DetailSkeleton />;
   if (isError) return (
-    <Box padding={{ top: "l" }}>
-      <Button variant="link" onClick={onBack}>← Back</Button>
+    <SpaceBetween size="l">
+      <Button variant="link" iconName="arrow-left" onClick={onBack}>Objects</Button>
       <StatusIndicator type="error">{(error as Error)?.message || "Failed to load"}</StatusIndicator>
-    </Box>
+    </SpaceBetween>
   );
 
   const handleDownload = () => {
@@ -809,10 +810,8 @@ function S3ObjectViewer({ bucket, objectKey, onBack }: { bucket: string; objectK
 
   return (
     <SpaceBetween size="l">
-      <SpaceBetween size="xs">
-        <Button variant="link" onClick={onBack}>← Objects</Button>
-        <Header variant="h2">{objectKey}</Header>
-      </SpaceBetween>
+      <Button variant="link" iconName="arrow-left" onClick={onBack}>Objects</Button>
+      <Header variant="h2">{objectKey}</Header>
 
       <ColumnLayout columns={4} variant="text-grid">
         <StatCard label="Size" value={data?.size != null ? formatBytes(data.size) : "—"} variant="info" size="sm" isText />

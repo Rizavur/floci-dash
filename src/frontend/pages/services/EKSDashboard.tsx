@@ -539,6 +539,7 @@ export function EKSDashboard() {
               {selectedCluster && (
                 <Box margin={{ bottom: "s" }}>
                   <Button
+                    variant="link"
                     iconName="arrow-left"
                     onClick={() => setSelectedCluster(null)}
                   >

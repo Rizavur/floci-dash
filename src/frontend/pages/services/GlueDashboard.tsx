@@ -516,7 +516,7 @@ export function GlueDashboard() {
     return (
       <>
         <Box margin={{ bottom: "s" }}>
-          <Button iconName="arrow-left" onClick={() => setSelectedDb(null)}>
+          <Button variant="link" iconName="arrow-left" onClick={() => setSelectedDb(null)}>
             Back to databases
           </Button>
         </Box>

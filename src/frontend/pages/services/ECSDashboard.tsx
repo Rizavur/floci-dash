@@ -882,8 +882,8 @@ function ECSClusterDetail({ clusterName, onBack }: { clusterName: string; onBack
 
   return (
     <SpaceBetween size="l">
-      <Button variant="link" onClick={onBack}>
-        &larr; Clusters
+      <Button variant="link" iconName="arrow-left" onClick={onBack}>
+        Clusters
       </Button>
       <Box variant="h2">{clusterName}</Box>
       <Tabs tabs={tabs} />
