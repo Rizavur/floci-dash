@@ -29,6 +29,7 @@ import {
   type TabsProps,
 } from "../../components/ui";
 import { useHealth } from "../../hooks/useSystem";
+import { useSettings } from "../../stores/settings";
 import { getServiceLabel } from "../../types/services";
 import StatusBadge from "../../components/StatusBadge";
 import EmptyState from "../../components/EmptyState";
@@ -800,6 +801,7 @@ function CloudWatchLogGroupSearch({
   const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
   const search = useFilterLogEvents(logGroupName);
   const { data: streamsData } = useLogStreams(logGroupName);
+  const { parseJsonLogs } = useSettings();
 
   const streamNames = (streamsData?.logStreams || [])
     .map((s) => s.logStreamName)
@@ -932,7 +934,7 @@ function CloudWatchLogGroupSearch({
                     color: "var(--sh-ink)",
                   }}
                 >
-                  {renderLogMessage(event.message || "")}
+                  {renderLogMessage(event.message || "", parseJsonLogs)}
                 </span>
               </div>
             );
@@ -1233,6 +1235,7 @@ function CloudWatchLogStreamDetail({
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [filterText, setFilterText] = useState("");
   const deleteLogStream = useDeleteLogStream();
+  const { parseJsonLogs } = useSettings();
 
   const { data, isLoading, isError, error, refetch } = useLogEvents(
     logGroupName,
@@ -1394,7 +1397,7 @@ function CloudWatchLogStreamDetail({
                 color: "var(--sh-ink)",
               }}
             >
-              {renderLogMessage(event.message || "")}
+              {renderLogMessage(event.message || "", parseJsonLogs)}
             </span>
           </div>
         ))}
@@ -1990,27 +1993,42 @@ export function highlightLogLevels(message: string) {
   return result;
 }
 
-/** Renders a log message as structured `key=value` fields if it parses as a
- * JSON object, falling back to level-keyword highlighting for plain text. */
-export function renderLogMessage(message: string) {
+function tryParseJsonObject(message: string): Record<string, unknown> | null {
   try {
     const parsed = JSON.parse(message);
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      return (
-        <span className="tw:inline-flex tw:flex-col">
-          {Object.entries(parsed).map(([key, value]) => (
-            <span key={key} className="tw:block">
-              <span className="tw:text-[var(--sh-dim)]">{key}=</span>
-              <span>{typeof value === "string" ? value : JSON.stringify(value)}</span>
-            </span>
-          ))}
-        </span>
-      );
-    }
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed;
   } catch {
-    // not JSON, fall through to plain text highlighting
+    // not JSON
   }
-  return highlightLogLevels(message);
+  return null;
+}
+
+function renderJsonFields(parsed: Record<string, unknown>) {
+  return (
+    <span className="tw:inline-flex tw:flex-col">
+      {Object.entries(parsed).map(([key, value]) => (
+        <span key={key} className="tw:block">
+          <span className="tw:text-[var(--sh-dim)]">{key}=</span>
+          <span>{typeof value === "string" ? value : JSON.stringify(value)}</span>
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/** Renders a log message. JSON objects are shown as structured `key=value`
+ * fields when `parseJson` is on; otherwise they're shown as raw text with a
+ * hover tooltip previewing the parsed fields. Non-JSON text always falls
+ * back to level-keyword highlighting. */
+export function renderLogMessage(message: string, parseJson: boolean) {
+  const parsed = tryParseJsonObject(message);
+  if (!parsed) return highlightLogLevels(message);
+  if (parseJson) return renderJsonFields(parsed);
+  return (
+    <span title={JSON.stringify(parsed, null, 2)} style={{ cursor: "help" }}>
+      {message}
+    </span>
+  );
 }
 
 const DISTRIBUTION_OPTIONS: SelectProps.Option[] = [
