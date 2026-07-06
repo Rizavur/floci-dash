@@ -18,7 +18,7 @@ html {
 /* ─── Global font stacks ────────────────────────────────────────────────── */
 :root {
   --font-ui:   'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, 'Cascadia Code',
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Code',
                Consolas, 'Courier New', monospace;
 }
 
