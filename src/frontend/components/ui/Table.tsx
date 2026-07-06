@@ -8,9 +8,11 @@ interface TextFilterProps {
   filteringPlaceholder?: string;
   onChange: (e: { detail: { filteringText: string } }) => void;
   countText?: string;
+  caseSensitive?: boolean;
+  onToggleCaseSensitive?: () => void;
 }
 
-export function TextFilter({ filteringText, filteringPlaceholder, onChange, countText }: TextFilterProps) {
+export function TextFilter({ filteringText, filteringPlaceholder, onChange, countText, caseSensitive, onToggleCaseSensitive }: TextFilterProps) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
       <div style={{ position: "relative", flex: 1, maxWidth: 320 }}>
@@ -21,10 +23,31 @@ export function TextFilter({ filteringText, filteringPlaceholder, onChange, coun
           placeholder={filteringPlaceholder}
           onChange={(e) => onChange({ detail: { filteringText: e.target.value } })}
           style={{
-            width: "100%", fontSize: "0.78125rem", padding: "6px 10px 6px 30px", borderRadius: 5,
+            width: "100%", fontSize: "0.78125rem",
+            padding: `6px ${onToggleCaseSensitive ? 36 : 10}px 6px 30px`,
+            borderRadius: 5,
             border: "1px solid var(--sh-line)", background: "var(--sh-elevated)", color: "var(--sh-ink)", outline: "none",
           }}
         />
+        {onToggleCaseSensitive && (
+          <button
+            type="button"
+            title={caseSensitive ? "Case sensitive: on" : "Case sensitive: off"}
+            onClick={onToggleCaseSensitive}
+            style={{
+              position: "absolute", right: 5, top: "50%", transform: "translateY(-50%)",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              width: 22, height: 22, padding: 0, border: "none", borderRadius: 3, cursor: "pointer",
+              background: caseSensitive ? "color-mix(in srgb, var(--sh-accent) 18%, transparent)" : "transparent",
+              color: caseSensitive ? "var(--sh-accent)" : "var(--sh-faint)",
+              fontSize: "0.6875rem", fontWeight: 700, fontFamily: "var(--font-ui, sans-serif)",
+              letterSpacing: "-0.02em", lineHeight: 1,
+              transition: "background 0.1s, color 0.1s",
+            }}
+          >
+            Aa
+          </button>
+        )}
       </div>
       {countText && <span style={{ fontSize: "0.71875rem", color: "var(--sh-faint)", whiteSpace: "nowrap" }}>{countText}</span>}
     </div>

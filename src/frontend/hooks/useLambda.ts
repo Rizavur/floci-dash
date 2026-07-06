@@ -43,6 +43,15 @@ export function useUpdateFunctionConfig() {
   });
 }
 
+export function useUpdateFunctionCode() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ name, zipFile }: { name: string; zipFile: string }) =>
+      api(`/aws/lambda/functions/${name}/code`, { method: "PUT", body: JSON.stringify({ zipFile }) }),
+    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: ["aws", "lambda", "functions", vars.name] }),
+  });
+}
+
 // ─── INVOKE ─────────────────────────────────────────────
 
 export function useInvokeFunction() {

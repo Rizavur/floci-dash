@@ -255,6 +255,7 @@ export function useFilterLogEvents(logGroupName: string | null) {
   return useMutation({
     mutationFn: (data: {
       filterPattern?: string;
+      caseInsensitive?: boolean;
       startTime?: number;
       endTime?: number;
       limit?: number;
@@ -264,6 +265,39 @@ export function useFilterLogEvents(logGroupName: string | null) {
         method: "POST",
         body: JSON.stringify(data),
       }),
+  });
+}
+
+// ─── Cross-group search ───────────────────────────────
+
+/** Fire filter-events against multiple log groups in parallel, merge by timestamp. */
+export function useSearchAcrossGroups() {
+  return useMutation({
+    mutationFn: async (data: {
+      logGroupNames: string[];
+      filterPattern?: string;
+      caseInsensitive?: boolean;
+      startTime?: number;
+      endTime?: number;
+      limit?: number;
+    }) => {
+      const { logGroupNames, limit = 500, ...rest } = data;
+      const perGroup = await Promise.all(
+        logGroupNames.map((name) =>
+          api<{ events: LogEvent[] }>(
+            `/aws/logs/log-groups/${encodeURIComponent(name)}/filter-events`,
+            { method: "POST", body: JSON.stringify({ ...rest, limit }) }
+          ).then((res) =>
+            res.events.map((e) => ({ ...e, logGroupName: name }))
+          )
+        )
+      );
+      const events = perGroup
+        .flat()
+        .sort((a, b) => (a.timestamp ?? 0) - (b.timestamp ?? 0))
+        .slice(0, limit);
+      return { events };
+    },
   });
 }
 

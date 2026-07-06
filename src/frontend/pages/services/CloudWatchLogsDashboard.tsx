@@ -56,6 +56,7 @@ import {
   useLogGroupTags,
   useTagLogGroup,
   useUntagLogGroup,
+  useSearchAcrossGroups,
 } from "../../hooks/useLogs";
 import {
   useRDSDBInstances,
@@ -527,6 +528,11 @@ export function CloudWatchLogsDashboard() {
       label: "Log Groups",
       content: <CloudWatchLogGroupList onSelect={(name) => setSelectedGroup(name)} />,
     },
+    {
+      id: "search",
+      label: "Search",
+      content: <CrossGroupSearch />,
+    },
   ];
 
   return (
@@ -535,6 +541,218 @@ export function CloudWatchLogsDashboard() {
       onChange={({ detail }) => setSelectedTab(detail.activeTabId)}
       tabs={tabs}
     />
+  );
+}
+
+// ─── Cross-Group Search ───────────────────────────────
+
+function CrossGroupSearch() {
+  const { data: groupsData, isLoading: groupsLoading } = useLogGroups();
+  const allGroups = (groupsData?.logGroups || []).map((g) => g.logGroupName).filter(Boolean) as string[];
+
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+  const [query, setQuery] = useState("");
+  const [caseSensitive, setCaseSensitive] = useState(false);
+  const [limit, setLimit] = useState(LOG_VIEW_LIMIT_OPTIONS[2]); // 500
+  const { parseJsonLogs } = useSettings();
+
+  const search = useSearchAcrossGroups();
+
+  const events = (search.data?.events || []) as Array<{
+    eventId?: string;
+    timestamp?: number;
+    message: string;
+    logStreamName?: string;
+    logGroupName?: string;
+  }>;
+
+  function runSearch() {
+    if (selectedGroups.length === 0) return;
+    search.mutate({
+      logGroupNames: selectedGroups,
+      filterPattern: query.trim() || undefined,
+      caseInsensitive: !caseSensitive,
+      limit: parseInt((limit.value || "500") as string),
+    });
+  }
+
+  if (groupsLoading) {
+    return <StatusIndicator type="loading">Loading log groups...</StatusIndicator>;
+  }
+
+  if (allGroups.length === 0) {
+    return (
+      <Box textAlign="center" padding="xl" color="text-body-secondary">
+        No log groups found.
+      </Box>
+    );
+  }
+
+  return (
+    <SpaceBetween size="m">
+      <Box variant="p" color="text-body-secondary">
+        Select one or more log groups, then enter a filter pattern and search across all of
+        them at once. Leave the pattern blank to return all recent events. Results are
+        sorted oldest-first, capped at the chosen limit.
+      </Box>
+
+      {/* Group picker */}
+      <Container header={<Header variant="h3">Log groups</Header>}>
+        <SpaceBetween size="s">
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+            {allGroups.map((name) => {
+              const checked = selectedGroups.includes(name);
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() =>
+                    setSelectedGroups((prev) =>
+                      checked ? prev.filter((g) => g !== name) : [...prev, name]
+                    )
+                  }
+                  style={{
+                    fontSize: "0.75rem",
+                    fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace",
+                    padding: "3px 10px",
+                    borderRadius: 4,
+                    border: "1px solid var(--sh-line)",
+                    background: checked ? "var(--sh-accent)" : "var(--sh-elevated)",
+                    color: checked ? "#fff" : "var(--sh-ink)",
+                    cursor: "pointer",
+                    transition: "background 0.12s, color 0.12s",
+                  }}
+                >
+                  {name}
+                </button>
+              );
+            })}
+          </div>
+          {selectedGroups.length > 0 && (
+            <Button variant="link" onClick={() => setSelectedGroups([])}>
+              Clear selection ({selectedGroups.length} selected)
+            </Button>
+          )}
+        </SpaceBetween>
+      </Container>
+
+      {/* Query bar */}
+      <form onSubmit={(e) => { e.preventDefault(); runSearch(); }}>
+        <SpaceBetween direction="horizontal" size="xs">
+          <div style={{ position: "relative", flex: 1 }}>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder='Filter pattern, e.g. ERROR or "timed out"'
+              disabled={selectedGroups.length === 0}
+              style={{
+                width: "100%", fontSize: "0.78125rem", padding: "6px 36px 6px 10px",
+                borderRadius: 5, border: "1px solid var(--sh-line)",
+                background: "var(--sh-elevated)", color: "var(--sh-ink)", outline: "none",
+                boxSizing: "border-box",
+              }}
+            />
+            <button
+              type="button"
+              title={caseSensitive ? "Case sensitive: on" : "Case sensitive: off"}
+              onClick={() => setCaseSensitive((v) => !v)}
+              style={{
+                position: "absolute", right: 5, top: "50%", transform: "translateY(-50%)",
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                width: 22, height: 22, padding: 0, border: "none", borderRadius: 3, cursor: "pointer",
+                background: caseSensitive ? "color-mix(in srgb, var(--sh-accent) 18%, transparent)" : "transparent",
+                color: caseSensitive ? "var(--sh-accent)" : "var(--sh-faint)",
+                fontSize: "0.6875rem", fontWeight: 700, fontFamily: "var(--font-ui, sans-serif)",
+                letterSpacing: "-0.02em", lineHeight: 1, transition: "background 0.1s, color 0.1s",
+              }}
+            >
+              Aa
+            </button>
+          </div>
+          <Select
+            selectedOption={limit}
+            onChange={({ detail }) => setLimit(detail.selectedOption)}
+            options={LOG_VIEW_LIMIT_OPTIONS}
+            ariaLabel="Result limit"
+          />
+          <Button
+            type="submit"
+            variant="primary"
+            loading={search.isPending}
+            disabled={selectedGroups.length === 0}
+          >
+            Search
+          </Button>
+        </SpaceBetween>
+      </form>
+
+      {selectedGroups.length === 0 && (
+        <Box color="text-body-secondary" fontSize="body-s">
+          Select at least one log group above to enable search.
+        </Box>
+      )}
+
+      {search.isError && (
+        <Alert type="error" dismissible>
+          {(search.error as Error)?.message || "Search failed"}
+        </Alert>
+      )}
+
+      {search.isSuccess && events.length === 0 && (
+        <Box textAlign="center" padding="xl" color="text-body-secondary">
+          No matching events found across the selected groups.
+        </Box>
+      )}
+
+      {events.length > 0 && (
+        <>
+          <div
+            style={{
+              maxHeight: "600px",
+              overflowY: "auto",
+              backgroundColor: "var(--sh-surface)",
+              border: "1px solid var(--sh-line)",
+              borderRadius: "4px",
+              fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace",
+              fontSize: "0.75rem",
+              lineHeight: "1.6",
+            }}
+          >
+            {events.map((event, idx) => (
+              <div
+                key={event.eventId || idx}
+                style={{
+                  display: "flex",
+                  gap: "16px",
+                  padding: "2px 8px",
+                  borderBottom: "1px solid var(--sh-line-sub)",
+                }}
+              >
+                <span style={{ color: "var(--sh-accent)", minWidth: "140px", flexShrink: 0, userSelect: "none" }}>
+                  {event.timestamp ? new Date(event.timestamp).toISOString() : "—"}
+                </span>
+                <span style={{ color: "var(--sh-dim)", minWidth: "160px", maxWidth: "260px", flexShrink: 0, userSelect: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                  title={event.logGroupName}
+                >
+                  {event.logGroupName || "—"}
+                </span>
+                <span style={{ color: "var(--sh-faint)", minWidth: "120px", maxWidth: "200px", flexShrink: 0, userSelect: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                  title={event.logStreamName}
+                >
+                  {event.logStreamName || "—"}
+                </span>
+                <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-all", color: "var(--sh-ink)" }}>
+                  {renderLogMessage(event.message || "", parseJsonLogs)}
+                </span>
+              </div>
+            ))}
+          </div>
+          <Box textAlign="center" fontSize="body-s" color="text-body-secondary">
+            {events.length} event{events.length !== 1 ? "s" : ""} across {selectedGroups.length} log group{selectedGroups.length !== 1 ? "s" : ""}
+          </Box>
+        </>
+      )}
+    </SpaceBetween>
   );
 }
 
@@ -797,6 +1015,7 @@ function CloudWatchLogGroupSearch({
   onSelectStream: (logStreamName: string) => void;
 }) {
   const [query, setQuery] = useState("");
+  const [caseSensitive, setCaseSensitive] = useState(false);
   const [limit, setLimit] = useState(LOG_VIEW_LIMIT_OPTIONS[2]); // 500
   const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
   const search = useFilterLogEvents(logGroupName);
@@ -810,6 +1029,7 @@ function CloudWatchLogGroupSearch({
   function runSearch() {
     search.mutate({
       filterPattern: query.trim() || undefined,
+      caseInsensitive: !caseSensitive,
       limit: parseInt((limit.value || "500") as string),
       logStreamNames: selectedStreams.length > 0 ? selectedStreams : undefined,
     });
@@ -838,11 +1058,35 @@ function CloudWatchLogGroupSearch({
         }}
       >
         <SpaceBetween direction="horizontal" size="xs">
-          <Input
-            value={query}
-            onChange={({ detail }) => setQuery(detail.value)}
-            placeholder='Search messages, e.g. ERROR or "connection timed out"'
-          />
+          <div style={{ position: "relative", flex: 1 }}>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder='Search messages, e.g. ERROR or "connection timed out"'
+              style={{
+                width: "100%", fontSize: "0.78125rem", padding: "6px 36px 6px 10px",
+                borderRadius: 5, border: "1px solid var(--sh-line)",
+                background: "var(--sh-elevated)", color: "var(--sh-ink)", outline: "none",
+                boxSizing: "border-box",
+              }}
+            />
+            <button
+              type="button"
+              title={caseSensitive ? "Case sensitive: on" : "Case sensitive: off"}
+              onClick={() => setCaseSensitive((v) => !v)}
+              style={{
+                position: "absolute", right: 5, top: "50%", transform: "translateY(-50%)",
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                width: 22, height: 22, padding: 0, border: "none", borderRadius: 3, cursor: "pointer",
+                background: caseSensitive ? "color-mix(in srgb, var(--sh-accent) 18%, transparent)" : "transparent",
+                color: caseSensitive ? "var(--sh-accent)" : "var(--sh-faint)",
+                fontSize: "0.6875rem", fontWeight: 700, fontFamily: "var(--font-ui, sans-serif)",
+                letterSpacing: "-0.02em", lineHeight: 1, transition: "background 0.1s, color 0.1s",
+              }}
+            >
+              Aa
+            </button>
+          </div>
           <LogStreamMultiSelect
             options={streamNames}
             selected={selectedStreams}
@@ -942,7 +1186,7 @@ function CloudWatchLogGroupSearch({
         </div>
       )}
 
-      {events.length > 0 && (
+      {search.isSuccess && events.length > 0 && (
         <Box textAlign="center" fontSize="body-s" color="text-body-secondary">
           {events.length} matching events
         </Box>
@@ -1234,6 +1478,7 @@ function CloudWatchLogStreamDetail({
   const [limit, setLimit] = useState(LOG_VIEW_LIMIT_OPTIONS[2]); // 500 default
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [filterText, setFilterText] = useState("");
+  const [caseSensitive, setCaseSensitive] = useState(false);
   const deleteLogStream = useDeleteLogStream();
   const { parseJsonLogs } = useSettings();
 
@@ -1259,7 +1504,12 @@ function CloudWatchLogStreamDetail({
 
   const events = (data?.events || []).slice().reverse(); // newest first
   const filteredEvents = filterText.trim()
-    ? events.filter((e: any) => (e.message || "").toLowerCase().includes(filterText.toLowerCase()))
+    ? events.filter((e: any) => {
+        const msg = e.message || "";
+        return caseSensitive
+          ? msg.includes(filterText)
+          : msg.toLowerCase().includes(filterText.toLowerCase());
+      })
     : events;
 
   return (
@@ -1339,6 +1589,8 @@ function CloudWatchLogStreamDetail({
           filteringText={filterText}
           filteringPlaceholder="Filter loaded events, e.g. ERROR or a request ID"
           onChange={({ detail }) => setFilterText(detail.filteringText)}
+          caseSensitive={caseSensitive}
+          onToggleCaseSensitive={() => setCaseSensitive((v) => !v)}
         />
       )}
 

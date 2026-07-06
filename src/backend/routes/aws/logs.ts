@@ -219,6 +219,7 @@ router.post("/log-groups/:name/filter-events", async (c: Context) => {
   const name = c.req.param("name");
   const body = await c.req.json<{
     filterPattern?: string;
+    caseInsensitive?: boolean;
     startTime?: number;
     endTime?: number;
     limit?: number;
@@ -237,10 +238,16 @@ router.post("/log-groups/:name/filter-events", async (c: Context) => {
       .filter((n): n is string => !!n);
   }
 
+  // floci's contains() is always case-sensitive. For case-insensitive searches,
+  // skip the filterPattern on the floci call and apply it ourselves after.
+  const serverPattern = body.caseInsensitive ? undefined : body.filterPattern;
+  const needle = body.filterPattern?.trim();
+  const needleLower = needle?.toLowerCase();
+
   const perStream = await Promise.all(
     streamNames.map(async (streamName) => {
       const params: any = { logGroupName: name, logStreamNames: [streamName] };
-      if (body.filterPattern) params.filterPattern = body.filterPattern;
+      if (serverPattern) params.filterPattern = serverPattern;
       if (body.startTime) params.startTime = body.startTime;
       if (body.endTime) params.endTime = body.endTime;
       if (body.limit) params.limit = body.limit;
@@ -255,10 +262,13 @@ router.post("/log-groups/:name/filter-events", async (c: Context) => {
     })
   );
 
-  // Each per-stream call already returns its earliest matches sorted ascending and
-  // capped at `limit`, so the merged global top-`limit` (also earliest-first) is a
-  // valid k-way merge of those results — no stream's cap could hide an earlier match.
   let events = perStream.flat().sort((a, b) => (a.timestamp ?? 0) - (b.timestamp ?? 0));
+
+  // Apply case-insensitive filter in Node when floci skipped it.
+  if (body.caseInsensitive && needleLower) {
+    events = events.filter((e) => (e.message ?? "").toLowerCase().includes(needleLower));
+  }
+
   if (body.limit) events = events.slice(0, body.limit);
 
   return c.json({
