@@ -797,24 +797,19 @@ function CloudWatchLogGroupSearch({
 }) {
   const [query, setQuery] = useState("");
   const [limit, setLimit] = useState(LOG_VIEW_LIMIT_OPTIONS[2]); // 500
-  const ALL_STREAMS: SelectProps.Option = { label: "All streams", value: "" };
-  const [streamScope, setStreamScope] = useState<SelectProps.Option>(ALL_STREAMS);
+  const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
   const search = useFilterLogEvents(logGroupName);
   const { data: streamsData } = useLogStreams(logGroupName);
 
-  const streamOptions: SelectProps.Option[] = [
-    ALL_STREAMS,
-    ...((streamsData?.logStreams || []).map((s) => ({
-      label: s.logStreamName,
-      value: s.logStreamName,
-    }))),
-  ];
+  const streamNames = (streamsData?.logStreams || [])
+    .map((s) => s.logStreamName)
+    .filter((n): n is string => !!n);
 
   function runSearch() {
     search.mutate({
       filterPattern: query.trim() || undefined,
       limit: parseInt((limit.value || "500") as string),
-      logStreamNames: streamScope.value ? [streamScope.value] : undefined,
+      logStreamNames: selectedStreams.length > 0 ? selectedStreams : undefined,
     });
   }
 
@@ -828,8 +823,9 @@ function CloudWatchLogGroupSearch({
   return (
     <SpaceBetween size="m">
       <Box variant="p" color="text-body-secondary">
-        Search log events across all streams in this log group. Enter plain text to match, or
-        use CloudWatch filter pattern syntax (e.g. <code>?ERROR ?WARN</code>).
+        Search log events across all streams, or narrow the query down to a chosen set of
+        streams. Enter plain text to match, or use CloudWatch filter pattern syntax
+        (e.g. <code>?ERROR ?WARN</code>).
       </Box>
 
       {/* Native form submit gives us "press Enter to search" for free. */}
@@ -845,11 +841,10 @@ function CloudWatchLogGroupSearch({
             onChange={({ detail }) => setQuery(detail.value)}
             placeholder='Search messages, e.g. ERROR or "connection timed out"'
           />
-          <Select
-            selectedOption={streamScope}
-            onChange={({ detail }) => setStreamScope(detail.selectedOption)}
-            options={streamOptions}
-            ariaLabel="Log stream scope"
+          <LogStreamMultiSelect
+            options={streamNames}
+            selected={selectedStreams}
+            onChange={setSelectedStreams}
           />
           <Select
             selectedOption={limit}
@@ -951,6 +946,106 @@ function CloudWatchLogGroupSearch({
         </Box>
       )}
     </SpaceBetween>
+  );
+}
+
+// ─── Log Stream Multi-Select (used by cross-stream search) ─────
+
+/** Dropdown checklist for picking a subset of log streams to search — the
+ * cross-stream search interface AWS console calls "Log Insights"-style
+ * stream selection. Empty selection means "search all streams". */
+function LogStreamMultiSelect({
+  options,
+  selected,
+  onChange,
+}: {
+  options: string[];
+  selected: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [open]);
+
+  const toggle = (name: string) =>
+    onChange(selected.includes(name) ? selected.filter((s) => s !== name) : [...selected, name]);
+
+  const label =
+    selected.length === 0
+      ? "All streams"
+      : selected.length === 1
+      ? selected[0]
+      : `${selected.length} streams selected`;
+
+  return (
+    <div ref={rootRef} style={{ position: "relative" }}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        style={{
+          fontSize: "0.78125rem",
+          fontFamily: "var(--font-ui)",
+          color: selected.length ? "var(--sh-ink)" : "var(--sh-faint)",
+          background: "var(--sh-elevated)",
+          border: "1px solid var(--sh-line)",
+          borderRadius: 5,
+          padding: "6px 10px",
+          minWidth: 160,
+          textAlign: "left",
+          cursor: "pointer",
+        }}
+      >
+        {label}
+      </button>
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            zIndex: 50,
+            top: "calc(100% + 4px)",
+            left: 0,
+            minWidth: 220,
+            maxHeight: 260,
+            overflowY: "auto",
+            padding: 8,
+            background: "var(--sh-surface)",
+            border: "1px solid var(--sh-line)",
+            borderRadius: 6,
+            boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+          }}
+        >
+          {options.length === 0 && (
+            <Box color="text-body-secondary" fontSize="body-s">
+              No log streams
+            </Box>
+          )}
+          {selected.length > 0 && (
+            <button
+              type="button"
+              onClick={() => onChange([])}
+              style={{ fontSize: "0.71875rem", color: "var(--sh-accent)", background: "transparent", border: 0, cursor: "pointer", padding: "2px 0 8px" }}
+            >
+              Clear selection
+            </button>
+          )}
+          <SpaceBetween size="xs">
+            {options.map((name) => (
+              <Checkbox key={name} checked={selected.includes(name)} onChange={() => toggle(name)}>
+                {name}
+              </Checkbox>
+            ))}
+          </SpaceBetween>
+        </div>
+      )}
+    </div>
   );
 }
 
