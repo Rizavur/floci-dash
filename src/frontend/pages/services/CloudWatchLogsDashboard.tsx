@@ -1902,9 +1902,9 @@ export function renderLogMessage(message: string) {
     const parsed = JSON.parse(message);
     if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
       return (
-        <span className="tw:inline-flex tw:flex-wrap tw:gap-x-3 tw:gap-y-0.5">
+        <span className="tw:inline-flex tw:flex-col">
           {Object.entries(parsed).map(([key, value]) => (
-            <span key={key}>
+            <span key={key} className="tw:block">
               <span className="tw:text-[var(--sh-dim)]">{key}=</span>
               <span>{typeof value === "string" ? value : JSON.stringify(value)}</span>
             </span>
