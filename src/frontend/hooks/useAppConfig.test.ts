@@ -15,7 +15,11 @@ import {
   useCreateAppConfigApplication,
   useDeleteAppConfigApplication,
   useAppConfigEnvironments,
+  useCreateAppConfigEnvironment,
+  useDeleteAppConfigEnvironment,
   useAppConfigProfiles,
+  useCreateAppConfigProfile,
+  useDeleteAppConfigProfile,
 } from "./useAppConfig";
 
 beforeEach(() => mockApi.mockReset());
@@ -67,5 +71,44 @@ describe("useAppConfig hooks", () => {
   it("useAppConfigProfiles disabled when null", () => {
     const { result } = renderHook(() => useAppConfigProfiles(null), { wrapper: createWrapper() });
     expect(result.current.fetchStatus).toBe("idle");
+  });
+
+  it("useCreateAppConfigEnvironment calls POST", async () => {
+    mockApi.mockResolvedValueOnce({ environment: {} });
+    const { result } = renderHook(() => useCreateAppConfigEnvironment("app-1"), { wrapper: createWrapper() });
+    await result.current.mutateAsync({ name: "prod" });
+    expect(mockApi).toHaveBeenCalledWith("/aws/appconfig/applications/app-1/environments", {
+      method: "POST",
+      body: JSON.stringify({ name: "prod" }),
+    });
+  });
+
+  it("useDeleteAppConfigEnvironment calls DELETE", async () => {
+    mockApi.mockResolvedValueOnce({ deleted: true });
+    const { result } = renderHook(() => useDeleteAppConfigEnvironment("app-1"), { wrapper: createWrapper() });
+    await result.current.mutateAsync("env-1");
+    expect(mockApi).toHaveBeenCalledWith("/aws/appconfig/applications/app-1/environments/env-1", {
+      method: "DELETE",
+    });
+  });
+
+  it("useCreateAppConfigProfile calls POST", async () => {
+    mockApi.mockResolvedValueOnce({ profile: {} });
+    const { result } = renderHook(() => useCreateAppConfigProfile("app-1"), { wrapper: createWrapper() });
+    await result.current.mutateAsync({ name: "profile-1", type: "AWS.Freeform" });
+    expect(mockApi).toHaveBeenCalledWith("/aws/appconfig/applications/app-1/configuration-profiles", {
+      method: "POST",
+      body: JSON.stringify({ name: "profile-1", type: "AWS.Freeform" }),
+    });
+  });
+
+  it("useDeleteAppConfigProfile calls DELETE", async () => {
+    mockApi.mockResolvedValueOnce({ deleted: true });
+    const { result } = renderHook(() => useDeleteAppConfigProfile("app-1"), { wrapper: createWrapper() });
+    await result.current.mutateAsync("profile-1");
+    expect(mockApi).toHaveBeenCalledWith(
+      "/aws/appconfig/applications/app-1/configuration-profiles/profile-1",
+      { method: "DELETE" }
+    );
   });
 });
