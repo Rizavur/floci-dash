@@ -1,6 +1,6 @@
 // Auto-split from ServicePage.tsx. Shared import preamble is intentional;
 // unused imports are tree-shaken at build (noUnusedLocals is off).
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { useUrlSelection } from "../../hooks/useUrlSelection";
 import { useQuery } from "@tanstack/react-query";
@@ -275,6 +275,12 @@ import {
   useAppConfigProfiles,
   useCreateAppConfigProfile,
   useDeleteAppConfigProfile,
+  useAppConfigVersions,
+  useAppConfigVersion,
+  useCreateAppConfigVersion,
+  useStartAppConfigDeployment,
+  APPCONFIG_DEPLOYMENT_STRATEGY_OPTIONS,
+  type AppConfigConfigurationProfile,
 } from "../../hooks/useAppConfig";
 import {
   useCloudMapNamespaces,
@@ -515,6 +521,16 @@ const APPCONFIG_PROFILE_TYPE_OPTIONS: SelectProps.Option[] = [
   { label: "Feature flags", value: "AWS.AppConfig.FeatureFlags" },
 ];
 
+// ponytail: feature flag profiles get the same raw content editor as
+// freeform ones instead of AWS's guided flag builder — upgrade to a real
+// flag editor (matching the AWS.AppConfig.FeatureFlags JSON schema) if
+// that becomes a common workflow here.
+const APPCONFIG_VERSION_CONTENT_TYPE_OPTIONS: SelectProps.Option[] = [
+  { label: "JSON", value: "application/json" },
+  { label: "YAML", value: "application/x-yaml" },
+  { label: "Plain text", value: "text/plain" },
+];
+
 export function AppConfigDashboard() {
   const { data, isLoading } = useAppConfigApplications();
   const createApp = useCreateAppConfigApplication();
@@ -647,6 +663,27 @@ function AppConfigApplicationDetail({
   const [profileType, setProfileType] = useState<SelectProps.Option>(APPCONFIG_PROFILE_TYPE_OPTIONS[0]);
   const [profileDescription, setProfileDescription] = useState("");
 
+  const [deployingEnv, setDeployingEnv] = useState<{ id: string; name: string } | null>(null);
+
+  // Not useUrlSelection: the application id must stay in the URL alongside
+  // the profile id so browser back steps profile → application → list.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedProfileId = searchParams.get("profile");
+  const selectedProfile = (profileData?.profiles || []).find((p: any) => p.Id === selectedProfileId);
+  const setSelectedProfileId = (id: string | null) =>
+    setSearchParams(id ? { app: applicationId, profile: id } : { app: applicationId });
+
+  if (selectedProfileId && selectedProfile) {
+    return (
+      <AppConfigProfileDetail
+        applicationId={applicationId}
+        profileId={selectedProfileId}
+        profileName={selectedProfile.Name}
+        onBack={() => setSelectedProfileId(null)}
+      />
+    );
+  }
+
   return (
     <>
       <Box margin={{ bottom: "s" }}>
@@ -680,12 +717,21 @@ function AppConfigApplicationDetail({
                     id: "actions",
                     header: "",
                     cell: (i: any) => (
-                      <DeleteButton
-                        itemName={i.name}
-                        resourceType="environment"
-                        loading={deleteEnv.isPending && deleteEnv.variables === i.id}
-                        onDelete={() => deleteEnv.mutateAsync(i.id)}
-                      />
+                      <SpaceBetween direction="horizontal" size="xs">
+                        <Button
+                          variant="normal"
+                          disabled={!profileData?.profiles?.length}
+                          onClick={() => setDeployingEnv({ id: i.id, name: i.name })}
+                        >
+                          Deploy
+                        </Button>
+                        <DeleteButton
+                          itemName={i.name}
+                          resourceType="environment"
+                          loading={deleteEnv.isPending && deleteEnv.variables === i.id}
+                          onDelete={() => deleteEnv.mutateAsync(i.id)}
+                        />
+                      </SpaceBetween>
                     ),
                   },
                 ]}
@@ -713,7 +759,16 @@ function AppConfigApplicationDetail({
                 loading={false}
                 emptyMessage="No configuration profiles"
                 columns={[
-                  { id: "name", header: "Name", cell: (i: any) => i.name, isRowHeader: true },
+                  {
+                    id: "name",
+                    header: "Name",
+                    cell: (i: any) => (
+                      <Button variant="link" onClick={() => setSelectedProfileId(i.id)}>
+                        {i.name}
+                      </Button>
+                    ),
+                    isRowHeader: true,
+                  },
                   { id: "type", header: "Type", cell: (i: any) => i.type },
                   { id: "location", header: "Location", cell: (i: any) => i.location },
                   {
@@ -738,6 +793,16 @@ function AppConfigApplicationDetail({
           },
         ]}
       />
+
+      {deployingEnv && (
+        <AppConfigDeployModal
+          applicationId={applicationId}
+          environmentId={deployingEnv.id}
+          environmentName={deployingEnv.name}
+          profiles={profileData?.profiles || []}
+          onDismiss={() => setDeployingEnv(null)}
+        />
+      )}
 
       <Modal
         visible={showCreateEnv}
@@ -840,12 +905,279 @@ function AppConfigApplicationDetail({
               options={APPCONFIG_PROFILE_TYPE_OPTIONS}
             />
           </FormField>
-          <FormField label="Description (optional)">
+           <FormField label="Description (optional)">
             <Input value={profileDescription} onChange={({ detail }) => setProfileDescription(detail.value)} />
           </FormField>
         </Form>
       </Modal>
     </>
+  );
+}
+
+/** Manages a configuration profile's *value* — AppConfig stores config
+ * content as immutable "hosted configuration versions", not as a single
+ * editable field, so this is a version history + "create new version"
+ * form rather than a simple text box. A version only takes effect once
+ * deployed to an environment (see AppConfigDeployModal). */
+function AppConfigProfileDetail({
+  applicationId,
+  profileId,
+  profileName,
+  onBack,
+}: {
+  applicationId: string;
+  profileId: string;
+  profileName: string;
+  onBack: () => void;
+}) {
+  const { data: versionsData, isLoading } = useAppConfigVersions(applicationId, profileId);
+  const createVersion = useCreateAppConfigVersion(applicationId, profileId);
+
+  const [showCreate, setShowCreate] = useState(false);
+  const [content, setContent] = useState("");
+  const [contentType, setContentType] = useState<SelectProps.Option>(APPCONFIG_VERSION_CONTENT_TYPE_OPTIONS[0]);
+  const [description, setDescription] = useState("");
+
+  const [viewingVersion, setViewingVersion] = useState<number | null>(null);
+  const { data: viewedVersion, isLoading: isLoadingVersion } = useAppConfigVersion(
+    applicationId,
+    profileId,
+    viewingVersion
+  );
+
+  const versions = [...(versionsData?.versions || [])].sort((a, b) => b.VersionNumber - a.VersionNumber);
+
+  return (
+    <>
+      <Box margin={{ bottom: "s" }}>
+        <Button iconName="arrow-left" onClick={onBack}>
+          Back to configuration profiles
+        </Button>
+      </Box>
+      <ResourceTable
+        resourceName="Version"
+        headerTitle={`Hosted Configuration Versions — ${profileName}`}
+        headerCounter={versionsData?.total}
+        items={versions.map((v) => ({
+          id: v.VersionNumber,
+          version: v.VersionNumber,
+          contentType: v.ContentType || "-",
+          description: v.Description || "-",
+        }))}
+        loading={isLoading}
+        emptyMessage="No configuration versions yet — create one to set a value for this profile."
+        columns={[
+          { id: "version", header: "Version", cell: (i: any) => i.version, isRowHeader: true },
+          { id: "contentType", header: "Content Type", cell: (i: any) => i.contentType },
+          { id: "description", header: "Description", cell: (i: any) => i.description },
+          {
+            id: "actions",
+            header: "",
+            cell: (i: any) => (
+              <Button variant="link" onClick={() => setViewingVersion(i.version)}>
+                View
+              </Button>
+            ),
+          },
+        ]}
+        onCreate={() => setShowCreate(true)}
+      />
+
+      <Modal
+        visible={showCreate}
+        onDismiss={() => setShowCreate(false)}
+        header="Create configuration version"
+        footer={
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button variant="link" onClick={() => setShowCreate(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                loading={createVersion.isPending}
+                disabled={!content.trim()}
+                onClick={() =>
+                  createVersion.mutate(
+                    {
+                      content,
+                      contentType: contentType.value,
+                      description: description.trim() || undefined,
+                    },
+                    {
+                      onSuccess: () => {
+                        setShowCreate(false);
+                        setContent("");
+                        setDescription("");
+                      },
+                    }
+                  )
+                }
+              >
+                Create
+              </Button>
+            </SpaceBetween>
+          </Box>
+        }
+      >
+        <Form>
+          {createVersion.isError && (
+            <Alert type="error" dismissible>
+              {(createVersion.error as Error)?.message || "Failed to create configuration version"}
+            </Alert>
+          )}
+          <FormField label="Content type">
+            <Select
+              selectedOption={contentType}
+              onChange={({ detail }) => setContentType(detail.selectedOption)}
+              options={APPCONFIG_VERSION_CONTENT_TYPE_OPTIONS}
+            />
+          </FormField>
+          <FormField
+            label="Configuration value"
+            description="The content served to clients once this version is deployed to an environment."
+          >
+            <Textarea
+              value={content}
+              onChange={({ detail }) => setContent(detail.value)}
+              rows={12}
+              placeholder={'{\n  "featureEnabled": true\n}'}
+            />
+          </FormField>
+          <FormField label="Description (optional)">
+            <Input value={description} onChange={({ detail }) => setDescription(detail.value)} />
+          </FormField>
+        </Form>
+      </Modal>
+
+      <Modal
+        visible={viewingVersion != null}
+        onDismiss={() => setViewingVersion(null)}
+        header={`Version ${viewingVersion}`}
+        footer={
+          <Box float="right">
+            <Button onClick={() => setViewingVersion(null)}>Close</Button>
+          </Box>
+        }
+      >
+        {isLoadingVersion ? (
+          <Spinner />
+        ) : (
+          <SpaceBetween size="s">
+            <Box>
+              <b>Content Type:</b> {viewedVersion?.version.contentType || "-"}
+            </Box>
+            <Textarea readOnly value={viewedVersion?.version.content || "(empty)"} rows={14} />
+          </SpaceBetween>
+        )}
+      </Modal>
+    </>
+  );
+}
+
+/** Starts a deployment — the step that makes a hosted configuration
+ * version "active" for an environment (and servable via AppConfig Data's
+ * GetLatestConfiguration). Deployment strategy is limited to AWS's 3
+ * built-ins; see the backend route for why. */
+function AppConfigDeployModal({
+  applicationId,
+  environmentId,
+  environmentName,
+  profiles,
+  onDismiss,
+}: {
+  applicationId: string;
+  environmentId: string;
+  environmentName: string;
+  profiles: AppConfigConfigurationProfile[];
+  onDismiss: () => void;
+}) {
+  const [profileId, setProfileId] = useState(profiles[0]?.Id ?? "");
+  const { data: versionsData } = useAppConfigVersions(applicationId, profileId || null);
+  const versionOptions: SelectProps.Option[] = (versionsData?.versions || [])
+    .slice()
+    .sort((a, b) => b.VersionNumber - a.VersionNumber)
+    .map((v) => ({ label: `Version ${v.VersionNumber}${v.Description ? ` — ${v.Description}` : ""}`, value: String(v.VersionNumber) }));
+  const [version, setVersion] = useState<SelectProps.Option | null>(null);
+  const [strategy, setStrategy] = useState<SelectProps.Option>(APPCONFIG_DEPLOYMENT_STRATEGY_OPTIONS[0]);
+  const [description, setDescription] = useState("");
+  const startDeployment = useStartAppConfigDeployment(applicationId, environmentId);
+  const { showToast } = useToast();
+
+  const profileOptions: SelectProps.Option[] = profiles.map((p) => ({ label: p.Name, value: p.Id }));
+
+  return (
+    <Modal
+      visible
+      onDismiss={onDismiss}
+      header={`Deploy to ${environmentName}`}
+      footer={
+        <Box float="right">
+          <SpaceBetween direction="horizontal" size="xs">
+            <Button variant="link" onClick={onDismiss}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              loading={startDeployment.isPending}
+              disabled={!profileId || !version}
+              onClick={() =>
+                startDeployment.mutate(
+                  {
+                    configurationProfileId: profileId,
+                    configurationVersion: version!.value!,
+                    deploymentStrategyId: strategy.value!,
+                    description: description.trim() || undefined,
+                  },
+                  {
+                    onSuccess: (res: any) => {
+                      showToast("success", `Deployment started — state: ${res.deployment?.State || "unknown"}`);
+                      onDismiss();
+                    },
+                    onError: (err: any) => showToast("error", err.message || "Failed to start deployment"),
+                  }
+                )
+              }
+            >
+              Deploy
+            </Button>
+          </SpaceBetween>
+        </Box>
+      }
+    >
+      <Form>
+        <FormField label="Configuration profile">
+          <Select
+            selectedOption={profileOptions.find((o) => o.value === profileId) || null}
+            onChange={({ detail }) => {
+              setProfileId(detail.selectedOption.value!);
+              setVersion(null);
+            }}
+            options={profileOptions}
+            placeholder="Choose a configuration profile"
+          />
+        </FormField>
+        <FormField label="Version" description={profileId && versionOptions.length === 0 ? "This profile has no versions yet." : undefined}>
+          <Select
+            selectedOption={version}
+            onChange={({ detail }) => setVersion(detail.selectedOption)}
+            options={versionOptions}
+            placeholder="Choose a version"
+            disabled={!profileId}
+          />
+        </FormField>
+        <FormField label="Deployment strategy">
+          <Select
+            selectedOption={strategy}
+            onChange={({ detail }) => setStrategy(detail.selectedOption)}
+            options={APPCONFIG_DEPLOYMENT_STRATEGY_OPTIONS}
+          />
+        </FormField>
+        <FormField label="Description (optional)">
+          <Input value={description} onChange={({ detail }) => setDescription(detail.value)} />
+        </FormField>
+      </Form>
+    </Modal>
   );
 }
 

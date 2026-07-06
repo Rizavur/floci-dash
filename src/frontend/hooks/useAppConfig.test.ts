@@ -20,6 +20,10 @@ import {
   useAppConfigProfiles,
   useCreateAppConfigProfile,
   useDeleteAppConfigProfile,
+  useAppConfigVersions,
+  useAppConfigVersion,
+  useCreateAppConfigVersion,
+  useStartAppConfigDeployment,
 } from "./useAppConfig";
 
 beforeEach(() => mockApi.mockReset());
@@ -109,6 +113,59 @@ describe("useAppConfig hooks", () => {
     expect(mockApi).toHaveBeenCalledWith(
       "/aws/appconfig/applications/app-1/configuration-profiles/profile-1",
       { method: "DELETE" }
+    );
+  });
+
+  it("useAppConfigVersions calls correct URL", async () => {
+    mockApi.mockResolvedValueOnce({ versions: [], total: 0 });
+    const { result } = renderHook(() => useAppConfigVersions("app-1", "profile-1"), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockApi).toHaveBeenCalledWith(
+      "/aws/appconfig/applications/app-1/configuration-profiles/profile-1/versions"
+    );
+  });
+
+  it("useAppConfigVersions disabled when profileId is null", () => {
+    const { result } = renderHook(() => useAppConfigVersions("app-1", null), { wrapper: createWrapper() });
+    expect(result.current.fetchStatus).toBe("idle");
+  });
+
+  it("useAppConfigVersion calls correct URL", async () => {
+    mockApi.mockResolvedValueOnce({ version: { versionNumber: 1, content: "{}" } });
+    const { result } = renderHook(() => useAppConfigVersion("app-1", "profile-1", 1), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockApi).toHaveBeenCalledWith(
+      "/aws/appconfig/applications/app-1/configuration-profiles/profile-1/versions/1"
+    );
+  });
+
+  it("useAppConfigVersion disabled when versionNumber is null", () => {
+    const { result } = renderHook(() => useAppConfigVersion("app-1", "profile-1", null), { wrapper: createWrapper() });
+    expect(result.current.fetchStatus).toBe("idle");
+  });
+
+  it("useCreateAppConfigVersion calls POST", async () => {
+    mockApi.mockResolvedValueOnce({ version: { versionNumber: 1 } });
+    const { result } = renderHook(() => useCreateAppConfigVersion("app-1", "profile-1"), { wrapper: createWrapper() });
+    await result.current.mutateAsync({ content: "{}", contentType: "application/json" });
+    expect(mockApi).toHaveBeenCalledWith(
+      "/aws/appconfig/applications/app-1/configuration-profiles/profile-1/versions",
+      { method: "POST", body: JSON.stringify({ content: "{}", contentType: "application/json" }) }
+    );
+  });
+
+  it("useStartAppConfigDeployment calls POST", async () => {
+    mockApi.mockResolvedValueOnce({ deployment: { State: "COMPLETE" } });
+    const { result } = renderHook(() => useStartAppConfigDeployment("app-1", "env-1"), { wrapper: createWrapper() });
+    const params = {
+      configurationProfileId: "profile-1",
+      configurationVersion: "1",
+      deploymentStrategyId: "AppConfig.AllAtOnce",
+    };
+    await result.current.mutateAsync(params);
+    expect(mockApi).toHaveBeenCalledWith(
+      "/aws/appconfig/applications/app-1/environments/env-1/deployments",
+      { method: "POST", body: JSON.stringify(params) }
     );
   });
 });
