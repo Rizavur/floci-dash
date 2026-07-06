@@ -4,7 +4,10 @@ import { useSettings } from "../stores/settings";
 import { api } from "../lib/client";
 
 export default function Settings() {
-  const { darkMode, refreshInterval, toggleDarkMode, setRefreshInterval, flociEndpoint, setFlociEndpoint } = useSettings();
+  const {
+    darkMode, refreshInterval, toggleDarkMode, setRefreshInterval, flociEndpoint, setFlociEndpoint,
+    parseJsonLogs, setParseJsonLogs,
+  } = useSettings();
   const [endpointInput, setEndpointInput] = useState(flociEndpoint || "http://localhost:4566");
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
@@ -53,6 +56,15 @@ export default function Settings() {
               setRefreshInterval(Number(detail.selectedOption.value))
             }
           />
+        </Container>
+
+        <Container header={<Header variant="h2">CloudWatch Logs</Header>}>
+          <Toggle checked={parseJsonLogs} onChange={({ detail }) => setParseJsonLogs(detail.checked)}>
+            Parse JSON log messages into key=value fields
+          </Toggle>
+          <Box variant="p" color="text-body-secondary" margin={{ top: "xs" }}>
+            When off, log messages are shown as raw text — hover over a JSON message to preview its parsed fields.
+          </Box>
         </Container>
 
         <Container header={<Header variant="h2">Floci Connection</Header>}>

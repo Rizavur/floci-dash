@@ -35,21 +35,30 @@ describe("highlightLogLevels", () => {
 });
 
 describe("renderLogMessage", () => {
-  it("renders a JSON object message as key=value fields", () => {
+  it("renders a JSON object message as key=value fields when parseJson is on", () => {
     const { container } = render(
-      <>{renderLogMessage('{"level":30,"avStatus":"PASSED","msg":"AV status updated"}')}</>,
+      <>{renderLogMessage('{"level":30,"avStatus":"PASSED","msg":"AV status updated"}', true)}</>,
     );
     expect(container.textContent).toBe("level=30avStatus=PASSEDmsg=AV status updated");
   });
 
+  it("shows raw text with a parsed-fields tooltip when parseJson is off", () => {
+    const { container } = render(
+      <>{renderLogMessage('{"level":30,"msg":"hi"}', false)}</>,
+    );
+    expect(container.textContent).toBe('{"level":30,"msg":"hi"}');
+    const span = container.querySelector("span");
+    expect(span?.title).toBe(JSON.stringify({ level: 30, msg: "hi" }, null, 2));
+  });
+
   it("falls back to level highlighting for non-JSON messages", () => {
-    const { container } = render(<>{renderLogMessage("ERROR something failed")}</>);
+    const { container } = render(<>{renderLogMessage("ERROR something failed", true)}</>);
     const span = container.querySelector("span");
     expect(span?.textContent).toBe("ERROR");
   });
 
   it("falls back to plain text for JSON arrays", () => {
-    const { container } = render(<>{renderLogMessage("[1,2,3]")}</>);
+    const { container } = render(<>{renderLogMessage("[1,2,3]", true)}</>);
     expect(container.textContent).toBe("[1,2,3]");
   });
 });

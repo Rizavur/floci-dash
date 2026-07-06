@@ -261,7 +261,7 @@ src/
       CloudFormationPage.tsx  CloudFormation stacks, resources, events, templates
       KMSPage.tsx           KMS keys, aliases, grants, crypto playground
       ServicePage.tsx      Dynamic service pages
-      Settings.tsx         Dark mode, refresh interval
+      Settings.tsx         Dark mode, refresh interval, CloudWatch Logs JSON parsing toggle
     hooks/                 TanStack Query hooks
       useS3.ts             S3 operations
       useS3Config.ts       S3 bucket config
@@ -357,7 +357,7 @@ These services have full CRUD operations in both backend and frontend:
 | **SQS** | List queues, create (standard/FIFO, attributes, tags), delete, view messages (via inspection API), send message (single/batch, FIFO group/dedup), delete message, purge queue, get/set attributes, tags CRUD, dead letter source queues |
 | **SNS** | List topics, create (standard/FIFO, display name, tags), delete, get/set attributes, subscriptions (subscribe/unsubscribe, 7 protocols), publish message (single, FIFO group/dedup), tags CRUD, platform applications (list, create, delete), platform endpoints (list, create, delete), SMS inbox + push notification inspection viewers |
 | **EventBridge** | Event buses (list, create, delete), rules (list, create with schedule/event pattern, delete, enable/disable toggle), targets (add/remove per rule), send events (PutEvents), archives (list, create, delete), replays (list) |
-| **CloudWatch Logs** | Log groups (list, create, delete, retention policy with data-loss warning), log streams (list, create, delete), log events (live viewer with auto-refresh/auto-scroll/limit selector, put events), search log events by text/filter pattern across all streams or a chosen subset of streams (click a result to jump to its stream), subscription filters (list, create, edit, delete), tags CRUD (add/edit/remove) |
+| **CloudWatch Logs** | Log groups (list, create, delete, retention policy with data-loss warning), log streams (list, create, delete), log events (live viewer with auto-refresh/auto-scroll/limit selector, put events; JSON message parsing is off by default — toggle it in Settings, or hover a raw JSON message to preview its parsed fields), search log events by text/filter pattern across all streams or a chosen subset of streams (click a result to jump to its stream), subscription filters (list, create, edit, delete), tags CRUD (add/edit/remove) |
 | **Lambda** | Functions (list, create with zip/S3 code, delete, get configuration, update config, update code), invoke (sync/async/dry-run with response viewer), versions (list, publish), aliases (list, create, delete), event source mappings (list, delete), layers (list versions, delete), function URL config, concurrency config, tags |
 | **CloudWatch** | Metrics (list, put metric data, get statistics with sparkline charts), alarms (list, create with threshold/comparison/statistic, delete, set state OK/ALARM), tags |
 | **IAM** | Users (list, create, delete, detail with groups/policies/access keys, create access keys), roles (list, create, delete, detail with trust policy/attached policies/tags), groups (list, create, delete), policies (list by scope, create, delete, detail with version document viewer), instance profiles (list) |

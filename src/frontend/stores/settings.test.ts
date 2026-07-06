@@ -5,13 +5,14 @@ import { useSettings } from "./settings";
 describe("settings store", () => {
   beforeEach(() => {
     // Reset to defaults between tests.
-    useSettings.setState({ darkMode: true, refreshInterval: 5000 });
+    useSettings.setState({ darkMode: true, refreshInterval: 5000, parseJsonLogs: false });
   });
 
   it("starts with sensible defaults", () => {
     const s = useSettings.getState();
     expect(s.darkMode).toBe(true);
     expect(s.refreshInterval).toBe(5000);
+    expect(s.parseJsonLogs).toBe(false);
   });
 
   it("toggleDarkMode flips darkMode", () => {
@@ -24,5 +25,12 @@ describe("settings store", () => {
   it("setRefreshInterval updates the interval", () => {
     useSettings.getState().setRefreshInterval(10000);
     expect(useSettings.getState().refreshInterval).toBe(10000);
+  });
+
+  it("setParseJsonLogs toggles JSON log parsing", () => {
+    useSettings.getState().setParseJsonLogs(true);
+    expect(useSettings.getState().parseJsonLogs).toBe(true);
+    useSettings.getState().setParseJsonLogs(false);
+    expect(useSettings.getState().parseJsonLogs).toBe(false);
   });
 });
