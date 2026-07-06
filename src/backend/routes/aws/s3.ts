@@ -14,6 +14,26 @@ import {
 import { getAwsConfig } from "../../clients/aws";
 import { sanitizeName, sanitizeS3Key, sanitizeBucketName, sanitizeFileName, validateJson } from "../../clients/sanitize";
 
+// ponytail: small lookup for common extensions browser leaves untyped (e.g. .jpg on macOS Finder).
+// Add entries when users report "application/octet-stream" for a common type.
+const EXT_MIME: Record<string, string> = {
+  jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", gif: "image/gif",
+  webp: "image/webp", svg: "image/svg+xml", ico: "image/x-icon",
+  mp4: "video/mp4", webm: "video/webm", mov: "video/quicktime",
+  mp3: "audio/mpeg", ogg: "audio/ogg", wav: "audio/wav",
+  pdf: "application/pdf", json: "application/json", xml: "application/xml",
+  txt: "text/plain", html: "text/html", css: "text/css", js: "text/javascript",
+  csv: "text/csv", zip: "application/zip", gz: "application/gzip",
+};
+
+function mimeForFile(file: File): string {
+  // ponytail: application/octet-stream is the multipart default for unknown types;
+  // check extension first so jpg/png/etc get the right MIME even when the browser
+  // or OS didn't set a type (common on macOS Finder drag-and-drop).
+  const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+  return EXT_MIME[ext] ?? (file.type || "application/octet-stream");
+}
+
 const router = new Hono();
 
 /** Per-file upload limit. The AWS SDK v3 buffers each file into a Buffer
@@ -193,7 +213,7 @@ router.post("/buckets/:name/objects/upload", async (c: Context) => {
             Bucket: bucket,
             Key: key,
             Body: body,
-            ContentType: file.type || "application/octet-stream",
+            ContentType: mimeForFile(file),
           })
         );
         return { key, size: file.size, status: "uploaded" as const };
