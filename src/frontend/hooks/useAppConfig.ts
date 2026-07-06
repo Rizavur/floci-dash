@@ -23,6 +23,21 @@ export interface AppConfigConfigurationProfile {
   LocationUri?: string;
 }
 
+export interface AppConfigHostedConfigurationVersionSummary {
+  VersionNumber: number;
+  Description?: string;
+  ContentType?: string;
+}
+
+export interface AppConfigHostedConfigurationVersion {
+  applicationId: string;
+  configurationProfileId: string;
+  versionNumber: number;
+  contentType?: string;
+  description?: string;
+  content: string;
+}
+
 // ── Applications ─────────────────────────────────────────
 
 export function useAppConfigApplications() {
@@ -120,5 +135,69 @@ export function useDeleteAppConfigProfile(applicationId: string) {
       ),
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: ["aws", "appconfig", "profiles", applicationId] }),
+  });
+}
+
+// ── Hosted Configuration Versions (the actual config value) ─
+
+export function useAppConfigVersions(applicationId: string | null, profileId: string | null) {
+  return useQuery<{ versions: AppConfigHostedConfigurationVersionSummary[]; total: number }>({
+    queryKey: ["aws", "appconfig", "versions", applicationId, profileId],
+    queryFn: () =>
+      api(
+        `/aws/appconfig/applications/${encodeURIComponent(applicationId!)}/configuration-profiles/${encodeURIComponent(profileId!)}/versions`
+      ),
+    enabled: !!applicationId && !!profileId,
+  });
+}
+
+export function useAppConfigVersion(
+  applicationId: string | null,
+  profileId: string | null,
+  versionNumber: number | null
+) {
+  return useQuery<{ version: AppConfigHostedConfigurationVersion }>({
+    queryKey: ["aws", "appconfig", "version", applicationId, profileId, versionNumber],
+    queryFn: () =>
+      api(
+        `/aws/appconfig/applications/${encodeURIComponent(applicationId!)}/configuration-profiles/${encodeURIComponent(profileId!)}/versions/${versionNumber}`
+      ),
+    enabled: !!applicationId && !!profileId && versionNumber != null,
+  });
+}
+
+export function useCreateAppConfigVersion(applicationId: string, profileId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (params: { content: string; contentType?: string; description?: string }) =>
+      api(
+        `/aws/appconfig/applications/${encodeURIComponent(applicationId)}/configuration-profiles/${encodeURIComponent(profileId)}/versions`,
+        { method: "POST", body: JSON.stringify(params) }
+      ),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: ["aws", "appconfig", "versions", applicationId, profileId] }),
+  });
+}
+
+// ── Deployments (activates a version for an environment) ────
+
+export const APPCONFIG_DEPLOYMENT_STRATEGY_OPTIONS = [
+  { label: "AllAtOnce (quick)", value: "AppConfig.AllAtOnce" },
+  { label: "Linear50PercentEvery30Seconds (test/demo)", value: "AppConfig.Linear50PercentEvery30Seconds" },
+  { label: "Canary10Percent20Minutes (AWS recommended)", value: "AppConfig.Canary10Percent20Minutes" },
+];
+
+export function useStartAppConfigDeployment(applicationId: string, environmentId: string) {
+  return useMutation({
+    mutationFn: (params: {
+      configurationProfileId: string;
+      configurationVersion: string;
+      deploymentStrategyId: string;
+      description?: string;
+    }) =>
+      api(
+        `/aws/appconfig/applications/${encodeURIComponent(applicationId)}/environments/${encodeURIComponent(environmentId)}/deployments`,
+        { method: "POST", body: JSON.stringify(params) }
+      ),
   });
 }
