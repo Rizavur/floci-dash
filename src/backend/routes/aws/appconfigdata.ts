@@ -36,7 +36,7 @@ router.post("/configurations", async (c: Context) => {
   );
 
   const content = result.Configuration
-    ? Buffer.from(result.Configuration as any).toString("base64")
+    ? Buffer.from(result.Configuration as any).toString("utf-8")
     : null;
 
   return c.json({

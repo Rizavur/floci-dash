@@ -15,11 +15,12 @@ vi.mock("@aws-sdk/client-appconfig", () => ({
   DeleteApplicationCommand: createCmd("DeleteApplicationCommand"),
   ListEnvironmentsCommand: createCmd("ListEnvironmentsCommand"),
   CreateEnvironmentCommand: createCmd("CreateEnvironmentCommand"),
-  DeleteEnvironmentCommand: createCmd("DeleteEnvironmentCommand"),
   ListConfigurationProfilesCommand: createCmd("ListConfigurationProfilesCommand"),
   CreateConfigurationProfileCommand: createCmd("CreateConfigurationProfileCommand"),
-  DeleteConfigurationProfileCommand: createCmd("DeleteConfigurationProfileCommand"),
   ListHostedConfigurationVersionsCommand: createCmd("ListHostedConfigurationVersionsCommand"),
+  GetHostedConfigurationVersionCommand: createCmd("GetHostedConfigurationVersionCommand"),
+  CreateHostedConfigurationVersionCommand: createCmd("CreateHostedConfigurationVersionCommand"),
+  StartDeploymentCommand: createCmd("StartDeploymentCommand"),
 }));
 
 vi.mock("../../clients/aws", () => ({ create: (Ctor: any, extra?: any) => new Ctor(extra) }));
@@ -88,13 +89,7 @@ describe("AppConfig Routes", () => {
     expect(res.status).toBe(201);
   });
 
-  it("DELETE /applications/:appId/environments/:envId — deletes env", async () => {
-    mockSend.mockResolvedValueOnce({});
-    const res = await del("/applications/app-1/environments/env-1");
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.deleted).toBe(true);
-  });
+
 
   it("GET /applications/:id/configuration-profiles — lists profiles", async () => {
     mockSend.mockResolvedValueOnce({ Items: [{ Id: "prof-1", Name: "config" }] });
@@ -109,16 +104,71 @@ describe("AppConfig Routes", () => {
     expect(res.status).toBe(201);
   });
 
-  it("DELETE /applications/:appId/configuration-profiles/:profileId — deletes profile", async () => {
-    mockSend.mockResolvedValueOnce({});
-    const res = await del("/applications/app-1/configuration-profiles/prof-1");
-    expect(res.status).toBe(200);
-  });
+
 
   it("GET /applications/:appId/configuration-profiles/:profileId/versions — lists versions", async () => {
     mockSend.mockResolvedValueOnce({ Items: [{ VersionNumber: 1 }] });
     const res = await get("/applications/app-1/configuration-profiles/prof-1/versions");
     const body = await res.json();
     expect(body.total).toBe(1);
+  });
+
+  it("GET .../versions/:versionNumber — returns version content", async () => {
+    mockSend.mockResolvedValueOnce({
+      VersionNumber: 1,
+      ContentType: "application/json",
+      Content: Buffer.from('{"enabled":true}'),
+      Description: "v1",
+    });
+    const res = await get("/applications/app-1/configuration-profiles/prof-1/versions/1");
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.content).toBe('{"enabled":true}');
+    expect(body.contentType).toBe("application/json");
+  });
+
+  it("POST /applications/:appId/configuration-profiles/:profileId/versions — creates version (201)", async () => {
+    mockSend.mockResolvedValueOnce({ VersionNumber: 1 });
+    const res = await post("/applications/app-1/configuration-profiles/prof-1/versions", {
+      content: '{"enabled":true}',
+      contentType: "application/json",
+    });
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.versionNumber).toBe(1);
+  });
+
+  it("POST .../versions — 400 if content missing", async () => {
+    const res = await post("/applications/app-1/configuration-profiles/prof-1/versions", {
+      contentType: "application/json",
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it("POST .../versions — 400 if contentType missing", async () => {
+    const res = await post("/applications/app-1/configuration-profiles/prof-1/versions", {
+      content: '{"enabled":true}',
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it("POST /applications/:appId/environments/:envId/deployments — starts deployment (201)", async () => {
+    mockSend.mockResolvedValueOnce({ DeploymentNumber: 1, State: "COMPLETE" });
+    const res = await post("/applications/app-1/environments/env-1/deployments", {
+      configurationProfileId: "prof-1",
+      configurationVersion: "1",
+      deploymentStrategyId: "AppConfig.AllAtOnce",
+    });
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.state).toBe("COMPLETE");
+  });
+
+  it("POST .../deployments — 400 if configurationProfileId missing", async () => {
+    const res = await post("/applications/app-1/environments/env-1/deployments", {
+      configurationVersion: "1",
+      deploymentStrategyId: "AppConfig.AllAtOnce",
+    });
+    expect(res.status).toBe(400);
   });
 });

@@ -324,6 +324,28 @@ describe("S3 Routes", () => {
       expect(body.results[0].status).toBe("error");
       expect(body.results[0].error).toBe("AccessDenied");
     });
+
+    it("POST upload — uses extension fallback when file.type is empty (jpeg)", async () => {
+      mockSend.mockResolvedValueOnce({});
+      // File with empty type simulates macOS Finder dropping a .jpg
+      const file = new File(["data"], "photo.jpg", { type: "" });
+      await uploadMultipart("/buckets/my-bucket/objects/upload", [file]);
+      expect(mockSend.mock.calls[0][0].ContentType).toBe("image/jpeg");
+    });
+
+    it("POST upload — uses extension fallback for png", async () => {
+      mockSend.mockResolvedValueOnce({});
+      const file = new File(["data"], "logo.png", { type: "" });
+      await uploadMultipart("/buckets/my-bucket/objects/upload", [file]);
+      expect(mockSend.mock.calls[0][0].ContentType).toBe("image/png");
+    });
+
+    it("POST upload — falls back to octet-stream for unknown extension", async () => {
+      mockSend.mockResolvedValueOnce({});
+      const file = new File(["data"], "archive.xyz", { type: "" });
+      await uploadMultipart("/buckets/my-bucket/objects/upload", [file]);
+      expect(mockSend.mock.calls[0][0].ContentType).toBe("application/octet-stream");
+    });
   });
 
   describe("Folders", () => {

@@ -9,11 +9,12 @@ import {
   DeleteApplicationCommand,
   ListEnvironmentsCommand,
   CreateEnvironmentCommand,
-  DeleteEnvironmentCommand,
   ListConfigurationProfilesCommand,
   CreateConfigurationProfileCommand,
-  DeleteConfigurationProfileCommand,
   ListHostedConfigurationVersionsCommand,
+  GetHostedConfigurationVersionCommand,
+  CreateHostedConfigurationVersionCommand,
+  StartDeploymentCommand,
 } from "@aws-sdk/client-appconfig";
 
 const router = new Hono();
@@ -79,13 +80,7 @@ router.post("/applications/:id/environments", async (c: Context) => {
   return c.json({ environment: result }, 201);
 });
 
-router.delete("/applications/:appId/environments/:envId", async (c: Context) => {
-  const appId = c.req.param("appId");
-  const envId = c.req.param("envId");
-  const client = getClient();
-  await client.send(new DeleteEnvironmentCommand({ ApplicationId: appId, EnvironmentId: envId }));
-  return c.json({ deleted: true });
-});
+// ponytail: Floci has no DELETE for environments or profiles; omitted intentionally.
 
 // ── Configuration Profiles ───────────────────────────────
 
@@ -120,15 +115,7 @@ router.post("/applications/:id/configuration-profiles", async (c: Context) => {
   return c.json({ profile: result }, 201);
 });
 
-router.delete("/applications/:appId/configuration-profiles/:profileId", async (c: Context) => {
-  const appId = c.req.param("appId");
-  const profileId = c.req.param("profileId");
-  const client = getClient();
-  await client.send(
-    new DeleteConfigurationProfileCommand({ ApplicationId: appId, ConfigurationProfileId: profileId })
-  );
-  return c.json({ deleted: true });
-});
+// ponytail: Floci has no DELETE for profiles; omitted intentionally.
 
 // ── Hosted Configuration Versions ────────────────────────
 
@@ -144,6 +131,72 @@ router.get("/applications/:appId/configuration-profiles/:profileId/versions", as
   );
   const versions = result.Items || [];
   return c.json({ versions, total: versions.length });
+});
+
+router.get("/applications/:appId/configuration-profiles/:profileId/versions/:versionNumber", async (c: Context) => {
+  const appId = c.req.param("appId");
+  const profileId = c.req.param("profileId");
+  const versionNumber = parseInt(c.req.param("versionNumber") ?? "", 10);
+  const client = getClient();
+  const result = await client.send(
+    new GetHostedConfigurationVersionCommand({
+      ApplicationId: appId,
+      ConfigurationProfileId: profileId,
+      VersionNumber: versionNumber,
+    })
+  );
+  const content = result.Content ? Buffer.from(result.Content as any).toString("utf-8") : "";
+  return c.json({ versionNumber: result.VersionNumber, contentType: result.ContentType, content, description: result.Description });
+});
+
+router.post("/applications/:appId/configuration-profiles/:profileId/versions", async (c: Context) => {
+  const appId = c.req.param("appId");
+  const profileId = c.req.param("profileId");
+  const body = await c.req.json<{ content: string; contentType: string; description?: string }>();
+  if (!body.content) return c.json({ error: "content is required" }, 400);
+  if (!body.contentType) return c.json({ error: "contentType is required" }, 400);
+
+  const client = getClient();
+  const result = await client.send(
+    new CreateHostedConfigurationVersionCommand({
+      ApplicationId: appId,
+      ConfigurationProfileId: profileId,
+      Content: Buffer.from(body.content, "utf-8"),
+      ContentType: body.contentType,
+      Description: body.description,
+    })
+  );
+  return c.json({ versionNumber: result.VersionNumber }, 201);
+});
+
+// ── Deployments ───────────────────────────────────────────
+// ponytail: Floci has no ListDeployments endpoint; only StartDeployment and GetDeployment exist.
+
+router.post("/applications/:appId/environments/:envId/deployments", async (c: Context) => {
+  const appId = c.req.param("appId");
+  const envId = c.req.param("envId");
+  const body = await c.req.json<{
+    configurationProfileId: string;
+    configurationVersion: string;
+    deploymentStrategyId: string;
+    description?: string;
+  }>();
+  if (!body.configurationProfileId) return c.json({ error: "configurationProfileId is required" }, 400);
+  if (!body.configurationVersion) return c.json({ error: "configurationVersion is required" }, 400);
+  if (!body.deploymentStrategyId) return c.json({ error: "deploymentStrategyId is required" }, 400);
+
+  const client = getClient();
+  const result = await client.send(
+    new StartDeploymentCommand({
+      ApplicationId: appId,
+      EnvironmentId: envId,
+      ConfigurationProfileId: body.configurationProfileId,
+      ConfigurationVersion: body.configurationVersion,
+      DeploymentStrategyId: body.deploymentStrategyId,
+      Description: body.description,
+    })
+  );
+  return c.json({ deploymentNumber: result.DeploymentNumber, state: result.State }, 201);
 });
 
 export default router;
