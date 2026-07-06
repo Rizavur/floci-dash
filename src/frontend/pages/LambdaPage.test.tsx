@@ -50,6 +50,12 @@ vi.mock("../hooks/useLambda", () => ({
   useDeleteLayerVersion: () => ({ mutateAsync: mockDeleteLayerVersionMutateAsync, isPending: false }),
   useFunctionUrl: (...args: any[]) => mockFunctionUrl(...args),
   useFunctionConcurrency: (...args: any[]) => mockFunctionConcurrency(...args),
+  useUpdateFunctionCode: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false, isError: false, isSuccess: false, error: null, reset: vi.fn() }),
+}));
+
+vi.mock("../hooks/useLogs", () => ({
+  useLogStreams: () => ({ data: { logStreams: [] }, isLoading: false }),
+  useLogEvents: () => ({ data: undefined, isLoading: false, isError: false, error: null, refetch: vi.fn() }),
 }));
 
 import LambdaPage from "./LambdaPage";
