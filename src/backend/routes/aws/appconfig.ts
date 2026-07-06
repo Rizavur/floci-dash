@@ -14,6 +14,10 @@ import {
   CreateConfigurationProfileCommand,
   DeleteConfigurationProfileCommand,
   ListHostedConfigurationVersionsCommand,
+  CreateHostedConfigurationVersionCommand,
+  GetHostedConfigurationVersionCommand,
+  StartDeploymentCommand,
+  GetDeploymentCommand,
 } from "@aws-sdk/client-appconfig";
 
 const router = new Hono();
@@ -144,6 +148,112 @@ router.get("/applications/:appId/configuration-profiles/:profileId/versions", as
   );
   const versions = result.Items || [];
   return c.json({ versions, total: versions.length });
+});
+
+router.post("/applications/:appId/configuration-profiles/:profileId/versions", async (c: Context) => {
+  const appId = c.req.param("appId");
+  const profileId = c.req.param("profileId");
+  const body = await c.req.json<{ content: string; contentType?: string; description?: string }>();
+  if (!body.content) return c.json({ error: "content is required" }, 400);
+
+  const client = getClient();
+  const result = await client.send(
+    new CreateHostedConfigurationVersionCommand({
+      ApplicationId: appId,
+      ConfigurationProfileId: profileId,
+      Content: body.content,
+      ContentType: body.contentType || "application/json",
+      Description: body.description,
+    })
+  );
+  return c.json(
+    {
+      version: {
+        applicationId: result.ApplicationId,
+        configurationProfileId: result.ConfigurationProfileId,
+        versionNumber: result.VersionNumber,
+        contentType: result.ContentType,
+        description: result.Description,
+      },
+    },
+    201
+  );
+});
+
+router.get("/applications/:appId/configuration-profiles/:profileId/versions/:versionNumber", async (c: Context) => {
+  const appId = c.req.param("appId");
+  const profileId = c.req.param("profileId");
+  const versionNumber = Number(c.req.param("versionNumber"));
+
+  const client = getClient();
+  const result = await client.send(
+    new GetHostedConfigurationVersionCommand({
+      ApplicationId: appId,
+      ConfigurationProfileId: profileId,
+      VersionNumber: versionNumber,
+    })
+  );
+  return c.json({
+    version: {
+      applicationId: result.ApplicationId,
+      configurationProfileId: result.ConfigurationProfileId,
+      versionNumber: result.VersionNumber,
+      contentType: result.ContentType,
+      description: result.Description,
+      content: result.Content ? Buffer.from(result.Content).toString("utf-8") : "",
+    },
+  });
+});
+
+// ── Deployments ───────────────────────────────────────────
+// No custom deployment strategy management here — floci only supports
+// looking up a strategy by ID (including the 3 AWS-predefined ones), not
+// listing custom ones after creation, so the UI only offers the built-ins.
+
+router.post("/applications/:appId/environments/:envId/deployments", async (c: Context) => {
+  const appId = c.req.param("appId");
+  const envId = c.req.param("envId");
+  const body = await c.req.json<{
+    configurationProfileId: string;
+    configurationVersion: string;
+    deploymentStrategyId: string;
+    description?: string;
+  }>();
+  if (!body.configurationProfileId || !body.configurationVersion || !body.deploymentStrategyId) {
+    return c.json(
+      { error: "configurationProfileId, configurationVersion, and deploymentStrategyId are required" },
+      400
+    );
+  }
+
+  const client = getClient();
+  const result = await client.send(
+    new StartDeploymentCommand({
+      ApplicationId: appId,
+      EnvironmentId: envId,
+      ConfigurationProfileId: body.configurationProfileId,
+      ConfigurationVersion: body.configurationVersion,
+      DeploymentStrategyId: body.deploymentStrategyId,
+      Description: body.description,
+    })
+  );
+  return c.json({ deployment: result }, 201);
+});
+
+router.get("/applications/:appId/environments/:envId/deployments/:deploymentNumber", async (c: Context) => {
+  const appId = c.req.param("appId");
+  const envId = c.req.param("envId");
+  const deploymentNumber = Number(c.req.param("deploymentNumber"));
+
+  const client = getClient();
+  const result = await client.send(
+    new GetDeploymentCommand({
+      ApplicationId: appId,
+      EnvironmentId: envId,
+      DeploymentNumber: deploymentNumber,
+    })
+  );
+  return c.json({ deployment: result });
 });
 
 export default router;
