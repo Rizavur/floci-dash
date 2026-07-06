@@ -517,7 +517,7 @@ export function CognitoDashboard() {
     return (
       <>
         <Box margin={{ bottom: "s" }}>
-          <Button iconName="arrow-left" onClick={() => setSelectedPool(null)}>
+          <Button variant="link" iconName="arrow-left" onClick={() => setSelectedPool(null)}>
             Back to user pools
           </Button>
         </Box>

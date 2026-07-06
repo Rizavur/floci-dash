@@ -58,29 +58,15 @@ export default function SNSPage() {
   return (
     <ContentLayout
       header={
-        <SpaceBetween size="m">
-          {selectedTopic && (
-            <Box>
-              <Button
-                variant="link"
-                onClick={() => {
-                  searchParams.delete("topicArn");
-                  setSearchParams(searchParams);
-                }}
-              >
-                ← Back to topics
-              </Button>
-            </Box>
-          )}
-          <Header variant="h1" description="Amazon Simple Notification Service">
-            SNS
-          </Header>
-        </SpaceBetween>
+        <Header variant="h1" description="Amazon Simple Notification Service">
+          SNS
+        </Header>
       }
     >
       {selectedTopic ? (
         <TopicDetail
           topicArn={selectedTopic}
+          onBack={() => { searchParams.delete("topicArn"); setSearchParams(searchParams); }}
           showToast={showToast}
           confirm={confirm}
           showPublish={showPublish}
@@ -322,6 +308,7 @@ function CreateTopicModal({
 
 function TopicDetail({
   topicArn,
+  onBack,
   showToast,
   confirm,
   showPublish,
@@ -330,6 +317,7 @@ function TopicDetail({
   setShowSubscribe,
 }: {
   topicArn: string;
+  onBack: () => void;
   showToast: (type: "success" | "error" | "info" | "warning", msg: string) => void;
   confirm: (opts: { title: string; message: string; confirmText?: string; variant?: "primary" | "danger" }) => Promise<boolean>;
   showPublish: boolean;
@@ -344,6 +332,9 @@ function TopicDetail({
 
   return (
     <SpaceBetween size="l">
+      <Button variant="link" iconName="arrow-left" onClick={onBack}>
+        Back to topics
+      </Button>
       <ColumnLayout columns={4} variant="text-grid">
         <StatCard
           label="Confirmed"

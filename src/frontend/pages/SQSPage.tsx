@@ -390,6 +390,9 @@ function QueueDetail({
 
   return (
     <SpaceBetween size="l">
+      <Button variant="link" iconName="arrow-left" onClick={onBack}>
+        Back to queues
+      </Button>
       <ColumnLayout columns={4} variant="text-grid">
         <StatCard
           label="Messages Available"
@@ -469,12 +472,6 @@ function QueueDetail({
         activeTabId={activeTab}
         onChange={({ detail }) => setActiveTab(detail.activeTabId)}
       />
-
-      <Box>
-        <Button variant="link" onClick={onBack}>
-          ← Back to queues
-        </Button>
-      </Box>
     </SpaceBetween>
   );
 }

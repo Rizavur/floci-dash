@@ -256,8 +256,8 @@ export default function DynamoDBTableDetail({
   if (detailError || scanError) {
     return (
       <SpaceBetween size="l">
-        <Button variant="link" onClick={onBack}>
-          ← Tables
+        <Button variant="link" iconName="arrow-left" onClick={onBack}>
+          Tables
         </Button>
         <StatusIndicator type="error">
           {(detailErr as Error)?.message ||
@@ -271,8 +271,8 @@ export default function DynamoDBTableDetail({
   if (detailLoading || scanLoading) {
     return (
       <SpaceBetween size="l">
-        <Button variant="link" onClick={onBack}>
-          ← Tables
+        <Button variant="link" iconName="arrow-left" onClick={onBack}>
+          Tables
         </Button>
         <Box textAlign="center" padding={{ top: "xxxl" }}>
           <Spinner size="large" />
@@ -381,8 +381,8 @@ export default function DynamoDBTableDetail({
 
   return (
     <SpaceBetween size="l">
-      <Button variant="link" onClick={onBack}>
-        ← Tables
+      <Button variant="link" iconName="arrow-left" onClick={onBack}>
+        Tables
       </Button>
 
       <Box variant="h2" padding={{ bottom: "xs" }}>

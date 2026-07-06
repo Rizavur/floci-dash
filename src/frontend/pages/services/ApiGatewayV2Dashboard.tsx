@@ -519,7 +519,7 @@ export function ApiGatewayV2Dashboard() {
     return (
       <>
         <Box margin={{ bottom: "s" }}>
-          <Button iconName="arrow-left" onClick={() => setSelectedApi(null)}>
+          <Button variant="link" iconName="arrow-left" onClick={() => setSelectedApi(null)}>
             Back to APIs
           </Button>
         </Box>

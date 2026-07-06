@@ -516,7 +516,7 @@ export function StepFunctionsDashboard() {
     return (
       <>
         <Box margin={{ bottom: "s" }}>
-          <Button iconName="arrow-left" onClick={() => setSelectedSm(null)}>
+          <Button variant="link" iconName="arrow-left" onClick={() => setSelectedSm(null)}>
             Back to state machines
           </Button>
         </Box>

@@ -801,11 +801,9 @@ export function AppConfigDashboard() {
     return (
       <>
         <Box margin={{ bottom: "s" }}>
-          <SpaceBetween direction="horizontal" size="xs">
-            <Button iconName="arrow-left" onClick={() => setSelectedProfile(null)}>
-              Back to application
-            </Button>
-          </SpaceBetween>
+          <Button variant="link" iconName="arrow-left" onClick={() => setSelectedProfile(null)}>
+            Back to application
+          </Button>
         </Box>
         {profile && (
           <Box margin={{ bottom: "s" }}>
@@ -825,7 +823,7 @@ export function AppConfigDashboard() {
     return (
       <>
         <Box margin={{ bottom: "s" }}>
-          <Button iconName="arrow-left" onClick={() => setSelectedApp(null)}>
+          <Button variant="link" iconName="arrow-left" onClick={() => setSelectedApp(null)}>
             Back to applications
           </Button>
         </Box>

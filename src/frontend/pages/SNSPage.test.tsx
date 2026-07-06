@@ -174,14 +174,14 @@ describe("SNSPage", () => {
   it("renders topic detail with back button", () => {
     mockSearchParams.mockReturnValue([new URLSearchParams("?topicArn=arn:aws:sns:us-east-1:000000000000:my-topic"), mockSetSearchParams]);
     render(<SNSPage />, { wrapper: createWrapper() });
-    expect(screen.getByText("← Back to topics")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /back to topics/i })).toBeTruthy();
   });
 
   it("navigates back from topic detail", async () => {
     const user = userEvent.setup();
     mockSearchParams.mockReturnValue([new URLSearchParams("?topicArn=arn:aws:sns:us-east-1:000000000000:my-topic"), mockSetSearchParams]);
     render(<SNSPage />, { wrapper: createWrapper() });
-    await clickButton(user, /← Back to topics/i);
+    await clickButton(user, /back to topics/i);
     expect(mockSetSearchParams).toHaveBeenCalled();
   });
 

@@ -568,7 +568,7 @@ export function CloudFrontDashboard() {
             <>
               {selectedDist && (
                 <Box margin={{ bottom: "s" }}>
-                  <Button iconName="arrow-left" onClick={() => { setSelectedDist(null); setActiveTab("distributions"); }}>
+                  <Button variant="link" iconName="arrow-left" onClick={() => { setSelectedDist(null); setActiveTab("distributions"); }}>
                     Back to distributions
                   </Button>
                 </Box>
