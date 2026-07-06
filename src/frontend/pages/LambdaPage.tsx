@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ContentLayout,
@@ -18,6 +18,8 @@ import {
   Textarea,
   ColumnLayout,
   Container,
+  TextFilter,
+  FileUpload,
   type TabsProps,
 } from "../components/ui";
 import {
@@ -34,11 +36,13 @@ import {
   useDeleteLayerVersion,
   useFunctionUrl,
   useFunctionConcurrency,
+  useUpdateFunctionCode,
 } from "../hooks/useLambda";
 import ResourceTable from "../components/ResourceTable";
 import DeleteButton from "../components/DeleteButton";
 import StatusBadge from "../components/StatusBadge";
 import { useHealth } from "../hooks/useSystem";
+import { useLogStreams, useLogEvents } from "../hooks/useLogs";
 
 const RUNTIMES = [
   "nodejs22.x", "nodejs20.x", "nodejs18.x",
@@ -244,6 +248,8 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
   const { data: urlConfig } = useFunctionUrl(name);
   const { data: concurrency } = useFunctionConcurrency(name);
   const publishVersion = usePublishVersion();
+  const updateCode = useUpdateFunctionCode();
+  const [zipFile, setZipFile] = useState<File[]>([]);
 
   if (isLoading) return <StatusIndicator type="loading">Loading function details...</StatusIndicator>;
   if (isError) return <StatusIndicator type="error">{(error as Error)?.message || "Failed to load"}</StatusIndicator>;
@@ -332,6 +338,60 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
               </Box>
             </Box>
           )}
+        </Container>
+      ),
+    },
+    {
+      id: "deploy",
+      label: "Deploy",
+      content: (
+        <Container header={<Header variant="h3">Upload deployment package</Header>}>
+          <SpaceBetween size="m">
+            <Box color="text-body-secondary" fontSize="body-s">
+              Upload a <code>.zip</code> file containing your function code and dependencies. This overwrites the current <code>$LATEST</code> code. Use <strong>Publish version</strong> afterwards to snapshot it.
+            </Box>
+            {updateCode.isError && (
+              <Alert type="error" dismissible>{(updateCode.error as Error)?.message || "Upload failed"}</Alert>
+            )}
+            {updateCode.isSuccess && (
+              <Alert type="success" dismissible>Code updated successfully. The function is now running the new deployment package.</Alert>
+            )}
+            <FormField label="Deployment package (.zip)">
+              <FileUpload
+                value={zipFile}
+                onChange={({ detail }) => {
+                  setZipFile(detail.value);
+                  updateCode.reset();
+                }}
+                multiple={false}
+                showFileSize
+                i18nStrings={{
+                  uploadButtonText: () => "Choose .zip file",
+                  dropzoneText: () => "Drop .zip here or choose a file",
+                  removeFileAriaLabel: (i, name) => `Remove ${name}`,
+                  errorIconAriaLabel: "Error",
+                }}
+              />
+            </FormField>
+            <Button
+              variant="primary"
+              loading={updateCode.isPending}
+              disabled={zipFile.length === 0}
+              onClick={() => {
+                const file = zipFile[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                  const b64 = (reader.result as string).split(",")[1];
+                  updateCode.mutate({ name, zipFile: b64 });
+                  setZipFile([]);
+                };
+                reader.readAsDataURL(file);
+              }}
+            >
+              Deploy
+            </Button>
+          </SpaceBetween>
         </Container>
       ),
     },
@@ -443,6 +503,11 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
         />
       ),
     },
+    {
+      id: "logs",
+      label: "Logs",
+      content: <LambdaFunctionLogs functionName={name} />,
+    },
   ];
 
   return (
@@ -469,6 +534,179 @@ function LambdaFunctionDetail({ name, onBack }: { name: string; onBack: () => vo
         <Tabs activeTabId={tab} onChange={({ detail }) => setTab(detail.activeTabId)} tabs={detailTabs} />
       </SpaceBetween>
     </ContentLayout>
+  );
+}
+
+// ─── FUNCTION LOGS ──────────────────────────────────────
+
+function LambdaFunctionLogs({ functionName }: { functionName: string }) {
+  const logGroupName = `/aws/lambda/${functionName}`;
+  const { data: streamsData, isLoading: streamsLoading } = useLogStreams(logGroupName);
+  const streams = streamsData?.logStreams || [];
+  const [selectedStream, setSelectedStream] = useState<string | null>(null);
+  const [filterText, setFilterText] = useState("");
+  const [caseSensitive, setCaseSensitive] = useState(false);
+
+  // Auto-select the most recent stream
+  useEffect(() => {
+    if (streams.length > 0 && !selectedStream) {
+      setSelectedStream(streams[0].logStreamName);
+    }
+  }, [streams, selectedStream]);
+
+  const { data: eventsData, isLoading: eventsLoading, refetch } = useLogEvents(
+    logGroupName,
+    selectedStream,
+    { limit: 200, startFromHead: false },
+    true
+  );
+
+  const events = (eventsData?.events || []).slice().reverse();
+  const filteredEvents = filterText.trim()
+    ? events.filter((e) => {
+        const msg = e.message || "";
+        return caseSensitive
+          ? msg.includes(filterText)
+          : msg.toLowerCase().includes(filterText.toLowerCase());
+      })
+    : events;
+
+  const logContainerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (logContainerRef.current) {
+      logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+    }
+  }, [eventsData?.events]);
+
+  if (streamsLoading) {
+    return <StatusIndicator type="loading">Loading log streams...</StatusIndicator>;
+  }
+
+  if (streams.length === 0) {
+    return (
+      <Box textAlign="center" padding="xl" color="text-body-secondary">
+        No log streams found. Invoke the function to generate logs.
+      </Box>
+    );
+  }
+
+  return (
+    <SpaceBetween size="m">
+      <Container header={<Header variant="h3">Log stream</Header>}>
+        <SpaceBetween size="s">
+          <Select
+            selectedOption={selectedStream ? { label: selectedStream, value: selectedStream } : null}
+            onChange={({ detail }) => {
+              setSelectedStream(detail.selectedOption.value || null);
+              setFilterText("");
+            }}
+            options={streams.map((s) => ({
+              label: s.logStreamName,
+              value: s.logStreamName,
+              description: s.lastEventTimestamp
+                ? new Date(s.lastEventTimestamp).toLocaleString()
+                : s.creationTime
+                ? `Created ${new Date(s.creationTime).toLocaleString()}`
+                : undefined,
+            }))}
+            placeholder="Select a log stream"
+          />
+          <Box fontSize="body-s" color="text-body-secondary">
+            Log group: <code>{logGroupName}</code> — {streams.length} stream{streams.length !== 1 ? "s" : ""}
+          </Box>
+        </SpaceBetween>
+      </Container>
+
+      {selectedStream && (
+        <Container
+          header={
+            <Header
+              variant="h3"
+              actions={
+                <SpaceBetween direction="horizontal" size="xs">
+                  <Button iconName="refresh" onClick={() => refetch()} loading={eventsLoading}>
+                    Refresh
+                  </Button>
+                </SpaceBetween>
+              }
+            >
+              Log events
+            </Header>
+          }
+        >
+          <SpaceBetween size="s">
+            {events.length > 0 && (
+              <TextFilter
+                filteringText={filterText}
+                filteringPlaceholder="Filter events, e.g. ERROR or a request ID"
+                onChange={({ detail }) => setFilterText(detail.filteringText)}
+                caseSensitive={caseSensitive}
+                onToggleCaseSensitive={() => setCaseSensitive((v) => !v)}
+              />
+            )}
+
+            {eventsLoading && events.length === 0 && (
+              <StatusIndicator type="loading">Loading events...</StatusIndicator>
+            )}
+
+            {!eventsLoading && events.length === 0 && (
+              <Box textAlign="center" padding="l" color="text-body-secondary">
+                No events in this stream yet.
+              </Box>
+            )}
+
+            {events.length > 0 && (
+              <div
+                ref={logContainerRef}
+                style={{
+                  maxHeight: "500px",
+                  overflowY: "auto",
+                  backgroundColor: "var(--sh-surface)",
+                  border: "1px solid var(--sh-line)",
+                  borderRadius: "4px",
+                  fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace",
+                  fontSize: "0.75rem",
+                  lineHeight: "1.6",
+                }}
+              >
+                {filteredEvents.length === 0 && filterText.trim() ? (
+                  <Box textAlign="center" padding="l" color="text-body-secondary">
+                    No events match "{filterText}".
+                  </Box>
+                ) : (
+                  filteredEvents.map((event, idx) => (
+                    <div
+                      key={event.eventId || idx}
+                      style={{
+                        display: "flex",
+                        gap: "16px",
+                        padding: "2px 8px",
+                        borderBottom: "1px solid var(--sh-line-sub)",
+                      }}
+                    >
+                      <span style={{ color: "var(--sh-accent)", minWidth: "140px", flexShrink: 0, userSelect: "none" }}>
+                        {event.timestamp ? new Date(event.timestamp).toISOString() : "—"}
+                      </span>
+                      <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-all", color: "var(--sh-ink)" }}>
+                        {event.message}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {eventsData && (
+              <Box textAlign="center" fontSize="body-s" color="text-body-secondary">
+                {filterText.trim()
+                  ? `${filteredEvents.length} of ${events.length} events`
+                  : `${events.length} events`}
+              </Box>
+            )}
+          </SpaceBetween>
+        </Container>
+      )}
+    </SpaceBetween>
   );
 }
 
